@@ -77,6 +77,10 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   }
 
   useEffect(() => {
+    // We need to call centerAndFit initially, and when the floorId changes.
+    // The floorId change is handled by the other useEffect.
+    centerAndFit(); 
+
     window.addEventListener('resize', centerAndFit);
     return () => window.removeEventListener('resize', centerAndFit);
   }, [isUpperFloor]);
