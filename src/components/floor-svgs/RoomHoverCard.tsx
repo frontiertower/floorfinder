@@ -32,7 +32,7 @@ export const RoomHoverCard: React.FC<RoomHoverCardProps> = ({ room, position }) 
         className="absolute z-10 p-3 bg-card text-card-foreground rounded-md shadow-lg pointer-events-none"
         style={style}
       >
-        <h3 className="font-bold text-sm mb-1">{room.name}</h3>
+        <h3 className="font-bold text-sm mb-1">{room.name}</h3> {room.id}
         {room.notes && (
           <p className="text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: room.notes }} />
         )}

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -60,27 +59,25 @@ const allRooms: Room[] = [
 
 
 export default function FloorFinder() {
-  const [selectedFloorId, setSelectedFloorId] = useState<string>('4'); // Default to floor 4
+  // Initialize selectedFloorId to null
+  const [selectedFloorId, setSelectedFloorId] = useState<string | null>(null);
   const [highlightedRoomId, setHighlightedRoomId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoomForInfo, setSelectedRoomForInfo] = useState<Room | null>(null);
 
-  // Read hash from URL on mount
+  // Read hash from URL on mount and set the floor
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#floor')) {
-      const idFromHash = hash.substring(6);
-      // Basic validation: check if the extracted id is a valid floor id
-      if (allFloors.some(floor => floor.id === idFromHash)) {
-         setSelectedFloorId(idFromHash);
-      } else {
-        setSelectedFloorId('4'); // Default to floor 4 if hash is invalid
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#floor')) {
+        const idFromHash = hash.substring(6);
+        // Basic validation: check if the extracted id is a valid floor id
+        if (allFloors.some(floor => floor.id === idFromHash)) {
+           setSelectedFloorId(idFromHash);
+        }
       }
-    } else {
-        setSelectedFloorId('4'); // Default to floor 4 if no hash
     }
   }, [allFloors]); // Depend on allFloors
-
 
 
   const sortedFloors = useMemo(() => {
@@ -152,7 +149,7 @@ export default function FloorFinder() {
                         <div>
                           <p className="font-semibold">{room.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            ID: {room.id} &middot; Floor: {allFloors.find(f => f.id === room.floorId)?.name}
+                            {room.floorId} - {allFloors.find(f => f.id === room.floorId)?.name}
                           </p>
                         </div>
                       </Button>
@@ -195,12 +192,15 @@ export default function FloorFinder() {
       </div>
 
       <main className="flex-1 flex flex-col bg-background relative overflow-hidden">
-        <FloorPlan
-          floorId={selectedFloorId}
-          highlightedRoomId={highlightedRoomId}
-          onRoomClick={handleRoomClick}
-          rooms={allRooms.filter(r => r.floorId === selectedFloorId)}
-        />
+        {/* Render FloorPlan only if a floor is selected */}
+        {selectedFloorId && (
+          <FloorPlan
+            floorId={selectedFloorId}
+            highlightedRoomId={highlightedRoomId}
+            onRoomClick={handleRoomClick}
+            rooms={allRooms.filter(r => r.floorId === selectedFloorId)}
+          />
+        )}
       </main>
 
       <RoomInfoDialog
