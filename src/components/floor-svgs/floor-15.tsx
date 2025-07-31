@@ -10,6 +10,7 @@ export const level = 15;
 export const rooms: RoomType[] = [
   {
     id: 'f15r1',
+    floorId: '15',
     name: 'Coworking Space',
     notes: 'Open area with desks for coworking.',
     color: 'rgba(255, 255, 200, .5)', // Added placeholder color
@@ -17,6 +18,7 @@ export const rooms: RoomType[] = [
   },
   {
     id: 'f15r2',
+    floorId: '15',
     name: 'Library',
     notes: 'Quiet area for reading and focus.',
     color: 'rgba(255, 255, 200, .5)', // Added placeholder color

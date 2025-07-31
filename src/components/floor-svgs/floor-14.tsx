@@ -11,6 +11,7 @@ export const rooms: RoomType[] = [
   {
     id: 'f14r1',
     name: 'Meditation and Quiet Zone',
+    floorId: id,
     notes: 'A space for quiet reflection and meditation.',
     color: 'rgba(200, 255, 200, .5)', // Added placeholder color
     coords: [18, 8, 10, 12], // Added placeholder coords
@@ -43,6 +44,7 @@ export const Floor14: React.FC<Floor14Props> = ({ highlightedRoomId, onRoomClick
           onMouseEnter={(e: React.MouseEvent<SVGElement>) => onMouseEnterRoom(roomData, { x: e.clientX, y: e.clientY })} // Pass room and event position
           onMouseLeave={onMouseLeaveRoom}
           onClick={() => onRoomClick(roomData.id)}
+        
         />
       )}
     </g>

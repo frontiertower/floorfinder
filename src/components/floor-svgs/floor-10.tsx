@@ -10,7 +10,7 @@ export const rooms: RoomType[] = [
   {
     id: 'f10r1',
     name: 'Accelerator Hot Desks',
-    // Removed floorId: '10',
+    floorId: id,
     notes: 'Flexible workspace for startups.',
     color: 'rgba(255, 200, 255, .5)', // Added color
     coords: [15, 7, 10, 8], // Added coords

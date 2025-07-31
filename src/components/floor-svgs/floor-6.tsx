@@ -10,7 +10,7 @@ export const rooms: RoomType[] = [
   {
     id: 'f6r1',
     name: 'Music Studio A',
-    // Removed floorId: '6',
+    floorId: '6',
     notes: 'Equipped for recording and practice.',
     color: 'rgba(200, 200, 255, .5)', // Added color
     coords: [5, 5, 10, 10], // Added coords
@@ -18,7 +18,7 @@ export const rooms: RoomType[] = [
    {
      id: 'f6r2',
      name: 'Art Workshop',
-     // Removed floorId: '6',
+     floorId: '6',
      notes: 'Space for various art projects.',
      color: 'rgba(200, 200, 255, .5)', // Added color
      coords: [20, 5, 10, 10], // Added coords

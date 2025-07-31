@@ -79,18 +79,20 @@ const Ruler = () => {
         <line x1="0" y1="0" x2="10" y2="0" stroke="hsl(var(--foreground))" strokeWidth="0.05" />
         <line x1="0" y1="0" x2="0" y2="-0.2" stroke="hsl(var(--foreground))" strokeWidth="0.05" />
         <line x1="10" y1="0" x2="10" y2="-0.2" stroke="hsl(var(--foreground))" strokeWidth="0.05" />
-        <text x="0.5" y="-0.5" dominantBaseline="middle" textAnchor="middle" className="font-mono" fontSize="0.5px" fill="hsl(var(--foreground))">10ft</text>
+        <text x="5" y="-0.5" dominantBaseline="middle" textAnchor="middle" className="font-mono" fontSize="0.5px" fill="hsl(var(--foreground))">10ft</text>
       </g>
     );
   };
 
 
 const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoomClick, rooms }) => {
-  const [viewBox, setViewBox] = useState('0 0 95 60'); // Default to upper floor size
+  const viewBox = '0 0 95 60'; // Default to upper floor size
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const [hoveredRoom, setHoveredRoom] = useState<Room | null>(null);
   const [hoverCardPosition, setHoverCardPosition] = useState<{ x: number; y: number } | null>(null);
+  const [coords, setCoords] = useState<{ x: number; y: number; z: number | null } | null>(null);
 
   const handleMouseEnterRoom = useCallback((room: Room, position: { x: number; y: number }) => { // Reverted to original signature
     setHoveredRoom(room);
@@ -100,6 +102,32 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   const handleMouseLeaveRoom = useCallback(() => {
     setHoveredRoom(null);
     setHoverCardPosition(null);
+  }, []);
+
+  const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (!svgRef.current) return;
+
+    const svg = svgRef.current;
+    const pt = svg.createSVGPoint();
+    pt.x = event.clientX;
+    pt.y = event.clientY;
+
+    const svgPoint = pt.matrixTransform(svg.getScreenCTM()?.inverse());
+    
+    const viewBoxParts = viewBox.split(' ').map(parseFloat);
+    const viewBoxHeight = viewBoxParts[3];
+
+    const currentFloor = allFloors.find(f => f.id === floorId);
+
+    setCoords({
+      x: svgPoint.x,
+      y: viewBoxHeight - svgPoint.y, // Invert Y to make bottom-left the origin
+      z: currentFloor?.level ?? null
+    });
+  }, [floorId, viewBox]);
+
+  const handleMouseLeave = useCallback(() => {
+    setCoords(null);
   }, []);
 
   const FloorComponent = useMemo(() => floorComponentMap[floorId] || DefaultFloor, [floorId]);
@@ -119,8 +147,21 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
 
 
   return (
-    <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-muted/20">
+    <div 
+      ref={containerRef} 
+      className="w-full h-full relative overflow-hidden bg-muted/20"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {coords && (
+        <div className="absolute top-2 right-2 bg-card/80 p-2 rounded-md text-xs font-mono z-10 pointer-events-none">
+          <div>X: {coords.x.toFixed(2)} ft</div>
+          <div>Y: {coords.y.toFixed(2)} ft</div>
+          <div>Z: {coords.z}</div>
+        </div>
+      )}
       <svg
+        ref={svgRef}
         viewBox={viewBox}
         preserveAspectRatio="xMidYMid meet"
         className="w-full h-full absolute p-10"
@@ -135,7 +176,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
 
         {/* Floor Name Label */}
         <text
-          x={viewBox.split(' ')[2] / 2 + 3} // X-coordinate at the horizontal center of the viewBox
+          x={3}
           y={4} // Y-coordinate near the top
           dominantBaseline="hanging"
           textAnchor="left"
@@ -146,7 +187,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
           {floorName}
         </text>
 
-        <g transform={`translate(${isUpperFloor ? 75 : 45}, ${isUpperFloor ? 45 : 20})`}> {/* Adjusted translate values */}
+        <g transform={`translate(75, 55)`}>
             <Ruler />
         </g>
       </svg>

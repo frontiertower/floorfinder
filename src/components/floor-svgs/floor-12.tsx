@@ -11,6 +11,7 @@ export const rooms: RoomType[] = [
   {
     id: 'f12r1',
     name: 'Blockchain Dev Area',
+    floorId: id,
     notes: 'Area for blockchain development and discussions.',
     color: 'rgba(255, 200, 200, .5)', // Added placeholder color
     coords: [10, 10, 15, 10], // Added placeholder coords

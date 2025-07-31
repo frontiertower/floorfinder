@@ -11,7 +11,7 @@ export const rooms: RoomType[] = [
   {
     id: 'f5r1',
     name: 'Fitness Area',
-    // Removed floorId: '5',
+    floorId: '5',
     notes: 'Exercise equipment and open space for activities.',
     color: 'rgba(200, 255, 200, .5)', // Added color
     coords: [10, 5, 15, 8], // Added coords

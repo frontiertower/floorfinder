@@ -10,7 +10,7 @@ export const rooms: RoomType[] = [
   {
     id: 'f7r1',
     name: '3D Printing Zone',
-    // Removed floorId: '7',
+    floorId: id,
     notes: 'Equipped with 3D printers.',
     color: 'rgba(255, 255, 200, .5)', // Added color
     coords: [5, 5, 10, 10], // Added coords
@@ -18,7 +18,7 @@ export const rooms: RoomType[] = [
   {
     id: 'f7r2',
     name: 'Laser Cutting Area',
-    // Removed floorId: '7',
+    floorId: id,
     notes: 'Area for laser cutting.',
     color: 'rgba(255, 255, 200, .5)', // Added color
     coords: [20, 5, 10, 10], // Added coords
