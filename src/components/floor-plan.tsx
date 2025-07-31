@@ -33,12 +33,12 @@ const Grid = ({ viewBox }: { viewBox: string }) => {
     const majorLines = [];
     const minorLines = [];
 
-    // Using feet, so conversion from meters is ~3.28
+    // The floor plans are in meters, so grid lines are at 1m and 10m intervals.
     const majorGridSpacing = 10;
     const minorGridSpacing = 1;
 
     // Vertical lines
-    for (let i = x; i <= x + width; i += minorGridSpacing) {
+    for (let i = Math.ceil(x / minorGridSpacing) * minorGridSpacing; i <= x + width; i += minorGridSpacing) {
         if (i % majorGridSpacing === 0) {
             majorLines.push(<line key={`v-maj-${i}`} x1={i} y1={y} x2={i} y2={y + height} stroke="hsl(var(--border))" strokeWidth="0.1" />);
         } else {
@@ -47,7 +47,7 @@ const Grid = ({ viewBox }: { viewBox: string }) => {
     }
 
     // Horizontal lines
-    for (let i = y; i <= y + height; i += minorGridSpacing) {
+    for (let i = Math.ceil(y / minorGridSpacing) * minorGridSpacing; i <= y + height; i += minorGridSpacing) {
         if (i % majorGridSpacing === 0) {
             majorLines.push(<line key={`h-maj-${i}`} x1={x} y1={i} x2={x + width} y2={i} stroke="hsl(var(--border))" strokeWidth="0.1" />);
         } else {
