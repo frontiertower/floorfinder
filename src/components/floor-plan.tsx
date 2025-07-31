@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
@@ -8,7 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Room, FloorData, Floor } from '@/lib/types';
 
 import { Card } from '@/components/ui/card';
-import { RoomHoverCard } from './floor-svgs/RoomHoverCard';
+import { RoomHoverCard } from './floor-svgs/RoomHoverCard'; // Keep RoomHoverCard import
+import { Infobox } from './floor-svgs/Infobox'; // Import Infobox
 
 // Statically import all floor components
 import { Floor4, id as id4, name as name4, level as level4, rooms as rooms4 } from './floor-svgs/floor-4';
@@ -92,7 +92,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   const [hoveredRoom, setHoveredRoom] = useState<Room | null>(null);
   const [hoverCardPosition, setHoverCardPosition] = useState<{ x: number; y: number } | null>(null);
 
-  const handleMouseEnterRoom = useCallback((room: Room, position: { x: number; y: number }) => {
+  const handleMouseEnterRoom = useCallback((room: Room, position: { x: number; y: number }) => { // Reverted to original signature
     setHoveredRoom(room);
     setHoverCardPosition(position);
   }, []);
@@ -103,14 +103,12 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   }, []);
 
   const FloorComponent = useMemo(() => floorComponentMap[floorId] || DefaultFloor, [floorId]);
-  
+
   const isUpperFloor = useMemo(() => {
     // Use allFloors to find the current floor's level
     const floor = allFloors.find(f => f.id === floorId);
     return floor ? floor.level >= 4 : false; // Still needed for ruler positioning
   }, [floorId]);
-
-  // Removed useEffect that set viewBox based on isUpperFloor
 
   // Get the floor name for display
   const floorName = useMemo(() => {
@@ -131,7 +129,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
             highlightedRoomId={highlightedRoomId}
             onRoomClick={onRoomClick}
             rooms={rooms} // Pass rooms for the current floor
-            onMouseEnterRoom={handleMouseEnterRoom}
+            onMouseEnterRoom={handleMouseEnterRoom} // Pass the original handler
             onMouseLeaveRoom={handleMouseLeaveRoom}
           />
 
@@ -153,7 +151,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
         </g>
       </svg>
 
-      <RoomHoverCard room={hoveredRoom} position={hoverCardPosition} />
+      <RoomHoverCard room={hoveredRoom} position={hoverCardPosition} /> {/* Keep RoomHoverCard */}
     </div>
   );
 };

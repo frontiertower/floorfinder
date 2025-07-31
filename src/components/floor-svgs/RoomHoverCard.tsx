@@ -12,14 +12,14 @@ export const RoomHoverCard: React.FC<RoomHoverCardProps> = ({ room, position }) 
 
   if (!room || !position) return null;
 
-  // Calculate adjusted position to center the card above the mouse
-  const cardWidth = cardRef.current?.offsetWidth || 0;
-  const cardHeight = cardRef.current?.offsetHeight || 0;
+  // Assume floor selector width is 200px for demonstration
+  const floorSelectorWidth = 350; // Estimated width of the floor selector
 
   const style = {
-    top: `${position.y - cardHeight - 10}px`, // Position above the cursor with a small offset
-    left: `${position.x - cardWidth / 2}px`, // Center horizontally above the cursor
+    top: `${position.y}px`,
+    left: `${position.x - floorSelectorWidth}px`, // Add floor selector width to the left position
   };
+  console.log(position);
 
   return (
     <AnimatePresence>
