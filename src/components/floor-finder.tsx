@@ -63,12 +63,6 @@ export default function FloorFinder() {
 
   const handleRoomClick = useCallback((roomId: string | null) => {
     setHighlightedRoomId(roomId);
-    // if(roomId) {
-    //   const room = floorData.rooms.find(r => r.id === roomId);
-    //   if(room) {
-    //     setSelectedRoomForInfo(room);
-    //   }
-    // }
   }, []);
 
   return (

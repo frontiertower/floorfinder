@@ -41,24 +41,20 @@ const DefaultFloor = () => (
     </div>
 );
 
-const Ruler = ({ scale }: { scale: number }) => {
-  const rulerWidthPixels = scale; // 1 meter in SVG units is scaled by 'scale'
-  return (
-    <div className="flex flex-col items-center">
-      <div style={{ width: `${rulerWidthPixels}px` }} className="relative h-4">
-        <div className="absolute bottom-0 left-0 h-2 w-px bg-foreground"></div>
-        <div className="absolute bottom-0 right-0 h-2 w-px bg-foreground"></div>
-        <div className="absolute bottom-0 left-0 w-full h-px bg-foreground"></div>
-      </div>
-      <p className="text-xs font-mono">1m</p>
-    </div>
-  );
-};
+const Ruler = () => {
+    return (
+      <g>
+        <line x1="0" y1="0" x2="1" y2="0" stroke="hsl(var(--foreground))" strokeWidth="0.05" />
+        <line x1="0" y1="0" x2="0" y2="-0.2" stroke="hsl(var(--foreground))" strokeWidth="0.05" />
+        <line x1="1" y1="0" x2="1" y2="-0.2" stroke="hsl(var(--foreground))" strokeWidth="0.05" />
+        <text x="0.5" y="-0.5" dominantBaseline="middle" textAnchor="middle" className="font-mono" fontSize="0.5px" fill="hsl(var(--foreground))">1m</text>
+      </g>
+    );
+  };
 
 
 const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoomClick, rooms }) => {
   const [viewBox, setViewBox] = useState('0 0 50 25');
-  const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   const FloorComponent = useMemo(() => floorComponentMap[floorId] || DefaultFloor, [floorId]);
@@ -68,62 +64,29 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     return floor;
   }, [floorId]);
 
-  const centerAndFit = useCallback(() => {
-    if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        const VBox = (isUpperFloor ? '0 0 30 15' : '0 0 50 25').split(' ').map(Number);
-        const [vbX, vbY, vbWidth, vbHeight] = VBox;
-
-        const scaleX = width / vbWidth;
-        const scaleY = height / vbHeight;
-        const scale = Math.min(scaleX, scaleY) * 0.9;
-
-        const x = (width - vbWidth * scale) / 2;
-        const y = (height - vbHeight * scale) / 2;
-        
-        setTransform({ x, y, k: scale });
-    }
-  }, [isUpperFloor]);
-
   useEffect(() => {
     setViewBox(isUpperFloor ? '0 0 30 15' : '0 0 50 25');
-    centerAndFit();
-  }, [floorId, isUpperFloor, centerAndFit]);
+  }, [floorId, isUpperFloor]);
 
-  useEffect(() => {
-    centerAndFit(); 
-
-    window.addEventListener('resize', centerAndFit);
-    return () => window.removeEventListener('resize', centerAndFit);
-  }, [centerAndFit]);
 
   return (
     <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-muted/20">
       <svg
         viewBox={viewBox}
-        preserveAspectRatio="none"
+        preserveAspectRatio="xMidYMid meet"
         className="w-full h-full absolute top-0 left-0"
       >
-        <g style={{ transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.k})`}}>
-          <Suspense fallback={<Skeleton className="w-full h-full" />}>
-            <FloorComponent
-              highlightedRoomId={highlightedRoomId}
-              onRoomClick={onRoomClick}
-              rooms={rooms}
-            />
-          </Suspense>
+        <Suspense fallback={<Skeleton className="w-full h-full" />}>
+          <FloorComponent
+            highlightedRoomId={highlightedRoomId}
+            onRoomClick={onRoomClick}
+            rooms={rooms}
+          />
+        </Suspense>
+        <g transform={`translate(${isUpperFloor ? 28 : 48}, ${isUpperFloor ? 14 : 24})`}>
+            <Ruler />
         </g>
       </svg>
-      <div className="absolute bottom-4 right-4 flex items-center space-x-2">
-        <Card className="px-3 py-2 text-sm text-muted-foreground shadow-lg">
-           <Ruler scale={transform.k} />
-        </Card>
-        <div className="flex flex-col space-y-2">
-            <Button size="icon" onClick={centerAndFit} aria-label="Reset view">
-                <RotateCcw />
-            </Button>
-        </div>
-      </div>
     </div>
   );
 };
