@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { allFloors, getRoomsForFloor } from '@/lib/floor-data';
 import type { Room, Floor } from '@/lib/types';
+import { Search } from 'lucide-react';
 
 import FloorPlan from './floor-plan';
 import RoomInfoDialog from './room-info-dialog';
@@ -26,7 +27,7 @@ const FloorFinder = () => {
       for (const floor of allFloors) {
         const floorRooms = getRoomsForFloor(floor.id);
         const floorResults = floorRooms.filter(room =>
-          room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (room.name && room.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
           room.id.toLowerCase().includes(searchQuery.toLowerCase())
         );
         if (floorResults.length > 0) {
@@ -79,13 +80,26 @@ const FloorFinder = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Floor Selection Sidebar */}
-      <div className="w-64 bg-white p-4 shadow-md overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Floors</h2>
-        <ul>
+      <div className="w-64 bg-white p-4 shadow-md flex flex-col">
+        <h1 className="text-3xl font-headline text-center mb-4">FloorFinder</h1>
+        
+        <div className="relative mb-4">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search by room name or ID..."
+            className="w-full p-2 pl-8 border rounded mb-2"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        <h2 className="text-xl font-bold mb-2">Floors</h2>
+        <ul className="overflow-y-auto">
           {allFloors.map(floor => (
             <li key={floor.id} className="mb-2">
               <button
-                className={`w-full text-left py-2 px-4 rounded ${selectedFloor?.id === floor.id ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`}
+                className={`w-full text-left py-2 px-4 rounded ${selectedFloor?.id === floor.id ? 'bg-blue-200 text-black' : 'hover:bg-gray-200'}`}
                 onClick={() => handleFloorChange(floor)}
               >
                 {floor.name}
@@ -94,50 +108,40 @@ const FloorFinder = () => {
           ))}
         </ul>
 
-        {/* Search Bar */}
-        <div className="mt-4">
-          <h2 className="text-xl font-bold mb-2">Search Rooms</h2>
-          <input
-            type="text"
-            placeholder="Enter room name or ID"
-            className="w-full p-2 border rounded mb-2"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-
-          {/* Search Results */}
-          {searchQuery && (
-            <div className="bg-gray-50 p-2 rounded max-h-60 overflow-y-auto">
-              {searchResults.size === 0 ? (
-                <p>No results found</p>
-              ) : (
-                Array.from(searchResults.entries()).map(([floorId, rooms]) => (
-                  <div key={floorId} className="mb-2">
-                    <h4 className="font-semibold">{allFloors.find(f => f.id === floorId)?.name}</h4>
-                    <ul>
-                      {rooms.map(room => (
-                        <li
-                          key={room.id}
-                          className="cursor-pointer hover:underline text-blue-600"
-                          onClick={() => {
-                            const floor = allFloors.find(f => f.id === floorId);
-                            if (floor) {
-                                setSelectedFloor(floor);
-                            }
-                            setHighlightedRoom(room.id);
-                          }}
-                        >
-                          {room.name || room.id}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
+        {/* Search Results */}
+        {searchQuery && (
+          <div className="mt-4 bg-gray-50 p-2 rounded max-h-60 overflow-y-auto border">
+            <h3 className="text-lg font-semibold mb-2">Search Results</h3>
+            {searchResults.size === 0 ? (
+              <p>No results found</p>
+            ) : (
+              Array.from(searchResults.entries()).map(([floorId, rooms]) => (
+                <div key={floorId} className="mb-2">
+                  <h4 className="font-semibold">{allFloors.find(f => f.id === floorId)?.name}</h4>
+                  <ul>
+                    {rooms.map(room => (
+                      <li
+                        key={room.id}
+                        className="cursor-pointer hover:underline text-blue-600"
+                        onClick={() => {
+                          const floor = allFloors.find(f => f.id === floorId);
+                          if (floor) {
+                              setSelectedFloor(floor);
+                          }
+                          setHighlightedRoom(room.id);
+                        }}
+                      >
+                        {room.name || room.id}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
+
 
       {/* Main Floor Plan View */}
       <div className="flex-1 flex items-center justify-center overflow-hidden">
