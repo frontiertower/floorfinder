@@ -1,11 +1,11 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import type { Room, Floor } from '@/lib/types';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
+import type { Room } from '@/lib/types';
 import { allFloors, floorComponentMap, upperFloorViewBox, lowerFloorViewBox } from '@/lib/floor-data';
 
-import { RoomHoverCard } from './floor-svgs/RoomHoverCard';
+import { InfoBox } from './infobox';
 
 import '../app/svg.css';
 
@@ -57,7 +57,7 @@ const Grid = ({ viewBox }: { viewBox: string }) => {
 
     return (
         <g className="pointer-events-none">
-          <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="white" stroke="none" />
+          <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="hsl(var(--background))" stroke="none" />
           {minorLines}
           {majorLines}
           <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="none" stroke="black" strokeWidth="0.25" />
@@ -76,20 +76,17 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   const svgRef = useRef<SVGSVGElement>(null);
 
   const [hoveredRoom, setHoveredRoom] = useState<Room | null>(null);
-  const [hoverCardPosition, setHoverCardPosition] = useState<{ x: number; y: number } | null>(null);
   const [coords, setCoords] = useState<{ x: number; y: number; z: number | null } | null>(null);
   
   const floor = useMemo(() => allFloors.find(f => f.id === floorId), [floorId]);
   const viewBox = useMemo(() => floor && floor.level < 4 ? lowerFloorViewBox : upperFloorViewBox, [floor]);
 
-  const handleMouseEnterRoom = useCallback((room: Room, position: { x: number; y: number }) => {
+  const handleMouseEnterRoom = useCallback((room: Room) => {
     setHoveredRoom(room);
-    setHoverCardPosition(position);
   }, []);
 
   const handleMouseLeaveRoom = useCallback(() => {
     setHoveredRoom(null);
-    setHoverCardPosition(null);
   }, []);
 
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
@@ -125,19 +122,16 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      {coords && (
-        <div className="absolute top-2 right-2 bg-card/80 p-2 rounded-md text-xs font-mono z-10 pointer-events-none">
-          <div>X: {coords.x.toFixed(2)}m</div>
-          <div>Y: {coords.y.toFixed(2)}m</div>
-          <div>Z: {coords.z}</div>
-        </div>
-      )}
+      <InfoBox floorName={floorName} coords={coords} hoveredRoom={hoveredRoom} />
       <svg
         ref={svgRef}
         viewBox={viewBox}
         className="w-full h-full absolute p-10"
       >
           <Grid viewBox={viewBox} />
+          <g transform="translate(1, 1)">
+            <Ruler />
+          </g>
           <FloorComponent
             highlightedRoomId={highlightedRoomId}
             onRoomClick={onRoomClick}
@@ -145,21 +139,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
             onMouseEnterRoom={handleMouseEnterRoom}
             onMouseLeaveRoom={handleMouseLeaveRoom}
           />
-
-        <text
-          x={3}
-          y={4}
-          dominantBaseline="hanging"
-          textAnchor="left"
-          fontSize="3"
-          fill="hsl(var(--foreground))"
-          className="font-bold font-headline"
-        >
-          {floorName}
-        </text>
       </svg>
-
-      <RoomHoverCard room={hoveredRoom} position={hoverCardPosition} />
     </div>
   );
 };

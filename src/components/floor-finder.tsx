@@ -8,15 +8,12 @@ import type { Room, Floor } from '@/lib/types';
 import { Search } from 'lucide-react';
 
 import FloorPlan from './floor-plan';
-import RoomInfoDialog from './room-info-dialog';
 
 const FloorFinder = () => {
   const [selectedFloor, setSelectedFloor] = useState<Floor | null>(allFloors.find(f => f.id === '4') || null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Map<string, Room[]>>(new Map());
   const [highlightedRoom, setHighlightedRoom] = useState<string | null>(null);
-  const [isRoomInfoDialogOpen, setIsRoomInfoDialogOpen] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
   const { toast } = useToast();
 
@@ -60,16 +57,6 @@ const FloorFinder = () => {
     setSearchQuery(''); // Clear search on floor change
     setHighlightedRoom(null); // Clear highlight on floor change
   };
-
-  const handleRoomClick = useCallback((room: Room) => {
-    setSelectedRoom(room);
-    setIsRoomInfoDialogOpen(true);
-  }, []);
-
-  const handleRoomInfoDialogClose = useCallback(() => {
-    setIsRoomInfoDialogOpen(false);
-    setSelectedRoom(null);
-  }, []);
 
   const roomsForSelectedFloor = selectedFloor ? getRoomsForFloor(selectedFloor.id) : [];
   
@@ -152,12 +139,7 @@ const FloorFinder = () => {
             floorId={selectedFloor.id}
             highlightedRoomId={highlightedRoom}
             onRoomClick={(roomId) => {
-              if (roomId) {
-                const room = roomsForSelectedFloor.find(r => r.id === roomId);
-                if (room) {
-                  handleRoomClick(room);
-                }
-              }
+                setHighlightedRoom(roomId);
             }}
             rooms={roomsForSelectedFloor}
           />
@@ -165,12 +147,6 @@ const FloorFinder = () => {
           <p>Select a floor to view the plan.</p>
         )}
       </div>
-
-      <RoomInfoDialog
-        open={isRoomInfoDialogOpen}
-        onOpenChange={handleRoomInfoDialogClose}
-        room={selectedRoom}
-      />
     </div>
   );
 };

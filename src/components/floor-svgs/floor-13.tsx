@@ -1,3 +1,4 @@
+
 import { CommonUpper } from './common-upper';
 import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
@@ -6,15 +7,11 @@ export const id = '13';
 export const name = 'Applied Research';
 export const level = 13;
 
-export const rooms: RoomType[] = [
-  // Add rooms for floor 13 here if any
-];
-
 interface Floor13Props {
   highlightedRoomId: string | null;
   onRoomClick: (roomId: string | null) => void;
   rooms: RoomType[];
-  onMouseEnterRoom: (room: RoomType, position: { x: number; y: number }) => void;
+  onMouseEnterRoom: (room: RoomType) => void;
   onMouseLeaveRoom: () => void;
 }
 export const Floor13: React.FC<Floor13Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }) => {
@@ -30,7 +27,7 @@ export const Floor13: React.FC<Floor13Props> = ({ highlightedRoomId, onRoomClick
           color={room.color}
           notes={room.notes}
           floorId={id} // Use the floor's constant id
-          onMouseEnter={(e) => onMouseEnterRoom(room, { x: e.clientX, y: e.clientY })} // Pass room and event position
+          onMouseEnter={() => onMouseEnterRoom(room)}
           onMouseLeave={onMouseLeaveRoom}
           onClick={() => onRoomClick(room.id)}
         />

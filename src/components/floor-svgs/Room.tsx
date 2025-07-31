@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { Room as RoomType } from '@/lib/types';
 
@@ -8,7 +9,7 @@ interface RoomProps {
   color?: string; // Optional color prop
   notes?: string;
   floorId: string; // Add floorId here
-  onMouseEnter?: (room: RoomType, position: { x: number; y: number }) => void;
+  onMouseEnter?: (room: RoomType) => void;
   onMouseLeave?: () => void;
   onClick?: () => void; // Add onClick here
 }
@@ -22,9 +23,9 @@ export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100,
   // Calculate font size based on room width (adjust multiplier as needed)
   const fontSize = width * 0.15;
 
-  const handleMouseEnter = (event: React.MouseEvent<SVGRectElement, MouseEvent>) => {
+  const handleMouseEnter = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
     if (onMouseEnter) {
-      onMouseEnter({ id, name, floorId, notes, coords, color }, { x: event.clientX, y: event.clientY });
+      onMouseEnter({ id, name, floorId, notes, coords, color });
     }
   };
 
@@ -41,7 +42,10 @@ export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100,
   };
 
   return (
-    <g>
+    <g 
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleClick}>
       <rect
         x={x}
         y={y}
@@ -52,9 +56,6 @@ export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100,
         strokeWidth="0.25"
         data-room-id={id}
         data-room-name={name}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={handleClick}
       />
       <text
         x={textX}
