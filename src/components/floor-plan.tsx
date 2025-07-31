@@ -119,7 +119,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
 
   return (
     <div 
-      className="w-full h-full relative overflow-hidden bg-muted/20"
+      className="w-full h-full relative overflow-hidden"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
