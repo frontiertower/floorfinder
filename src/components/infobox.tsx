@@ -14,11 +14,19 @@ export const InfoBox = ({ floorName, coords, hoveredRoom }: InfoBoxProps) => {
   return (
     <div className="absolute top-4 right-4 bg-card p-3 rounded-lg shadow-lg w-64 text-sm z-10 pointer-events-none border border-border">
       <h2 className="font-headline text-lg mb-2">{floorName}</h2>
-      <div className="font-mono text-xs space-y-0.5 text-muted-foreground">
-        <div>X: {coords ? coords.x.toFixed(2) : '-'}m</div>
-        <div>Y: {coords ? coords.y.toFixed(2) : '-'}m</div>
-        <div>Z: {coords ? coords.z : '-'}</div>
-      </div>
+      {coords && (
+          <>
+            <Separator className="my-2" />
+            <div className="font-mono text-xs space-y-0.5 text-muted-foreground">
+              <div>Floor: {coords ? coords.z : '-'} -
+                   (
+                     {coords ? coords.x.toFixed(1) : '-'},
+                     {coords ? coords.y.toFixed(1) : '-'}
+                   ) ft
+              </div>
+            </div>
+          </>
+      )}
       
       {hoveredRoom && (
         <>

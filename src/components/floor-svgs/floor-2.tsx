@@ -1,10 +1,10 @@
 
 import { cn } from '@/lib/utils';
 import type { Room } from '@/lib/types';
-import { CommonLower } from './common-lower';
+import { Floor2Blueprint } from './blueprints/floor-2';
 
 export const id = '2';
-export const name = 'Residential Floor';
+export const name = 'Spaceship';
 export const level = 2;
 
 interface FloorProps {
@@ -18,7 +18,7 @@ export const Floor2 = ({ highlightedRoomId, onRoomClick, rooms }: FloorProps) =>
 
   return (
     <g>
-      <CommonLower />
+      <Floor2Blueprint />
       {rooms.map(room => (
         <g key={room.id} onClick={() => onRoomClick(room.id)}>
             <rect

@@ -1,5 +1,5 @@
 
-import { CommonLower } from './common-lower';
+import { CommonLower } from './blueprints/common-lower';
 
 export const id = '0';
 export const name = 'Basement';

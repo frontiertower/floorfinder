@@ -1,7 +1,7 @@
 
 import { cn } from '@/lib/utils';
 import type { Room } from '@/lib/types';
-import { CommonUpper } from './common-upper';
+import { CommonUpper } from './blueprints/common-upper';
 
 export const id = '17';
 export const name = 'Roof';

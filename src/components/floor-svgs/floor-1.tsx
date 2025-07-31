@@ -1,10 +1,10 @@
 
 import { cn } from '@/lib/utils';
 import type { Room } from '@/lib/types';
-import { CommonLower } from './common-lower';
+import { CommonLower } from './blueprints/common-lower';
 
 export const id = '1';
-export const name = 'Floor 1';
+export const name = 'Lobby';
 export const level = 1;
 
 interface FloorProps {

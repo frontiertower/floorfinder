@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from 'react';
@@ -56,7 +55,20 @@ const FloorFinder = () => {
     setSelectedFloor(floor);
     setSearchQuery(''); // Clear search on floor change
     setHighlightedRoom(null); // Clear highlight on floor change
+    // Update URL hash with floor ID
+    window.location.hash = floor.id;
   };
+
+  // Read hash on initial load
+  useEffect(() => {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+      const initialFloor = allFloors.find(f => f.id === hash);
+      if (initialFloor) {
+        setSelectedFloor(initialFloor);
+      }
+    }
+  }, []);
 
   const roomsForSelectedFloor = selectedFloor ? getRoomsForFloor(selectedFloor.id) : [];
   
@@ -68,9 +80,9 @@ const FloorFinder = () => {
 
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-card/50">
       {/* Floor Selection Sidebar */}
-      <div className="w-64 bg-white p-4 shadow-md flex flex-col">
+      <div className="w-64 bg-white p-4 shadow-md flex flex-col bg-card/50">
         <h1 className="text-3xl font-headline text-center mb-4">FloorFinder</h1>
         
         <div className="relative mb-4">

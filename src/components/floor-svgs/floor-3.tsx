@@ -1,8 +1,8 @@
 
-import { CommonLower } from './common-lower';
+import { CommonLower } from './blueprints/common-lower';
 
 export const id = '3';
-export const name = 'Mixed-Use Floor';
+export const name = 'Private Offices';
 export const level = 3;
 
 export const Floor3 = () => {
