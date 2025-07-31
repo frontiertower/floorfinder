@@ -15,19 +15,19 @@ export const FloorRoof = ({ highlightedRoomId, onRoomClick, rooms }: FloorProps)
   return (
     <g>
       <CommonUpper />
-      <circle cx="150" cy="75" r="50" fill="hsl(var(--card))" stroke="black" strokeWidth="1" />
-      <text x="150" y="70" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-2xl">Roof</text>
+      <circle cx="15" cy="7.5" r="5" fill="hsl(var(--card))" stroke="black" strokeWidth="0.1" />
+      <text x="15" y="7" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-[2.5px]">Roof</text>
       
       {/* Maintenance Access */}
       <rect
         id="roof-access"
-        x="125" y="25" width="50" height="20"
+        x="12.5" y="2.5" width="5" height="2"
         onClick={() => onRoomClick('roof-access')}
-        className={cn('clickable-room fill-white stroke-black stroke-[0.2]', {
+        className={cn('clickable-room fill-white stroke-black stroke-[0.02]', {
           'highlighted-room': highlightedRoomId === 'roof-access',
         })}
       />
-      <text x="150" y="35" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-base">{getRoomById('roof-access')?.name}</text>
+      <text x="15" y="3.5" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-[1.2px]">{getRoomById('roof-access')?.name}</text>
     </g>
   );
 };

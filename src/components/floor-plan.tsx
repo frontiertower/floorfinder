@@ -41,7 +41,7 @@ const DefaultFloor = () => (
 );
 
 const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoomClick, rooms }) => {
-  const [viewBox, setViewBox] = useState('0 0 500 250');
+  const [viewBox, setViewBox] = useState('0 0 50 25');
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
   const [isPanning, setIsPanning] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
@@ -55,14 +55,14 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   }, [floorId]);
 
   useEffect(() => {
-    setViewBox(isUpperFloor ? '0 0 300 150' : '0 0 500 250');
+    setViewBox(isUpperFloor ? '0 0 30 15' : '0 0 50 25');
     centerAndFit();
   }, [floorId, isUpperFloor]);
 
   const centerAndFit = () => {
     if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect();
-        const VBox = (isUpperFloor ? '0 0 300 150' : '0 0 500 250').split(' ').map(Number);
+        const VBox = (isUpperFloor ? '0 0 30 15' : '0 0 50 25').split(' ').map(Number);
         const [vbX, vbY, vbWidth, vbHeight] = VBox;
 
         const scaleX = width / vbWidth;
@@ -112,7 +112,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     const scaleAmount = 1 - e.deltaY * 0.001;
     const newScale = transform.k * scaleAmount;
 
-    const VBox = (isUpperFloor ? '0 0 300 150' : '0 0 500 250').split(' ').map(Number);
+    const VBox = (isUpperFloor ? '0 0 30 15' : '0 0 50 25').split(' ').map(Number);
     const [vbX, vbY, vbWidth, vbHeight] = VBox;
     const maxScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 2;
     const minScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 0.5;
@@ -130,7 +130,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     const scaleFactor = 1.2;
     const newScale = direction === 'in' ? transform.k * scaleFactor : transform.k / scaleFactor;
     
-    const VBox = (isUpperFloor ? '0 0 300 150' : '0 0 500 250').split(' ').map(Number);
+    const VBox = (isUpperFloor ? '0 0 30 15' : '0 0 50 25').split(' ').map(Number);
     const [vbX, vbY, vbWidth, vbHeight] = VBox;
     const maxScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 2;
     const minScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 0.5;

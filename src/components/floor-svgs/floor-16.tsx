@@ -19,24 +19,24 @@ export const Floor16 = ({ highlightedRoomId, onRoomClick, rooms }: FloorProps) =
       {/* Penthouse Living Area */}
       <rect
         id="f16r1"
-        x="25" y="25" width="250" height="50"
+        x="2.5" y="2.5" width="25" height="5"
         onClick={() => onRoomClick('f16r1')}
-        className={cn('clickable-room fill-white stroke-black stroke-[0.2]', {
+        className={cn('clickable-room fill-white stroke-black stroke-[0.02]', {
           'highlighted-room': highlightedRoomId === 'f16r1',
         })}
       />
-      <text x="150" y="50" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-2xl">{getRoomById('f16r1')?.name}</text>
+      <text x="15" y="5" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-[2.5px]">{getRoomById('f16r1')?.name}</text>
 
       {/* Sky Garden */}
       <rect
         id="f16r2"
-        x="25" y="85" width="250" height="40"
+        x="2.5" y="8.5" width="25" height="4"
         onClick={() => onRoomClick('f16r2')}
-        className={cn('clickable-room fill-green-100 stroke-black stroke-[0.2]', {
+        className={cn('clickable-room fill-green-100 stroke-black stroke-[0.02]', {
           'highlighted-room': highlightedRoomId === 'f16r2',
         })}
       />
-      <text x="150" y="105" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-2xl">{getRoomById('f16r2')?.name}</text>
+      <text x="15" y="10.5" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-[2.5px]">{getRoomById('f16r2')?.name}</text>
     </g>
   );
 };

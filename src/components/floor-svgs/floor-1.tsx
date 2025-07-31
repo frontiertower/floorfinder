@@ -18,35 +18,35 @@ export const Floor1 = ({ highlightedRoomId, onRoomClick, rooms }: FloorProps) =>
       {/* Lobby */}
       <rect
         id="f1r1"
-        x="25" y="25" width="200" height="200"
+        x="2.5" y="2.5" width="20" height="20"
         onClick={() => onRoomClick('f1r1')}
-        className={cn('clickable-room fill-white stroke-black stroke-[0.2]', {
+        className={cn('clickable-room fill-white stroke-black stroke-[0.02]', {
           'highlighted-room': highlightedRoomId === 'f1r1',
         })}
       />
-      <text x="125" y="125" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-2xl">{getRoomById('f1r1')?.name}</text>
+      <text x="12.5" y="12.5" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-[2.5px]">{getRoomById('f1r1')?.name}</text>
 
       {/* Reception */}
       <rect
         id="f1r2"
-        x="250" y="25" width="225" height="95"
+        x="25" y="2.5" width="22.5" height="9.5"
         onClick={() => onRoomClick('f1r2')}
-        className={cn('clickable-room fill-white stroke-black stroke-[0.2]', {
+        className={cn('clickable-room fill-white stroke-black stroke-[0.02]', {
           'highlighted-room': highlightedRoomId === 'f1r2',
         })}
       />
-       <text x="362.5" y="72.5" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-2xl">{getRoomById('f1r2')?.name}</text>
+       <text x="36.25" y="7.25" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-[2.5px]">{getRoomById('f1r2')?.name}</text>
 
       {/* Mail Room */}
       <rect
         id="f1r3"
-        x="250" y="130" width="225" height="95"
+        x="25" y="13" width="22.5" height="9.5"
         onClick={() => onRoomClick('f1r3')}
-        className={cn('clickable-room fill-white stroke-black stroke-[0.2]', {
+        className={cn('clickable-room fill-white stroke-black stroke-[0.02]', {
           'highlighted-room': highlightedRoomId === 'f1r3',
         })}
       />
-      <text x="362.5" y="177.5" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-2xl">{getRoomById('f1r3')?.name}</text>
+      <text x="36.25" y="17.75" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-[2.5px]">{getRoomById('f1r3')?.name}</text>
     </g>
   );
 };
