@@ -57,8 +57,9 @@ const Grid = ({ viewBox }: { viewBox: string }) => {
 
     return (
         <g className="pointer-events-none">
-            {minorLines}
-            {majorLines}
+          <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="white" stroke="none" />
+          {minorLines}
+          {majorLines}
           <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="none" stroke="black" strokeWidth="0.25" />
         </g>
     );

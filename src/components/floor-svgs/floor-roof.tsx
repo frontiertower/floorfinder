@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import type { Room } from '@/lib/types';
 import { CommonUpper } from './common-upper';
 
-export const id = 'roof';
+export const id = '17';
 export const name = 'Roof';
 export const level = 17;
 
@@ -19,7 +19,6 @@ export const FloorRoof = ({ highlightedRoomId, onRoomClick, rooms }: FloorProps)
 
   return (
     <g>
-      <CommonUpper />
       <circle cx="15" cy="7.5" r="5" fill="hsl(var(--card))" stroke="black" strokeWidth="0.1" />
       <text x="15" y="7" dominantBaseline="middle" textAnchor="middle" className="pointer-events-none font-sans text-[2.5px]">Roof</text>
       

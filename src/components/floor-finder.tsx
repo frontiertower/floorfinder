@@ -134,7 +134,7 @@ const FloorFinder = () => {
                       className={`w-full text-left py-2 px-4 rounded ${selectedFloor?.id === floor.id ? 'bg-primary/20 text-primary-foreground' : 'hover:bg-gray-200'}`}
                       onClick={() => handleFloorChange(floor)}
                     >
-                      {floor.name}
+                      {floor.id} - {floor.name}
                     </button>
                   </li>
                 ))}
