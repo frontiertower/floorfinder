@@ -26,24 +26,24 @@ export default function RoomInfoDialog({ room, open, onOpenChange }: RoomInfoDia
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (room && open) {
-      setLoading(true);
-      setError(null);
-      setEnhancement(null);
-      enhanceSpaceName({ spaceName: room.name })
-        .then((result) => {
-          setEnhancement(result);
-        })
-        .catch((err) => {
-          console.error('Failed to enhance space name:', err);
-          setError('Could not retrieve additional information.');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [room, open]);
+  // useEffect(() => {
+  //   if (room && open) {
+  //     setLoading(true);
+  //     setError(null);
+  //     setEnhancement(null);
+  //     enhanceSpaceName({ spaceName: room.name })
+  //       .then((result) => {
+  //         setEnhancement(result);
+  //       })
+  //       .catch((err) => {
+  //         console.error('Failed to enhance space name:', err);
+  //         setError('Could not retrieve additional information.');
+  //       })
+  //       .finally(() => {
+  //         setLoading(false);
+  //       });
+  //   }
+  // }, [room, open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -56,9 +56,9 @@ export default function RoomInfoDialog({ room, open, onOpenChange }: RoomInfoDia
           <div className="flex items-center gap-2">
             <Wand2 className="h-5 w-5 text-primary" />
             <h3 className="font-headline text-lg">Enhanced Details</h3>
-            <Badge variant="outline">AI Generated</Badge>
+            <Badge variant="outline">AI Disabled</Badge>
           </div>
-          {loading && (
+          {/* {loading && (
             <div className="space-y-2">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
@@ -66,7 +66,8 @@ export default function RoomInfoDialog({ room, open, onOpenChange }: RoomInfoDia
             </div>
           )}
           {error && <p className="text-destructive">{error}</p>}
-          {enhancement && <p className="text-sm text-foreground">{enhancement.enhancedDescription}</p>}
+          {enhancement && <p className="text-sm text-foreground">{enhancement.enhancedDescription}</p>} */}
+          <p className="text-sm text-muted-foreground">AI functionality is currently disabled.</p>
         </div>
       </DialogContent>
     </Dialog>
