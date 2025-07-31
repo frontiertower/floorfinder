@@ -71,14 +71,17 @@ const FloorFinder = () => {
     setSelectedRoom(null);
   }, []);
 
-  const handleAIRequest = useCallback(async (room: Room) => {
-    // AI functionality is disabled
-  }, []);
-
   const roomsForSelectedFloor = selectedFloor ? getRoomsForFloor(selectedFloor.id) : [];
+  
+  // Flatten search results for rendering
+  const flatSearchResults = Array.from(searchResults.entries()).flatMap(([floorId, rooms]) => {
+      const floor = allFloors.find(f => f.id === floorId);
+      return rooms.map(room => ({ ...room, floorName: floor?.name || 'Unknown' }));
+  });
+
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-background">
       {/* Floor Selection Sidebar */}
       <div className="w-64 bg-white p-4 shadow-md flex flex-col">
         <h1 className="text-3xl font-headline text-center mb-4">FloorFinder</h1>
@@ -88,58 +91,57 @@ const FloorFinder = () => {
           <input
             type="text"
             placeholder="Search by room name or ID..."
-            className="w-full p-2 pl-8 border rounded mb-2"
+            className="w-full p-2 pl-8 border rounded mb-2 border-accent ring-1 ring-accent"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        <h2 className="text-xl font-bold mb-2">Floors</h2>
-        <ul className="overflow-y-auto">
-          {allFloors.map(floor => (
-            <li key={floor.id} className="mb-2">
-              <button
-                className={`w-full text-left py-2 px-4 rounded ${selectedFloor?.id === floor.id ? 'bg-blue-200 text-black' : 'hover:bg-gray-200'}`}
-                onClick={() => handleFloorChange(floor)}
-              >
-                {floor.name}
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        {/* Search Results */}
-        {searchQuery && (
-          <div className="mt-4 bg-gray-50 p-2 rounded max-h-60 overflow-y-auto border">
-            <h3 className="text-lg font-semibold mb-2">Search Results</h3>
-            {searchResults.size === 0 ? (
-              <p>No results found</p>
-            ) : (
-              Array.from(searchResults.entries()).map(([floorId, rooms]) => (
-                <div key={floorId} className="mb-2">
-                  <h4 className="font-semibold">{allFloors.find(f => f.id === floorId)?.name}</h4>
-                  <ul>
-                    {rooms.map(room => (
-                      <li
-                        key={room.id}
-                        className="cursor-pointer hover:underline text-blue-600"
+        <div className="overflow-y-auto">
+          {searchQuery ? (
+            <div>
+              {flatSearchResults.length === 0 ? (
+                <p className="text-muted-foreground p-4 text-center">No results found.</p>
+              ) : (
+                <ul>
+                  {flatSearchResults.map(room => (
+                    <li key={room.id} className="mb-2">
+                      <button
+                        className="w-full text-left p-2 rounded hover:bg-gray-100"
                         onClick={() => {
-                          const floor = allFloors.find(f => f.id === floorId);
+                          const floor = allFloors.find(f => f.id === room.floorId);
                           if (floor) {
-                              setSelectedFloor(floor);
+                            setSelectedFloor(floor);
                           }
                           setHighlightedRoom(room.id);
                         }}
                       >
-                        {room.name || room.id}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))
-            )}
-          </div>
-        )}
+                        <div className="font-bold">{room.name} [{room.id}]</div>
+                        <div className="text-sm text-muted-foreground">{room.floorName}</div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ) : (
+            <div>
+              <h2 className="text-xl font-bold mb-2">Floors</h2>
+              <ul className="overflow-y-auto">
+                {allFloors.map(floor => (
+                  <li key={floor.id} className="mb-2">
+                    <button
+                      className={`w-full text-left py-2 px-4 rounded ${selectedFloor?.id === floor.id ? 'bg-primary/20 text-primary-foreground' : 'hover:bg-gray-200'}`}
+                      onClick={() => handleFloorChange(floor)}
+                    >
+                      {floor.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
 
 

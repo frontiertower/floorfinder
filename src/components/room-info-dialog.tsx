@@ -36,7 +36,7 @@ export default function RoomInfoDialog({ room, open, onOpenChange }: RoomInfoDia
             <h3 className="font-headline text-lg">Enhanced Details</h3>
             <Badge variant="outline">AI Disabled</Badge>
           </div>
-          <p className="text-sm text-muted-foreground">AI functionality is currently disabled.</p>
+          <p className="text-sm text-muted-foreground">The AI feature to enhance room descriptions is currently disabled.</p>
         </div>
       </DialogContent>
     </Dialog>
