@@ -19,30 +19,52 @@ import { Floor15 } from '@/components/floor-svgs/floor-15';
 import { Floor16 } from '@/components/floor-svgs/floor-16';
 import { FloorRoof } from '@/components/floor-svgs/floor-roof';
 
-import * as floor1Rooms from '@/components/floor-svgs/floor-1';
-import * as floor2Rooms from '@/components/floor-svgs/floor-2';
-// ... import other floor room data if they export it
+import * as floorBData from '@/components/floor-svgs/floor-b';
+import * as floor1Data from '@/components/floor-svgs/floor-1';
+import * as floor2Data from '@/components/floor-svgs/floor-2';
+import * as floor3Data from '@/components/floor-svgs/floor-3';
+import * as floor4Data from '@/components/floor-svgs/floor-4';
+import * as floor5Data from '@/components/floor-svgs/floor-5';
+import * as floor6Data from '@/components/floor-svgs/floor-6';
+import * as floor7Data from '@/components/floor-svgs/floor-7';
+import * as floor8Data from '@/components/floor-svgs/floor-8';
+import * as floor9Data from '@/components/floor-svgs/floor-9';
+import * as floor10Data from '@/components/floor-svgs/floor-10';
+import * as floor11Data from '@/components/floor-svgs/floor-11';
+import * as floor12Data from '@/components/floor-svgs/floor-12';
+import * as floor13Data from '@/components/floor-svgs/floor-13';
+import * as floor14Data from '@/components/floor-svgs/floor-14';
+import * as floor15Data from '@/components/floor-svgs/floor-15';
+import * as floor16Data from '@/components/floor-svgs/floor-16';
+import * as floorRoofData from '@/components/floor-svgs/floor-roof';
 
-export const allFloors: Floor[] = [
-    { id: 'b', name: 'Basement', level: 0 },
-    { id: '1', name: 'Floor 1', level: 1 },
-    { id: '2', name: 'Floor 2', level: 2 },
-    { id: '3', name: 'Floor 3', level: 3 },
-    { id: '4', name: 'Floor 4', level: 4 },
-    { id: '5', name: 'Floor 5', level: 5 },
-    { id: '6', name: 'Floor 6', level: 6 },
-    { id: '7', name: 'Floor 7', level: 7 },
-    { id: '8', name: 'Floor 8', level: 8 },
-    { id: '9', name: 'Floor 9', level: 9 },
-    { id: '10', name: 'Floor 10', level: 10 },
-    { id: '11', name: 'Floor 11', level: 11 },
-    { id: '12', name: 'Floor 12', level: 12 },
-    { id: '13', name: 'Floor 13', level: 13 },
-    { id: '14', name: 'Floor 14', level: 14 },
-    { id: '15', name: 'Floor 15', level: 15 },
-    { id: '16', name: 'Floor 16', level: 16 },
-    { id: 'roof', name: 'Roof', level: 17 },
-  ];
+const floorModules = [
+  floorBData,
+  floor1Data,
+  floor2Data,
+  floor3Data,
+  floor4Data,
+  floor5Data,
+  floor6Data,
+  floor7Data,
+  floor8Data,
+  floor9Data,
+  floor10Data,
+  floor11Data,
+  floor12Data,
+  floor13Data,
+  floor14Data,
+  floor15Data,
+  floor16Data,
+  floorRoofData,
+];
+
+export const allFloors: Floor[] = floorModules.map(module => ({
+  id: module.id,
+  name: module.name,
+  level: module.level,
+}));
+
   
   const allRooms: Room[] = [
     // Floor 1

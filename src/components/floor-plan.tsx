@@ -59,6 +59,7 @@ const Grid = ({ viewBox }: { viewBox: string }) => {
         <g className="pointer-events-none">
             {minorLines}
             {majorLines}
+          <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="none" stroke="black" strokeWidth="0.25" />
         </g>
     );
 };
@@ -133,7 +134,6 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
       <svg
         ref={svgRef}
         viewBox={viewBox}
-        preserveAspectRatio="xMidYMid meet"
         className="w-full h-full absolute p-10"
       >
           <Grid viewBox={viewBox} />
@@ -156,10 +156,6 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
         >
           {floorName}
         </text>
-
-        <g transform={`translate(75, 55)`}>
-            <Ruler />
-        </g>
       </svg>
 
       <RoomHoverCard room={hoveredRoom} position={hoverCardPosition} />

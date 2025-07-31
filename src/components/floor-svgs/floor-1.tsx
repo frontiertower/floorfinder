@@ -3,6 +3,10 @@ import { cn } from '@/lib/utils';
 import type { Room } from '@/lib/types';
 import { CommonLower } from './common-lower';
 
+export const id = '1';
+export const name = 'Floor 1';
+export const level = 1;
+
 interface FloorProps {
   highlightedRoomId: string | null;
   onRoomClick: (roomId: string) => void;
@@ -13,7 +17,7 @@ export const Floor1 = ({ highlightedRoomId, onRoomClick, rooms }: FloorProps) =>
   const getRoomById = (id: string) => rooms.find(r => r.id === id);
 
   return (
-    <g>
+    <g data-floor-id="1">
       <CommonLower />
       {rooms.map(room => (
         <g key={room.id} onClick={() => onRoomClick(room.id)}>

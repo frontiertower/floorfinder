@@ -1,6 +1,10 @@
 
 import { CommonLower } from './common-lower';
 
+export const id = '3';
+export const name = 'Mixed-Use Floor';
+export const level = 3;
+
 export const Floor3 = () => {
   return (
     <g>

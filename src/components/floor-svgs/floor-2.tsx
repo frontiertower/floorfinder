@@ -3,6 +3,10 @@ import { cn } from '@/lib/utils';
 import type { Room } from '@/lib/types';
 import { CommonLower } from './common-lower';
 
+export const id = '2';
+export const name = 'Residential Floor';
+export const level = 2;
+
 interface FloorProps {
   highlightedRoomId: string | null;
   onRoomClick: (roomId: string) => void;

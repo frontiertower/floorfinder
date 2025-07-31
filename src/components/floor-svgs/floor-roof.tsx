@@ -3,6 +3,10 @@ import { cn } from '@/lib/utils';
 import type { Room } from '@/lib/types';
 import { CommonUpper } from './common-upper';
 
+export const id = 'roof';
+export const name = 'Roof';
+export const level = 17;
+
 interface FloorProps {
   highlightedRoomId: string | null;
   onRoomClick: (roomId: string) => void;
