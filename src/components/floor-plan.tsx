@@ -6,6 +6,7 @@ import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Room } from '@/lib/types';
+import { Card } from '@/components/ui/card';
 
 import { Floor1 } from './floor-svgs/floor-1';
 import { Floor2 } from './floor-svgs/floor-2';
@@ -77,8 +78,6 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   }
 
   useEffect(() => {
-    // We need to call centerAndFit initially, and when the floorId changes.
-    // The floorId change is handled by the other useEffect.
     centerAndFit(); 
 
     window.addEventListener('resize', centerAndFit);
@@ -87,14 +86,12 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsPanning(true);
-    const { left, top } = containerRef.current!.getBoundingClientRect();
-    setStartPoint({ x: e.clientX - left - transform.x, y: e.clientY - top - transform.y });
+    setStartPoint({ x: e.clientX - transform.x, y: e.clientY - transform.y });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isPanning) return;
-    const { left, top } = containerRef.current!.getBoundingClientRect();
-    setTransform((t) => ({ ...t, x: e.clientX - left - startPoint.x, y: e.clientY - top - startPoint.y }));
+    setTransform((t) => ({ ...t, x: e.clientX - startPoint.x, y: e.clientY - startPoint.y }));
   };
 
   const handleMouseUpOrLeave = () => {
@@ -114,7 +111,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
 
     const VBox = (isUpperFloor ? '0 0 30 15' : '0 0 50 25').split(' ').map(Number);
     const [vbX, vbY, vbWidth, vbHeight] = VBox;
-    const maxScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 2;
+    const maxScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 5;
     const minScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 0.5;
 
     const clampedScale = Math.max(minScale, Math.min(maxScale, newScale));
@@ -132,7 +129,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     
     const VBox = (isUpperFloor ? '0 0 30 15' : '0 0 50 25').split(' ').map(Number);
     const [vbX, vbY, vbWidth, vbHeight] = VBox;
-    const maxScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 2;
+    const maxScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 5;
     const minScale = Math.min(containerRef.current.clientWidth / vbWidth, containerRef.current.clientHeight / vbHeight) * 0.5;
 
     const clampedScale = Math.max(minScale, Math.min(maxScale, newScale));
@@ -149,7 +146,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-muted/20" onWheel={handleWheel}>
       <svg
         viewBox={viewBox}
-        preserveAspectRatio="xMidYMid meet"
+        preserveAspectRatio="none"
         className="w-full h-full absolute top-0 left-0"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -157,8 +154,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
         onMouseLeave={handleMouseUpOrLeave}
         style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
       >
-        <g transform={`translate(${transform.x / transform.k} ${transform.y / transform.k}) scale(${transform.k})`}>
-         <g transform={`scale(1) translate(-${transform.x / transform.k} -${transform.y / transform.k})`}>
+        <g style={{ transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.k})`}}>
           <Suspense fallback={<Skeleton className="w-full h-full" />}>
             <FloorComponent
               highlightedRoomId={highlightedRoomId}
@@ -167,18 +163,22 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
             />
           </Suspense>
         </g>
-        </g>
       </svg>
-      <div className="absolute bottom-4 right-4 flex flex-col space-y-2">
-        <Button size="icon" onClick={() => zoom('in')} aria-label="Zoom in">
-          <ZoomIn />
-        </Button>
-        <Button size="icon" onClick={() => zoom('out')} aria-label="Zoom out">
-          <ZoomOut />
-        </Button>
-        <Button size="icon" onClick={centerAndFit} aria-label="Reset view">
-          <RotateCcw />
-        </Button>
+      <div className="absolute bottom-4 right-4 flex items-center space-x-2">
+        <Card className="px-3 py-2 text-sm text-muted-foreground shadow-lg">
+           Zoom: {transform.k.toFixed(2)}x
+        </Card>
+        <div className="flex flex-col space-y-2">
+            <Button size="icon" onClick={() => zoom('in')} aria-label="Zoom in">
+                <ZoomIn />
+            </Button>
+            <Button size="icon" onClick={() => zoom('out')} aria-label="Zoom out">
+                <ZoomOut />
+            </Button>
+            <Button size="icon" onClick={centerAndFit} aria-label="Reset view">
+                <RotateCcw />
+            </Button>
+        </div>
       </div>
     </div>
   );
