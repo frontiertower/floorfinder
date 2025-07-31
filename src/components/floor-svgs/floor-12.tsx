@@ -29,9 +29,10 @@ interface Floor12Props {
   rooms: RoomType[];
   onMouseEnterRoom: (room: RoomType) => void;
   onMouseLeaveRoom: () => void;
+  viewBox: string;
 }
 
-export const Floor12: React.FC<Floor12Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }) => {
+export const Floor12: React.FC<Floor12Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom, viewBox }) => {
    const roomData = rooms.find(room => room.id === 'f12r1');
 
   return (
@@ -46,6 +47,7 @@ export const Floor12: React.FC<Floor12Props> = ({ highlightedRoomId, onRoomClick
           color={roomData.color} // Use color from roomData
           notes={roomData.notes}
           floorId={id} // Use the floor's constant id
+          viewBox={viewBox}
           onMouseEnter={() => onMouseEnterRoom(roomData)}
           onMouseLeave={onMouseLeaveRoom}
           onClick={() => onRoomClick(roomData.id)}

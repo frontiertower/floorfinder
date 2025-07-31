@@ -29,9 +29,10 @@ interface Floor4Props {
   rooms: RoomType[];
   onMouseEnterRoom: (room: RoomType) => void;
   onMouseLeaveRoom: () => void;
+  viewBox: string;
 }
 
-export const Floor4: React.FC<Floor4Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }) => {
+export const Floor4: React.FC<Floor4Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom, viewBox }) => {
 
   return (
     <g data-floor-id="4">
@@ -46,6 +47,7 @@ export const Floor4: React.FC<Floor4Props> = ({ highlightedRoomId, onRoomClick, 
           color={room.color}
           notes={room.notes}
           floorId={id} // Use the floor's constant id
+          viewBox={viewBox}
           onMouseEnter={() => onMouseEnterRoom(room)}
           onMouseLeave={onMouseLeaveRoom}
           onClick={() => onRoomClick(room.id)}

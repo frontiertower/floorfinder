@@ -41,9 +41,10 @@ interface Floor7Props {
   rooms: RoomType[];
   onMouseEnterRoom: (room: RoomType) => void;
   onMouseLeaveRoom: () => void;
+  viewBox: string;
 }
 
-export const Floor7: React.FC<Floor7Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }) => {
+export const Floor7: React.FC<Floor7Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom, viewBox }) => {
 
   return (
     <g data-floor-id="7">
@@ -58,6 +59,7 @@ export const Floor7: React.FC<Floor7Props> = ({ highlightedRoomId, onRoomClick, 
           color={room.color} // Use color from room data
           notes={room.notes}
           floorId={id} // Use the floor's constant id
+          viewBox={viewBox}
           onMouseEnter={() => onMouseEnterRoom(room)}
           onMouseLeave={onMouseLeaveRoom}
           onClick={() => onRoomClick(room.id)} // Use onRoomClick prop

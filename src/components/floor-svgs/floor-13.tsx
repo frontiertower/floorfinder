@@ -14,8 +14,9 @@ interface Floor13Props {
   rooms: RoomType[];
   onMouseEnterRoom: (room: RoomType) => void;
   onMouseLeaveRoom: () => void;
+  viewBox: string;
 }
-export const Floor13: React.FC<Floor13Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }) => {
+export const Floor13: React.FC<Floor13Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom, viewBox }) => {
   return (
     <g data-floor-id="13">
       <CommonUpper />
@@ -28,6 +29,7 @@ export const Floor13: React.FC<Floor13Props> = ({ highlightedRoomId, onRoomClick
           color={room.color}
           notes={room.notes}
           floorId={id} // Use the floor's constant id
+          viewBox={viewBox}
           onMouseEnter={() => onMouseEnterRoom(room)}
           onMouseLeave={onMouseLeaveRoom}
           onClick={() => onRoomClick(room.id)}
