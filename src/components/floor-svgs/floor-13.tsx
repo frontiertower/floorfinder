@@ -19,22 +19,7 @@ interface Floor13Props {
 export const Floor13: React.FC<Floor13Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom, viewBox }) => {
   return (
     <g data-floor-id="13">
-      <CommonUpper />
-      {rooms.map(room => (
-        <Room
-          key={room.id}
-          id={room.id}
-          name={room.name}
-          coords={room.coords}
-          color={room.color}
-          notes={room.notes}
-          floorId={id} // Use the floor's constant id
-          viewBox={viewBox}
-          onMouseEnter={() => onMouseEnterRoom(room)}
-          onMouseLeave={onMouseLeaveRoom}
-          onClick={() => onRoomClick(room.id)}
-        />
-      ))}
+      <image height="50" width="50" href="https://upload.wikimedia.org/wikipedia/en/0/02/The_Thirteenth_Floor_poster.jpg" /> 
     </g>
   );
 };

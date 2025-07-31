@@ -15,8 +15,8 @@ export const rooms: RoomType[] = [
         "notes": "This is the main robotics laboratory on floor 4.",
         "color": "rgba(255, 200, 200, .5)",
         "coords": [
-            33,
-            6,
+            35,
+            56,
             13,
             13
         ]

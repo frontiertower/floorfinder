@@ -52,7 +52,7 @@ const floorModules = [
   floor10Data,
   floor11Data,
   floor12Data,
-  floor13Data,
+//  floor13Data,
   floor14Data,
   floor15Data,
   floor16Data,

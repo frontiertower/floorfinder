@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import type { Room } from '@/lib/types';
 import { CommonUpper } from './blueprints/common-upper';
 
-export const id = 'roof';
+export const id = '17';
 export const name = 'Roof';
 export const level = 17;
 export const rooms: Room[] = [

@@ -7,6 +7,7 @@ import type { Room, Floor } from '@/lib/types';
 import { Search } from 'lucide-react';
 
 import FloorPlan from './floor-plan';
+import { Readme } from './readme';
 
 const FloorFinder = () => {
   const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
@@ -59,24 +60,22 @@ const FloorFinder = () => {
     window.location.hash = floor.id;
   };
 
-  // Read hash on initial load or default to floor 2
+  // Read hash on initial load or default to readme
   useEffect(() => {
     const hash = window.location.hash.substring(1);
     if (hash) {
       const initialFloor = allFloors.find(f => f.id === hash);
       if (initialFloor) {
         setSelectedFloor(initialFloor);
+      } else if (hash === 'readme') {
+        setSelectedFloor({ id: 'readme', name: 'App Design Summary', level: 0 }); // Assuming readme has a similar structure to Floor
       }
     } else {
-        const defaultFloor = allFloors.find(f => f.id === '2');
-        if (defaultFloor) {
-            setSelectedFloor(defaultFloor);
-            window.location.hash = '2';
-        }
+        setSelectedFloor({ id: 'readme', name: 'App Design Summary', level: 0 }); // Default to readme
     }
   }, []);
 
-  const roomsForSelectedFloor = selectedFloor ? getRoomsForFloor(selectedFloor.id) : [];
+  const roomsForSelectedFloor = selectedFloor && selectedFloor.id !== 'readme' ? getRoomsForFloor(selectedFloor.id) : [];
   
   // Flatten search results for rendering
   const flatSearchResults = Array.from(searchResults.entries()).flatMap(([floorId, rooms]) => {
@@ -89,7 +88,7 @@ const FloorFinder = () => {
     <div className="flex h-screen bg-card/50">
       {/* Floor Selection Sidebar */}
       <div className="w-64 bg-white p-4 shadow-md flex flex-col bg-card/50">
-        <h1 className="text-3xl font-headline text-center mb-4">FloorFinder</h1>
+        <a href="/"><h1 className="text-3xl font-headline text-center mb-4">FloorFinder</h1></a>
         
         <div className="relative mb-4">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -153,14 +152,18 @@ const FloorFinder = () => {
       {/* Main Floor Plan View */}
       <div className="flex-1 flex items-center justify-center overflow-hidden">
         {selectedFloor ? (
-          <FloorPlan
-            floorId={selectedFloor.id}
-            highlightedRoomId={highlightedRoom}
-            onRoomClick={(roomId) => {
-                setHighlightedRoom(roomId);
-            }}
-            rooms={roomsForSelectedFloor}
-          />
+            selectedFloor.id === 'readme' ? (
+                <Readme />
+            ) : (
+                <FloorPlan
+                  floorId={selectedFloor.id}
+                  highlightedRoomId={highlightedRoom}
+                  onRoomClick={(roomId) => {
+                      setHighlightedRoom(roomId);
+                  }}
+                  rooms={roomsForSelectedFloor}
+                />
+            )
         ) : (
           <p>Select a floor to view the plan.</p>
         )}

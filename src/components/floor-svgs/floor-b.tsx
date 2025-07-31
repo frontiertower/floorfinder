@@ -2,7 +2,7 @@
 import { CommonLower } from './blueprints/common-lower';
 import type { Room } from '@/lib/types';
 
-export const id = 'b';
+export const id = '0';
 export const name = 'Basement';
 export const level = 0;
 export const rooms: Room[] = [];

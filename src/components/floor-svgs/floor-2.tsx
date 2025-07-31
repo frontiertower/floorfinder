@@ -4,7 +4,7 @@ import type { Room as RoomType } from '@/lib/types';
 import React from 'react';
 
 export const id = '2';
-export const name = 'Spaceship';
+export const name = 'Event Space';
 export const level = 2;
 export const rooms: RoomType[] = [
   {
