@@ -7,42 +7,30 @@ export const id = '2';
 export const name = 'Spaceship';
 export const level = 2;
 export const rooms: RoomType[] = [
-    {
-        "id": "f2r1",
-        "name": "Open Office",
-        "floorId": "2",
-        "coords": [
-            2.5,
-            2.5,
-            45,
-            15
-        ],
-        "color": "rgba(255, 255, 255, 1)"
-    },
-    {
-        "id": "f2r2",
-        "name": "Conference Room",
-        "floorId": "2",
-        "coords": [
-            2.5,
-            18.5,
-            22,
-            4
-        ],
-        "color": "rgba(255, 255, 255, 1)"
-    },
-    {
-        "id": "f2r3",
-        "name": "Kitchenette",
-        "floorId": "2",
-        "coords": [
-            25.5,
-            18.5,
-            22,
-            4
-        ],
-        "color": "rgba(255, 255, 255, 1)"
-    }
+  {
+      "id": "f2r1",
+      "name": "Spaceship",
+      "floorId": "2",
+      "coords": [
+          10,
+          30,
+          80,
+          22
+      ],
+      "color": "rgba(255, 255, 255, 1)"
+  },
+  {
+      "id": "f2r2",
+      "name": "Green Room",
+      "floorId": "2",
+      "coords": [
+          8,
+          56,
+          10,
+          10
+      ],
+      "color": "rgba(255, 255, 255, 1)"
+  },
 ];
 
 interface Floor2Props {
@@ -51,9 +39,10 @@ interface Floor2Props {
   rooms: RoomType[];
   onMouseEnterRoom: (room: RoomType) => void;
   onMouseLeaveRoom: () => void;
+  viewBox: string
 }
 
-export const Floor2: React.FC<Floor2Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }) => {
+export const Floor2: React.FC<Floor2Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom, viewBox }) => {
 
   return (
     <g data-floor-id="2">
@@ -67,6 +56,7 @@ export const Floor2: React.FC<Floor2Props> = ({ highlightedRoomId, onRoomClick, 
           coords={room.coords}
           color={room.color}
           notes={room.notes}
+          viewBox={viewBox}
           floorId={id} // Use the floor's constant id
           onMouseEnter={() => onMouseEnterRoom(room)}
           onMouseLeave={onMouseLeaveRoom}

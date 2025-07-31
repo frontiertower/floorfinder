@@ -92,5 +92,5 @@ export const floorComponentMap: { [key: string]: React.ComponentType<any> } = {
     'roof': FloorRoof,
 };
   
-export const lowerFloorViewBox = '0 0 50 25';
-export const upperFloorViewBox = '0 0 95 60';
+export const lowerFloorViewBox = '0 0 180 90';
+export const upperFloorViewBox = '0 0 100 60';

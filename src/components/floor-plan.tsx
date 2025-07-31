@@ -15,17 +15,6 @@ const DefaultFloor = () => (
     </div>
 );
 
-const Ruler = () => {
-    return (
-      <g>
-        <line x1="0" y1="0" x2="10" y2="0" stroke="hsl(var(--foreground))" strokeWidth="0.05" />
-        <line x1="0" y1="0" x2="0" y2="-0.2" stroke="hsl(var(--foreground))" strokeWidth="0.05" />
-        <line x1="10" y1="0" x2="10" y2="-0.2" stroke="hsl(var(--foreground))" strokeWidth="0.05" />
-        <text x="5" y="-0.5" dominantBaseline="middle" textAnchor="middle" className="font-mono" fontSize="0.5px" fill="hsl(var(--foreground))">10m</text>
-      </g>
-    );
-};
-
 const Grid = ({ viewBox }: { viewBox: string }) => {
     const viewBoxParts = viewBox.split(' ').map(parseFloat);
     const [x, y, width, height] = viewBoxParts;
@@ -122,20 +111,18 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      <InfoBox floorName={floorName} coords={coords} hoveredRoom={hoveredRoom} />
+      <InfoBox floor={floor?.level}  floorName={floorName} coords={coords} hoveredRoom={hoveredRoom} />
       <svg
         ref={svgRef}
         viewBox={viewBox}
-        className="w-full h-full absolute p-10"
+        className="w-full absolute p-10"
       >
           <Grid viewBox={viewBox} />
-          <g transform="translate(1, 1)">
-            <Ruler />
-          </g>
           <FloorComponent
             highlightedRoomId={highlightedRoomId}
             onRoomClick={onRoomClick}
             rooms={rooms}
+            viewBox={viewBox}
             onMouseEnterRoom={handleMouseEnterRoom}
             onMouseLeaveRoom={handleMouseLeaveRoom}
           />

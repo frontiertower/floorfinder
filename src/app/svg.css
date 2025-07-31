@@ -3,9 +3,9 @@ svg {
 .g0{fill:none;stroke:red;}
 .g1{fill:none;stroke:orange;}
 .g3{fill:none;stroke:yellow;}
-.g4{fill:none;stroke:green;}
-.g5{fill:none;stroke:blue;}
-.g6{fill:none;stroke:indigo;}
+.g4{fill:none;stroke:#7e7e7e;}
+.g5{fill:#7e7e7e;stroke-width:0;}
+.g6{fill:none;stroke:#7e7e7e;}
 .g7{fill:none;stroke:violet;}
 
 

@@ -1,7 +1,6 @@
 
 export const Floor2Blueprint = () => (
-    <g transform="translate(-2.25 -10) scale(.095)">
-      <rect x="0" y="0" width="500" height="250" fill="red" stroke="black" strokeWidth="0.2" />
+    <g transform="translate(-4 -35) scale(.188888)">
 <path d='M947.1 810.2h8.4l-8.4 8.4Z' class='g1'/>
 <path d='M947.1 818.6v-8.4h8.4' class='g2'/>
 <g clip-path='url(#c0)'>

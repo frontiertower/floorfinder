@@ -15,10 +15,10 @@ export const rooms: RoomType[] = [
         "notes": "Relaxation and social area.",
         "color": "rgba(200, 200, 255, .5)",
         "coords": [
-            45,
+            47,
             20,
-            30,
-            20
+            32,
+            34
         ]
     },
     {
@@ -28,10 +28,10 @@ export const rooms: RoomType[] = [
         "notes": "Group lunches and dinners are here.",
         "color": "rgba(200, 200, 255, .5)",
         "coords": [
-            5,
-            43,
+            6,
+            42,
             40,
-            10
+            12
         ]
     }
 ];

@@ -1,7 +1,7 @@
 
 export const CommonUpper = () => (
     <g>
-    <g transform="translate(-2.25 -10) scale(.095)">
+    <g transform="translate(-2.25 -13) scale(.1)">
   <path d='M115.1 157.1H46.9l68.2 2.6Zm-68.2 0l68.2 2.6H46.9Z' className='walls'/>
   <path d='M118.4 159.7H46.9l71.5 12.6Zm-71.5 0l71.5 12.6H46.9Z' className='walls'/>
   <path d='M73.9 172.3h-27l27 10.1Zm-27 0l27 10.1h-27Z' className='walls'/>

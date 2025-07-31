@@ -8,13 +8,20 @@ interface RoomProps {
   coords: [number, number, number, number]; // [x, y, width, height]
   color?: string; // Optional color prop
   notes?: string;
-  floorId: string; // Add floorId here
+  floorId: string;
+  viewBox: string; 
   onMouseEnter?: (room: RoomType) => void;
   onMouseLeave?: () => void;
   onClick?: () => void; // Add onClick here
 }
-export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100, 100, 100, .5)', notes, onMouseEnter, onMouseLeave, onClick, floorId }) => {
-  const [x, y, width, height] = coords;
+export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100, 100, 100, .5)', notes, onMouseEnter, onMouseLeave, onClick, floorId, viewBox }) => {
+  let [x, y, width, height] = coords;
+
+  if (viewBox) {
+    const viewBoxParts = viewBox.split(' ').map(parseFloat);
+    const height = viewBoxParts[3];
+    y = height - y;
+  }
 
   // Calculate text position for the center of the rectangle
   const textX = x + width / 2;
