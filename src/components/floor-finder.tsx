@@ -9,7 +9,7 @@ import { Search } from 'lucide-react';
 import FloorPlan from './floor-plan';
 
 const FloorFinder = () => {
-  const [selectedFloor, setSelectedFloor] = useState<Floor | null>(allFloors.find(f => f.id === '4') || null);
+  const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Map<string, Room[]>>(new Map());
   const [highlightedRoom, setHighlightedRoom] = useState<string | null>(null);
@@ -59,13 +59,15 @@ const FloorFinder = () => {
     window.location.hash = floor.id;
   };
 
-  // Read hash on initial load
+  // Read hash on initial load or default to floor 2
   useEffect(() => {
     const hash = window.location.hash.substring(1);
-    if (hash) {
-      const initialFloor = allFloors.find(f => f.id === hash);
-      if (initialFloor) {
-        setSelectedFloor(initialFloor);
+    const floorIdToLoad = hash || '2';
+    const initialFloor = allFloors.find(f => f.id === floorIdToLoad);
+    if (initialFloor) {
+      setSelectedFloor(initialFloor);
+      if(!hash) {
+        window.location.hash = floorIdToLoad;
       }
     }
   }, []);
