@@ -105,7 +105,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
 
     setCoords({
       x: svgPoint.x,
-      y: viewBoxHeight - svgPoint.y, // Invert Y to make bottom-left the origin
+      y: viewBoxParts[1] + viewBoxHeight - svgPoint.y, // Invert Y and offset by viewbox start
       z: floor?.level ?? null
     });
   }, [floor, viewBox]);
@@ -119,7 +119,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
 
   return (
     <div 
-      className="w-full h-full relative overflow-hidden"
+      className="w-full h-full relative overflow-hidden bg-background"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
