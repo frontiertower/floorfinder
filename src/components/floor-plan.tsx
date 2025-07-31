@@ -26,6 +26,44 @@ const Ruler = () => {
     );
 };
 
+const Grid = ({ viewBox }: { viewBox: string }) => {
+    const viewBoxParts = viewBox.split(' ').map(parseFloat);
+    const width = viewBoxParts[2];
+    const height = viewBoxParts[3];
+
+    const majorLines = [];
+    const minorLines = [];
+
+    // Using feet, so conversion from meters is ~3.28
+    const majorGridSpacing = 10;
+    const minorGridSpacing = 1;
+
+    // Vertical lines
+    for (let i = 0; i <= width; i += minorGridSpacing) {
+        if (i % majorGridSpacing === 0) {
+            majorLines.push(<line key={`v-maj-${i}`} x1={i} y1={0} x2={i} y2={height} stroke="hsl(var(--border))" strokeWidth="0.1" />);
+        } else {
+            minorLines.push(<line key={`v-min-${i}`} x1={i} y1={0} x2={i} y2={height} stroke="hsl(var(--border))" strokeWidth="0.05" opacity="0.5" />);
+        }
+    }
+
+    // Horizontal lines
+    for (let i = 0; i <= height; i += minorGridSpacing) {
+        if (i % majorGridSpacing === 0) {
+            majorLines.push(<line key={`h-maj-${i}`} x1={0} y1={i} x2={width} y2={i} stroke="hsl(var(--border))" strokeWidth="0.1" />);
+        } else {
+            minorLines.push(<line key={`h-min-${i}`} x1={0} y1={i} x2={width} y2={i} stroke="hsl(var(--border))" strokeWidth="0.05" opacity="0.5" />);
+        }
+    }
+
+    return (
+        <g className="pointer-events-none">
+            {minorLines}
+            {majorLines}
+        </g>
+    );
+};
+
 interface FloorPlanProps {
   floorId: string;
   highlightedRoomId: string | null;
@@ -88,8 +126,8 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     >
       {coords && (
         <div className="absolute top-2 right-2 bg-card/80 p-2 rounded-md text-xs font-mono z-10 pointer-events-none">
-          <div>X: {coords.x.toFixed(2)}m</div>
-          <div>Y: {coords.y.toFixed(2)}m</div>
+          <div>X: {coords.x.toFixed(2)}ft</div>
+          <div>Y: {coords.y.toFixed(2)}ft</div>
           <div>Z: {coords.z}</div>
         </div>
       )}
@@ -99,6 +137,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
         preserveAspectRatio="xMidYMid meet"
         className="w-full h-full absolute p-10"
       >
+          <Grid viewBox={viewBox} />
           <FloorComponent
             highlightedRoomId={highlightedRoomId}
             onRoomClick={onRoomClick}
