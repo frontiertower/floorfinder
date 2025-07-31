@@ -6,6 +6,34 @@ import type { Room as RoomType } from '@/lib/types';
 export const id = '6';
 export const name = 'Arts & Music';
 export const level = 6;
+export const rooms: RoomType[] = [
+    {
+        "id": "f6r1",
+        "name": "Music Studio A",
+        "floorId": "6",
+        "notes": "Equipped for recording and practice.",
+        "color": "rgba(200, 200, 255, .5)",
+        "coords": [
+            5,
+            5,
+            10,
+            10
+        ]
+    },
+    {
+        "id": "f6r2",
+        "name": "Art Workshop",
+        "floorId": "6",
+        "notes": "Space for various art projects.",
+        "color": "rgba(200, 200, 255, .5)",
+        "coords": [
+            20,
+            5,
+            10,
+            10
+        ]
+    }
+];
 
 interface Floor6Props {
   highlightedRoomId: string | null;

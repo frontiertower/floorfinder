@@ -6,6 +6,34 @@ import type { Room as RoomType } from '@/lib/types';
 export const id = '7';
 export const name = 'Frontier Makerspace';
 export const level = 7;
+export const rooms: RoomType[] = [
+    {
+        "id": "f7r1",
+        "name": "3D Printing Zone",
+        "floorId": "7",
+        "notes": "Equipped with 3D printers.",
+        "color": "rgba(255, 255, 200, .5)",
+        "coords": [
+            5,
+            5,
+            10,
+            10
+        ]
+    },
+    {
+        "id": "f7r2",
+        "name": "Laser Cutting Area",
+        "floorId": "7",
+        "notes": "Area for laser cutting.",
+        "color": "rgba(255, 255, 200, .5)",
+        "coords": [
+            20,
+            5,
+            10,
+            10
+        ]
+    }
+];
 
 interface Floor7Props {
   highlightedRoomId: string | null;

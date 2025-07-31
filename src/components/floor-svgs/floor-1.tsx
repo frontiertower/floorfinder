@@ -6,6 +6,44 @@ import { CommonLower } from './blueprints/common-lower';
 export const id = '1';
 export const name = 'Lobby';
 export const level = 1;
+export const rooms: Room[] = [
+    {
+        "id": "f1r1",
+        "name": "Lobby",
+        "floorId": "1",
+        "coords": [
+            2.5,
+            2.5,
+            20,
+            20
+        ],
+        "color": "rgba(255, 255, 255, 1)"
+    },
+    {
+        "id": "f1r2",
+        "name": "Reception",
+        "floorId": "1",
+        "coords": [
+            25,
+            2.5,
+            22.5,
+            9.5
+        ],
+        "color": "rgba(255, 255, 255, 1)"
+    },
+    {
+        "id": "f1r3",
+        "name": "Mail Room",
+        "floorId": "1",
+        "coords": [
+            25,
+            13,
+            22.5,
+            9.5
+        ],
+        "color": "rgba(255, 255, 255, 1)"
+    }
+];
 
 interface FloorProps {
   highlightedRoomId: string | null;

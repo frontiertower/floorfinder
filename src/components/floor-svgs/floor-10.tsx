@@ -6,6 +6,21 @@ import type { Room as RoomType } from '@/lib/types';
 export const id = '10';
 export const name = 'Frontier @ Accerlate';
 export const level = 10;
+export const rooms: RoomType[] = [
+    {
+        "id": "f10r1",
+        "name": "Accelerator Hot Desks",
+        "floorId": "10",
+        "notes": "Flexible workspace for startups.",
+        "color": "rgba(255, 200, 255, .5)",
+        "coords": [
+            15,
+            7,
+            10,
+            8
+        ]
+    }
+];
 
 interface Floor10Props {
   highlightedRoomId: string | null;

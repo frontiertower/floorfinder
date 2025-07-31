@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { allFloors, getRoomsForFloor } from '@/lib/floor-data';
+import { allFloors, getRoomsForFloor } from '@/lib/config';
 import type { Room, Floor } from '@/lib/types';
 import { Search } from 'lucide-react';
 
@@ -62,13 +62,17 @@ const FloorFinder = () => {
   // Read hash on initial load or default to floor 2
   useEffect(() => {
     const hash = window.location.hash.substring(1);
-    const floorIdToLoad = hash || '2';
-    const initialFloor = allFloors.find(f => f.id === floorIdToLoad);
-    if (initialFloor) {
-      setSelectedFloor(initialFloor);
-      if(!hash) {
-        window.location.hash = floorIdToLoad;
+    if (hash) {
+      const initialFloor = allFloors.find(f => f.id === hash);
+      if (initialFloor) {
+        setSelectedFloor(initialFloor);
       }
+    } else {
+        const defaultFloor = allFloors.find(f => f.id === '2');
+        if (defaultFloor) {
+            setSelectedFloor(defaultFloor);
+            window.location.hash = '2';
+        }
     }
   }, []);
 

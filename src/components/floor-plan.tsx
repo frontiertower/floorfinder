@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useMemo, useCallback } from 'react';
 import type { Room } from '@/lib/types';
-import { allFloors, floorComponentMap, upperFloorViewBox, lowerFloorViewBox } from '@/lib/floor-data';
+import { allFloors, floorComponentMap, upperFloorViewBox, lowerFloorViewBox } from '@/lib/config';
 
 import { InfoBox } from './infobox';
 
@@ -57,7 +57,7 @@ const Grid = ({ viewBox }: { viewBox: string }) => {
 
     return (
         <g className="pointer-events-none">
-          <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="hsl(var(--card))" stroke="none" />
+          <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="white" stroke="none" />
           {minorLines}
           {majorLines}
           <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="none" stroke="black" strokeWidth="0.25" />

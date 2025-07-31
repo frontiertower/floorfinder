@@ -1,45 +1,77 @@
-
-import { cn } from '@/lib/utils';
-import type { Room } from '@/lib/types';
 import { Floor2Blueprint } from './blueprints/floor-2';
+import { Room } from './Room';
+import type { Room as RoomType } from '@/lib/types';
+import React from 'react';
 
 export const id = '2';
 export const name = 'Spaceship';
 export const level = 2;
+export const rooms: RoomType[] = [
+    {
+        "id": "f2r1",
+        "name": "Open Office",
+        "floorId": "2",
+        "coords": [
+            2.5,
+            2.5,
+            45,
+            15
+        ],
+        "color": "rgba(255, 255, 255, 1)"
+    },
+    {
+        "id": "f2r2",
+        "name": "Conference Room",
+        "floorId": "2",
+        "coords": [
+            2.5,
+            18.5,
+            22,
+            4
+        ],
+        "color": "rgba(255, 255, 255, 1)"
+    },
+    {
+        "id": "f2r3",
+        "name": "Kitchenette",
+        "floorId": "2",
+        "coords": [
+            25.5,
+            18.5,
+            22,
+            4
+        ],
+        "color": "rgba(255, 255, 255, 1)"
+    }
+];
 
-interface FloorProps {
+interface Floor2Props {
   highlightedRoomId: string | null;
-  onRoomClick: (roomId: string) => void;
-  rooms: Room[];
+  onRoomClick: (roomId: string | null) => void;
+  rooms: RoomType[];
+  onMouseEnterRoom: (room: RoomType) => void;
+  onMouseLeaveRoom: () => void;
 }
 
-export const Floor2 = ({ highlightedRoomId, onRoomClick, rooms }: FloorProps) => {
-  const getRoomById = (id: string) => rooms.find(r => r.id === id);
+export const Floor2: React.FC<Floor2Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }) => {
 
   return (
-    <g>
+    <g data-floor-id="2">
       <Floor2Blueprint />
+      {/* Map over rooms array to render Room components */}
       {rooms.map(room => (
-        <g key={room.id} onClick={() => onRoomClick(room.id)}>
-            <rect
-                id={room.id}
-                x={room.coords[0]}
-                y={room.coords[1]}
-                width={room.coords[2]}
-                height={room.coords[3]}
-                className={cn('clickable-room fill-white stroke-black stroke-[0.02]', {
-                    'highlighted-room': highlightedRoomId === room.id,
-                })}
-            />
-            <text 
-                x={room.coords[0] + room.coords[2] / 2} 
-                y={room.coords[1] + room.coords[3] / 2} 
-                dominantBaseline="middle" 
-                textAnchor="middle" 
-                className="pointer-events-none font-sans text-[2.5px]">
-                    {room.name}
-            </text>
-        </g>
+        <Room
+          key={room.id}
+          id={room.id}
+          name={room.name}
+          coords={room.coords}
+          color={room.color}
+          notes={room.notes}
+          floorId={id} // Use the floor's constant id
+          onMouseEnter={() => onMouseEnterRoom(room)}
+          onMouseLeave={onMouseLeaveRoom}
+          onClick={() => onRoomClick(room.id)}
+        />
       ))}
     </g>
   );

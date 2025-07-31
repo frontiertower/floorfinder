@@ -7,6 +7,21 @@ import React from 'react';
 export const id = '4';
 export const name = 'Robotics & Hard Tech';
 export const level = 4;
+export const rooms: RoomType[] = [
+    {
+        "id": "f4r1",
+        "floorId": "4",
+        "name": "Robotics Lab",
+        "notes": "This is the main robotics laboratory on floor 4.",
+        "color": "rgba(255, 200, 200, .5)",
+        "coords": [
+            33,
+            6,
+            13,
+            13
+        ]
+    }
+];
 
 interface Floor4Props {
   highlightedRoomId: string | null;

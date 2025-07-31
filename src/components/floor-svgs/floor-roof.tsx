@@ -3,9 +3,23 @@ import { cn } from '@/lib/utils';
 import type { Room } from '@/lib/types';
 import { CommonUpper } from './blueprints/common-upper';
 
-export const id = '17';
+export const id = 'roof';
 export const name = 'Roof';
 export const level = 17;
+export const rooms: Room[] = [
+    {
+        "id": "roof-access",
+        "name": "Maintenance Access",
+        "floorId": "roof",
+        "coords": [
+            12.5,
+            2.5,
+            5,
+            2
+        ],
+        "color": "rgba(255, 255, 255, 1)"
+    }
+];
 
 interface FloorProps {
   highlightedRoomId: string | null;

@@ -7,6 +7,34 @@ import React from 'react';
 export const id = '16';
 export const name = 'd/acc Lounge';
 export const level = 16;
+export const rooms: RoomType[] = [
+    {
+        "id": "f16r1",
+        "name": "Lounge",
+        "floorId": "16",
+        "notes": "Relaxation and social area.",
+        "color": "rgba(200, 200, 255, .5)",
+        "coords": [
+            45,
+            20,
+            30,
+            20
+        ]
+    },
+    {
+        "id": "f16r2",
+        "name": "Dining Hall",
+        "floorId": "16",
+        "notes": "Group lunches and dinners are here.",
+        "color": "rgba(200, 200, 255, .5)",
+        "coords": [
+            5,
+            43,
+            40,
+            10
+        ]
+    }
+];
 
 interface Floor16Props {
   highlightedRoomId: string | null;

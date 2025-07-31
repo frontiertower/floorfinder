@@ -7,6 +7,21 @@ import React from 'react';
 export const id = '5';
 export const name = 'Movement & Fitness';
 export const level = 5;
+export const rooms: RoomType[] = [
+    {
+        "id": "f5r1",
+        "name": "Fitness Area",
+        "floorId": "5",
+        "notes": "Exercise equipment and open space for activities.",
+        "color": "rgba(200, 255, 200, .5)",
+        "coords": [
+            10,
+            5,
+            15,
+            8
+        ]
+    }
+];
 
 interface Floor5Props {
   highlightedRoomId: string | null;

@@ -7,6 +7,21 @@ import React from 'react';
 export const id = '14';
 export const name = 'Human Flourishing';
 export const level = 14;
+export const rooms: RoomType[] = [
+    {
+        "id": "f14r1",
+        "name": "Meditation and Quiet Zone",
+        "floorId": "14",
+        "notes": "A space for quiet reflection and meditation.",
+        "color": "rgba(200, 255, 200, .5)",
+        "coords": [
+            18,
+            8,
+            10,
+            12
+        ]
+    }
+];
 
 interface Floor14Props {
   highlightedRoomId: string | null;

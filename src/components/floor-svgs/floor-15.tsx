@@ -7,6 +7,34 @@ import React from 'react';
 export const id = '15';
 export const name = 'Coworking & Library';
 export const level = 15;
+export const rooms: RoomType[] = [
+    {
+        "id": "f15r1",
+        "floorId": "15",
+        "name": "Coworking Space",
+        "notes": "Open area with desks for coworking.",
+        "color": "rgba(255, 255, 200, .5)",
+        "coords": [
+            5,
+            5,
+            15,
+            15
+        ]
+    },
+    {
+        "id": "f15r2",
+        "floorId": "15",
+        "name": "Library",
+        "notes": "Quiet area for reading and focus.",
+        "color": "rgba(255, 255, 200, .5)",
+        "coords": [
+            25,
+            5,
+            10,
+            15
+        ]
+    }
+];
 
 interface Floor15Props {
   highlightedRoomId: string | null;
