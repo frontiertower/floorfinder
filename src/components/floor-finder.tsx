@@ -78,7 +78,7 @@ const FloorFinder = () => {
           <input
             type="text"
             placeholder="Search by room name or ID..."
-            className="w-full p-2 pl-8 border rounded mb-2 border-accent ring-1 ring-accent"
+            className="w-full p-2 pl-8 border rounded mb-2"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -116,9 +116,9 @@ const FloorFinder = () => {
               <h2 className="text-xl font-bold mb-2">Floors</h2>
               <ul className="overflow-y-auto">
                 {allFloors.map(floor => (
-                  <li key={floor.id} className="mb-2">
+                  <li key={floor.id} className="mb-1">
                     <button
-                      className={`w-full text-left py-2 px-4 rounded ${selectedFloor?.id === floor.id ? 'bg-primary/20 text-primary-foreground' : 'hover:bg-gray-200'}`}
+                      className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === floor.id ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20'}`}
                       onClick={() => handleFloorChange(floor)}
                     >
                       {floor.id} - {floor.name}

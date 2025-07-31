@@ -57,7 +57,7 @@ const Grid = ({ viewBox }: { viewBox: string }) => {
 
     return (
         <g className="pointer-events-none">
-          <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="hsl(var(--background))" stroke="none" />
+          <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="hsl(var(--card))" stroke="none" />
           {minorLines}
           {majorLines}
           <rect x={x + .25} y={y + .25} width={width - .5 } height={height - .5} fill="none" stroke="black" strokeWidth="0.25" />
