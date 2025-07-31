@@ -1,213 +1,172 @@
-'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import type { Floor, Room, FloorData } from '@/lib/types';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Search, Info } from 'lucide-react';
+"use client";
 
-// Statically import all floor components
-import * as Floor4 from './floor-svgs/floor-4';
-import * as Floor5 from './floor-svgs/floor-5';
-import * as Floor6 from './floor-svgs/floor-6';
-import * as Floor7 from './floor-svgs/floor-7';
-import * as Floor8 from './floor-svgs/floor-8';
-import * as Floor9 from './floor-svgs/floor-9';
-import * as Floor10 from './floor-svgs/floor-10';
-import * as Floor11 from './floor-svgs/floor-11';
-import * as Floor12 from './floor-svgs/floor-12';
-import * as Floor14 from './floor-svgs/floor-14';
-import * as Floor15 from './floor-svgs/floor-15';
-import * as Floor16 from './floor-svgs/floor-16';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { allFloors, getRoomsForFloor } from '@/lib/floor-data';
+import type { Room, Floor } from '@/lib/types';
 
 import FloorPlan from './floor-plan';
 import RoomInfoDialog from './room-info-dialog';
 
-// Combine floor and room data from static imports
-const allFloors: Floor[] = [
-  { id: Floor4.id, name: Floor4.name, level: Floor4.level },
-  { id: Floor5.id, name: Floor5.name, level: Floor5.level },
-  { id: Floor6.id, name: Floor6.name, level: Floor6.level },
-  { id: Floor7.id, name: Floor7.name, level: Floor7.level },
-  { id: Floor8.id, name: Floor8.name, level: Floor8.level },
-  { id: Floor9.id, name: Floor9.name, level: Floor9.level },
-  { id: Floor10.id, name: Floor10.name, level: Floor10.level },
-  { id: Floor11.id, name: Floor11.name, level: Floor11.level },
-  { id: Floor12.id, name: Floor12.name, level: Floor12.level },
-  { id: Floor14.id, name: Floor14.name, level: Floor14.level },
-  { id: Floor15.id, name: Floor15.name, level: Floor15.level },
-  { id: Floor16.id, name: Floor16.name, level: Floor16.level },
-];
-
-const allRooms: Room[] = [
-  ...Floor4.rooms,
-  ...Floor5.rooms,
-  ...Floor6.rooms,
-  ...Floor7.rooms,
-  ...Floor8.rooms,
-  ...Floor9.rooms,
-  ...Floor10.rooms,
-  ...Floor11.rooms,
-  ...Floor12.rooms,
-  ...Floor14.rooms,
-  ...Floor15.rooms,
-  ...Floor16.rooms,
-];
-
-
-export default function FloorFinder() {
-  // Initialize selectedFloorId to null
-  const [selectedFloorId, setSelectedFloorId] = useState<string | null>(null);
-  const [highlightedRoomId, setHighlightedRoomId] = useState<string | null>(null);
+const FloorFinder = () => {
+  const [selectedFloor, setSelectedFloor] = useState<Floor | null>(allFloors.find(f => f.id === '4') || null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRoomForInfo, setSelectedRoomForInfo] = useState<Room | null>(null);
+  const [searchResults, setSearchResults] = useState<Map<string, Room[]>>(new Map());
+  const [highlightedRoom, setHighlightedRoom] = useState<string | null>(null);
+  const [isRoomInfoDialogOpen, setIsRoomInfoDialogOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
-  // Read hash from URL on mount and set the floor
+  const { toast } = useToast();
+
+  // Handle room search
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const hash = window.location.hash;
-      if (hash && hash.startsWith('#floor')) {
-        const idFromHash = hash.substring(6);
-        // Basic validation: check if the extracted id is a valid floor id
-        if (allFloors.some(floor => floor.id === idFromHash)) {
-           setSelectedFloorId(idFromHash);
+    if (searchQuery.length > 0) {
+      const results = new Map<string, Room[]>();
+      for (const floor of allFloors) {
+        const floorRooms = getRoomsForFloor(floor.id);
+        const floorResults = floorRooms.filter(room =>
+          room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          room.id.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        if (floorResults.length > 0) {
+          results.set(floor.id, floorResults);
         }
       }
+      setSearchResults(results);
+    } else {
+      setSearchResults(new Map());
+      setHighlightedRoom(null);
     }
-  }, [allFloors]); // Depend on allFloors
+  }, [searchQuery]);
 
-
-  const sortedFloors = useMemo(() => {
-    // Filter out commented floors (b, 1, 2, 3, 13, roof) - already done by selecting which floors to import
-    return [...allFloors].sort((a, b) => b.level - a.level);
-  }, [allFloors]);
-
-  const searchResults = useMemo<Room[]>(() => {
-    if (!searchQuery) return [];
-    const lowerCaseQuery = searchQuery.toLowerCase();
-    return allRooms.filter(
-      (room) =>
-        room.name.toLowerCase().includes(lowerCaseQuery) ||
-        room.id.toLowerCase().includes(lowerCaseQuery)
-    );
-  }, [searchQuery, allRooms]);
-
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchResults.length === 1) {
-      const room = searchResults[0];
-      setSelectedFloorId(room.floorId);
-      setHighlightedRoomId(room.id);
-      setSearchQuery('');
+  // Auto-select and highlight room if only one search result
+  useEffect(() => {
+    if (searchResults.size === 1) {
+      const [floorId, rooms] = searchResults.entries().next().value;
+      if (rooms.length === 1) {
+        const floor = allFloors.find(f => f.id === floorId);
+        if (floor) {
+          setSelectedFloor(floor);
+        }
+        setHighlightedRoom(rooms[0].id);
+      }
     }
+  }, [searchResults]);
+
+  const handleFloorChange = (floor: Floor) => {
+    setSelectedFloor(floor);
+    setSearchQuery(''); // Clear search on floor change
+    setHighlightedRoom(null); // Clear highlight on floor change
   };
 
-  const handleSelectSearchResult = (room: Room) => {
-    setSelectedFloorId(room.floorId);
-    setHighlightedRoomId(room.id);
-    setSearchQuery('');
-  };
-
-  const handleRoomClick = useCallback((roomId: string | null) => {
-    setHighlightedRoomId(roomId);
+  const handleRoomClick = useCallback((room: Room) => {
+    setSelectedRoom(room);
+    setIsRoomInfoDialogOpen(true);
   }, []);
 
+  const handleRoomInfoDialogClose = useCallback(() => {
+    setIsRoomInfoDialogOpen(false);
+    setSelectedRoom(null);
+  }, []);
+
+  const handleAIRequest = useCallback(async (room: Room) => {
+    // AI functionality is disabled
+  }, []);
+
+  const roomsForSelectedFloor = selectedFloor ? getRoomsForFloor(selectedFloor.id) : [];
+
   return (
-    <div className="flex h-screen w-screen bg-background text-foreground font-body">
-      <div className="w-80 flex flex-col border-r bg-card/50">
-        <header className="p-4 border-b">
-          <h1 className="text-2xl font-headline font-bold text-center">FloorFinder</h1>
-        </header>
+    <div className="flex h-screen bg-gray-100">
+      {/* Floor Selection Sidebar */}
+      <div className="w-64 bg-white p-4 shadow-md overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4">Floors</h2>
+        <ul>
+          {allFloors.map(floor => (
+            <li key={floor.id} className="mb-2">
+              <button
+                className={`w-full text-left py-2 px-4 rounded ${selectedFloor?.id === floor.id ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`}
+                onClick={() => handleFloorChange(floor)}
+              >
+                {floor.name}
+              </button>
+            </li>
+          ))}
+        </ul>
 
-        <div className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Search by room name or ID..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearchKeyDown}
-            />
-          </div>
-        </div>
+        {/* Search Bar */}
+        <div className="mt-4">
+          <h2 className="text-xl font-bold mb-2">Search Rooms</h2>
+          <input
+            type="text"
+            placeholder="Enter room name or ID"
+            className="w-full p-2 border rounded mb-2"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
 
-        {searchQuery ? (
-          <ScrollArea className="flex-1">
-            <div className="p-4 pt-0">
-              {searchResults.length > 0 ? (
-                <ul className="space-y-2">
-                  {searchResults.map((room) => (
-                    <li key={room.id}>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-left h-auto"
-                        onClick={() => handleSelectSearchResult(room)}
-                      >
-                        <div>
-                          <p className="font-semibold">{room.name} [{room.id}]</p> 
-                          <p className="text-sm text-muted-foreground">
-                            {room.floorId} - {allFloors.find(f => f.id === room.floorId)?.name}
-                          </p>
-                        </div>
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
+          {/* Search Results */}
+          {searchQuery && (
+            <div className="bg-gray-50 p-2 rounded max-h-60 overflow-y-auto">
+              {searchResults.size === 0 ? (
+                <p>No results found</p>
               ) : (
-                <p className="text-center text-muted-foreground p-4">No results found.</p>
-              )}
-            </div>
-          </ScrollArea>
-        ) : (
-          <div className="flex-1 flex flex-col">
-            <h2 className="text-lg font-headline font-semibold px-4 pb-2">Floors</h2>
-            <ScrollArea className="flex-1">
-              <nav className="px-4">
-                {
-                  <ul className="space-y-1">
-                    {sortedFloors.map((floor) => (
-                      <li key={floor.id}>
-                        <Button
-                          variant={selectedFloorId === floor.id ? 'default' : 'ghost'}
-                          className="w-full justify-start"
+                Array.from(searchResults.entries()).map(([floorId, rooms]) => (
+                  <div key={floorId} className="mb-2">
+                    <h4 className="font-semibold">{allFloors.find(f => f.id === floorId)?.name}</h4>
+                    <ul>
+                      {rooms.map(room => (
+                        <li
+                          key={room.id}
+                          className="cursor-pointer hover:underline text-blue-600"
                           onClick={() => {
-                              setSelectedFloorId(floor.id);
-                              setHighlightedRoomId(null);
-                              window.location.hash = `floor${floor.id}`; // Update URL hash
+                            const floor = allFloors.find(f => f.id === floorId);
+                            if (floor) {
+                                setSelectedFloor(floor);
+                            }
+                            setHighlightedRoom(room.id);
                           }}
                         >
-                          {floor.id} - {floor.name}
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
+                          {room.name || room.id}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Main Floor Plan View */}
+      <div className="flex-1 flex items-center justify-center overflow-hidden">
+        {selectedFloor ? (
+          <FloorPlan
+            floorId={selectedFloor.id}
+            highlightedRoomId={highlightedRoom}
+            onRoomClick={(roomId) => {
+              if (roomId) {
+                const room = roomsForSelectedFloor.find(r => r.id === roomId);
+                if (room) {
+                  handleRoomClick(room);
                 }
-              </nav>
-            </ScrollArea>
-          </div>
+              }
+            }}
+            rooms={roomsForSelectedFloor}
+          />
+        ) : (
+          <p>Select a floor to view the plan.</p>
         )}
       </div>
 
-      <main className="flex-1 flex flex-col bg-background relative overflow-hidden">
-        {/* Render FloorPlan only if a floor is selected */}
-        {selectedFloorId && (
-          <FloorPlan
-            floorId={selectedFloorId}
-            highlightedRoomId={highlightedRoomId}
-            onRoomClick={handleRoomClick}
-            rooms={allRooms.filter(r => r.floorId === selectedFloorId)}
-          />
-        )}
-      </main>
-
       <RoomInfoDialog
-        room={selectedRoomForInfo}
-        open={!!selectedRoomForInfo}
-        onOpenChange={(isOpen) => !isOpen && setSelectedRoomForInfo(null)}
+        open={isRoomInfoDialogOpen}
+        onOpenChange={handleRoomInfoDialogClose}
+        room={selectedRoom}
       />
     </div>
   );
-}
+};
+
+export default FloorFinder;
