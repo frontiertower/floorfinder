@@ -10,18 +10,56 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Search, Info } from 'lucide-react';
 
-// Import the config data directly
-import { floorData as importedFloorData } from '../config';
+// Statically import all floor components
+import * as Floor4 from './floor-svgs/floor-4';
+import * as Floor5 from './floor-svgs/floor-5';
+import * as Floor6 from './floor-svgs/floor-6';
+import * as Floor7 from './floor-svgs/floor-7';
+import * as Floor8 from './floor-svgs/floor-8';
+import * as Floor9 from './floor-svgs/floor-9';
+import * as Floor10 from './floor-svgs/floor-10';
+import * as Floor11 from './floor-svgs/floor-11';
+import * as Floor12 from './floor-svgs/floor-12';
+import * as Floor14 from './floor-svgs/floor-14';
+import * as Floor15 from './floor-svgs/floor-15';
+import * as Floor16 from './floor-svgs/floor-16';
 
 import FloorPlan from './floor-plan';
 import RoomInfoDialog from './room-info-dialog';
 
+// Combine floor and room data from static imports
+const allFloors: Floor[] = [
+  { id: Floor4.id, name: Floor4.name, level: Floor4.level },
+  { id: Floor5.id, name: Floor5.name, level: Floor5.level },
+  { id: Floor6.id, name: Floor6.name, level: Floor6.level },
+  { id: Floor7.id, name: Floor7.name, level: Floor7.level },
+  { id: Floor8.id, name: Floor8.name, level: Floor8.level },
+  { id: Floor9.id, name: Floor9.name, level: Floor9.level },
+  { id: Floor10.id, name: Floor10.name, level: Floor10.level },
+  { id: Floor11.id, name: Floor11.name, level: Floor11.level },
+  { id: Floor12.id, name: Floor12.name, level: Floor12.level },
+  { id: Floor14.id, name: Floor14.name, level: Floor14.level },
+  { id: Floor15.id, name: Floor15.name, level: Floor15.level },
+  { id: Floor16.id, name: Floor16.name, level: Floor16.level },
+];
+
+const allRooms: Room[] = [
+  ...Floor4.rooms,
+  ...Floor5.rooms,
+  ...Floor6.rooms,
+  ...Floor7.rooms,
+  ...Floor8.rooms,
+  ...Floor9.rooms,
+  ...Floor10.rooms,
+  ...Floor11.rooms,
+  ...Floor12.rooms,
+  ...Floor14.rooms,
+  ...Floor15.rooms,
+  ...Floor16.rooms,
+];
+
+
 export default function FloorFinder() {
-  // Use room data directly from imported config
-  const allRooms = useMemo(() => importedFloorData.rooms, [importedFloorData.rooms]);
-
-  // Removed loadingRooms state and useEffect for room extraction
-
   const [selectedFloorId, setSelectedFloorId] = useState<string>('4'); // Default to floor 4
   const [highlightedRoomId, setHighlightedRoomId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,7 +71,7 @@ export default function FloorFinder() {
     if (hash && hash.startsWith('#floor')) {
       const idFromHash = hash.substring(6);
       // Basic validation: check if the extracted id is a valid floor id
-      if (importedFloorData.floors.some(floor => floor.id === idFromHash)) {
+      if (allFloors.some(floor => floor.id === idFromHash)) {
          setSelectedFloorId(idFromHash);
       } else {
         setSelectedFloorId('4'); // Default to floor 4 if hash is invalid
@@ -41,18 +79,14 @@ export default function FloorFinder() {
     } else {
         setSelectedFloorId('4'); // Default to floor 4 if no hash
     }
-  }, [importedFloorData.floors]); 
+  }, [allFloors]); // Depend on allFloors
 
 
 
   const sortedFloors = useMemo(() => {
-    // Filter out commented floors (b, 1, 2, 3, 13, roof)
-    const filteredFloors = importedFloorData.floors.filter(floor =>
-        floor.id !== 'b' && floor.id !== '1' && floor.id !== '2' &&
-        floor.id !== '3' && floor.id !== '13' && floor.id !== 'roof'
-    );
-    return [...filteredFloors].sort((a, b) => b.level - a.level);
-  }, [importedFloorData.floors]);
+    // Filter out commented floors (b, 1, 2, 3, 13, roof) - already done by selecting which floors to import
+    return [...allFloors].sort((a, b) => b.level - a.level);
+  }, [allFloors]);
 
   const searchResults = useMemo<Room[]>(() => {
     if (!searchQuery) return [];
@@ -118,7 +152,7 @@ export default function FloorFinder() {
                         <div>
                           <p className="font-semibold">{room.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            ID: {room.id} &middot; Floor: {importedFloorData.floors.find(f => f.id === room.floorId)?.name}
+                            ID: {room.id} &middot; Floor: {allFloors.find(f => f.id === room.floorId)?.name}
                           </p>
                         </div>
                       </Button>

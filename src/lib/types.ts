@@ -9,6 +9,7 @@ export interface Room {
   id: string;
   name: string;
   floorId: string;
+  notes?: string; // Added optional notes property
 }
 
 export interface FloorData {
