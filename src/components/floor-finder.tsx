@@ -8,43 +8,61 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Info } from 'lucide-react';
+
+// Import the config data directly
+import { floorData as importedFloorData } from '../config';
 
 import FloorPlan from './floor-plan';
 import RoomInfoDialog from './room-info-dialog';
 
 export default function FloorFinder() {
-  const [floorData, setFloorData] = useState<FloorData>({ floors: [], rooms: [] });
-  const [loading, setLoading] = useState(true);
-  const [selectedFloorId, setSelectedFloorId] = useState<string>('1');
+  // Use room data directly from imported config
+  const allRooms = useMemo(() => importedFloorData.rooms, [importedFloorData.rooms]);
+
+  // Removed loadingRooms state and useEffect for room extraction
+
+  const [selectedFloorId, setSelectedFloorId] = useState<string>('4'); // Default to floor 4
   const [highlightedRoomId, setHighlightedRoomId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoomForInfo, setSelectedRoomForInfo] = useState<Room | null>(null);
 
+  // Read hash from URL on mount
   useEffect(() => {
-    fetch('/config.json')
-      .then((res) => res.json())
-      .then((data) => {
-        setFloorData(data);
-        setLoading(false);
-      })
-      .catch(console.error);
-  }, []);
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#floor')) {
+      const idFromHash = hash.substring(6);
+      // Basic validation: check if the extracted id is a valid floor id
+      if (importedFloorData.floors.some(floor => floor.id === idFromHash)) {
+         setSelectedFloorId(idFromHash);
+      } else {
+        setSelectedFloorId('4'); // Default to floor 4 if hash is invalid
+      }
+    } else {
+        setSelectedFloorId('4'); // Default to floor 4 if no hash
+    }
+  }, [importedFloorData.floors]); 
+
+
 
   const sortedFloors = useMemo(() => {
-    return [...floorData.floors].sort((a, b) => b.level - a.level);
-  }, [floorData.floors]);
+    // Filter out commented floors (b, 1, 2, 3, 13, roof)
+    const filteredFloors = importedFloorData.floors.filter(floor =>
+        floor.id !== 'b' && floor.id !== '1' && floor.id !== '2' &&
+        floor.id !== '3' && floor.id !== '13' && floor.id !== 'roof'
+    );
+    return [...filteredFloors].sort((a, b) => b.level - a.level);
+  }, [importedFloorData.floors]);
 
   const searchResults = useMemo<Room[]>(() => {
     if (!searchQuery) return [];
     const lowerCaseQuery = searchQuery.toLowerCase();
-    return floorData.rooms.filter(
+    return allRooms.filter(
       (room) =>
         room.name.toLowerCase().includes(lowerCaseQuery) ||
         room.id.toLowerCase().includes(lowerCaseQuery)
     );
-  }, [searchQuery, floorData.rooms]);
+  }, [searchQuery, allRooms]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && searchResults.length === 1) {
@@ -100,7 +118,7 @@ export default function FloorFinder() {
                         <div>
                           <p className="font-semibold">{room.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            ID: {room.id} &middot; Floor: {floorData.floors.find(f => f.id === room.floorId)?.name}
+                            ID: {room.id} &middot; Floor: {importedFloorData.floors.find(f => f.id === room.floorId)?.name}
                           </p>
                         </div>
                       </Button>
@@ -117,11 +135,7 @@ export default function FloorFinder() {
             <h2 className="text-lg font-headline font-semibold px-4 pb-2">Floors</h2>
             <ScrollArea className="flex-1">
               <nav className="px-4">
-                {loading ? (
-                  <div className="space-y-2">
-                    {[...Array(10)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
-                  </div>
-                ) : (
+                {
                   <ul className="space-y-1">
                     {sortedFloors.map((floor) => (
                       <li key={floor.id}>
@@ -129,16 +143,17 @@ export default function FloorFinder() {
                           variant={selectedFloorId === floor.id ? 'default' : 'ghost'}
                           className="w-full justify-start"
                           onClick={() => {
-                              setSelectedFloorId(floor.id)
-                              setHighlightedRoomId(null)
+                              setSelectedFloorId(floor.id);
+                              setHighlightedRoomId(null);
+                              window.location.hash = `floor${floor.id}`; // Update URL hash
                           }}
                         >
-                          {floor.name}
+                          {floor.id} - {floor.name}
                         </Button>
                       </li>
                     ))}
                   </ul>
-                )}
+                }
               </nav>
             </ScrollArea>
           </div>
@@ -150,7 +165,7 @@ export default function FloorFinder() {
           floorId={selectedFloorId}
           highlightedRoomId={highlightedRoomId}
           onRoomClick={handleRoomClick}
-          rooms={floorData.rooms.filter(r => r.floorId === selectedFloorId)}
+          rooms={allRooms.filter(r => r.floorId === selectedFloorId)}
         />
       </main>
 
