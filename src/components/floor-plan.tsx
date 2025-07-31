@@ -20,7 +20,7 @@ import { FloorRoof } from './floor-svgs/floor-roof';
 interface FloorPlanProps {
   floorId: string;
   highlightedRoomId: string | null;
-  onRoomClick: (roomId: string) => void;
+  onRoomClick: (roomId: string | null) => void;
   rooms: Room[];
 }
 
@@ -41,6 +41,21 @@ const DefaultFloor = () => (
     </div>
 );
 
+const Ruler = ({ scale }: { scale: number }) => {
+  const rulerWidthPixels = scale; // 1 meter in SVG units is scaled by 'scale'
+  return (
+    <div className="flex flex-col items-center">
+      <div style={{ width: `${rulerWidthPixels}px` }} className="relative h-4">
+        <div className="absolute bottom-0 left-0 h-2 w-px bg-foreground"></div>
+        <div className="absolute bottom-0 right-0 h-2 w-px bg-foreground"></div>
+        <div className="absolute bottom-0 left-0 w-full h-px bg-foreground"></div>
+      </div>
+      <p className="text-xs font-mono">1m</p>
+    </div>
+  );
+};
+
+
 const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoomClick, rooms }) => {
   const [viewBox, setViewBox] = useState('0 0 50 25');
   const [transform, setTransform] = useState({ x: 0, y: 0, k: 1 });
@@ -54,11 +69,6 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     const floor = ['4', '5', '16', 'roof'].includes(floorId);
     return floor;
   }, [floorId]);
-
-  useEffect(() => {
-    setViewBox(isUpperFloor ? '0 0 30 15' : '0 0 50 25');
-    centerAndFit();
-  }, [floorId, isUpperFloor]);
 
   const centerAndFit = () => {
     if (containerRef.current) {
@@ -78,11 +88,16 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   }
 
   useEffect(() => {
+    setViewBox(isUpperFloor ? '0 0 30 15' : '0 0 50 25');
+    centerAndFit();
+  }, [floorId, isUpperFloor]);
+
+  useEffect(() => {
     centerAndFit(); 
 
     window.addEventListener('resize', centerAndFit);
     return () => window.removeEventListener('resize', centerAndFit);
-  }, [isUpperFloor]);
+  }, [isUpperFloor, centerAndFit]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsPanning(true);
@@ -166,7 +181,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
       </svg>
       <div className="absolute bottom-4 right-4 flex items-center space-x-2">
         <Card className="px-3 py-2 text-sm text-muted-foreground shadow-lg">
-           Zoom: {transform.k.toFixed(2)}x
+           <Ruler scale={transform.k} />
         </Card>
         <div className="flex flex-col space-y-2">
             <Button size="icon" onClick={() => zoom('in')} aria-label="Zoom in">
