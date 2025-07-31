@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect, Suspense, useMemo } from 'react';
+import React, { useState, useRef, useEffect, Suspense, useMemo, useCallback } from 'react';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -70,7 +70,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     return floor;
   }, [floorId]);
 
-  const centerAndFit = () => {
+  const centerAndFit = useCallback(() => {
     if (containerRef.current) {
         const { width, height } = containerRef.current.getBoundingClientRect();
         const VBox = (isUpperFloor ? '0 0 30 15' : '0 0 50 25').split(' ').map(Number);
@@ -85,19 +85,19 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
         
         setTransform({ x, y, k: scale });
     }
-  }
+  }, [isUpperFloor]);
 
   useEffect(() => {
     setViewBox(isUpperFloor ? '0 0 30 15' : '0 0 50 25');
     centerAndFit();
-  }, [floorId, isUpperFloor]);
+  }, [floorId, isUpperFloor, centerAndFit]);
 
   useEffect(() => {
     centerAndFit(); 
 
     window.addEventListener('resize', centerAndFit);
     return () => window.removeEventListener('resize', centerAndFit);
-  }, [isUpperFloor, centerAndFit]);
+  }, [centerAndFit]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsPanning(true);
