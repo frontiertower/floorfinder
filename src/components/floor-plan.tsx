@@ -91,7 +91,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   }, []);
 
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || !viewBox) return;
 
     const svg = svgRef.current;
     const pt = svg.createSVGPoint();
@@ -125,8 +125,8 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     >
       {coords && (
         <div className="absolute top-2 right-2 bg-card/80 p-2 rounded-md text-xs font-mono z-10 pointer-events-none">
-          <div>X: {coords.x.toFixed(2)}ft</div>
-          <div>Y: {coords.y.toFixed(2)}ft</div>
+          <div>X: {coords.x.toFixed(2)}m</div>
+          <div>Y: {coords.y.toFixed(2)}m</div>
           <div>Z: {coords.z}</div>
         </div>
       )}
@@ -152,7 +152,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
           textAnchor="left"
           fontSize="3"
           fill="hsl(var(--foreground))"
-          className="font-bold"
+          className="font-bold font-headline"
         >
           {floorName}
         </text>
