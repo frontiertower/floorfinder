@@ -1,13 +1,20 @@
 import { CommonUpper } from './common-upper';
 import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
+import React from 'react';
 
 export const id = '14';
 export const name = 'Human Flourishing';
 export const level = 14;
 
 export const rooms: RoomType[] = [
-  { id: 'f14r1', name: 'Meditation and Quiet Zone', floorId: '14', notes: 'A space for quiet reflection and meditation.' },
+  {
+    id: 'f14r1',
+    name: 'Meditation and Quiet Zone',
+    notes: 'A space for quiet reflection and meditation.',
+    color: 'rgba(200, 255, 200, .5)', // Added placeholder color
+    coords: [18, 8, 10, 12], // Added placeholder coords
+  },
 ];
 
 interface Floor14Props {
@@ -29,12 +36,13 @@ export const Floor14: React.FC<Floor14Props> = ({ highlightedRoomId, onRoomClick
           key={roomData.id}
           id={roomData.id}
           name={roomData.name}
-          coords={[18, 8, 10, 12]}
-          color="rgba(200, 255, 200, .5)"
+          coords={roomData.coords} // Use coords from roomData
+          color={roomData.color} // Use color from roomData
           notes={roomData.notes}
-          floorId={roomData.floorId}
-          onMouseEnter={onMouseEnterRoom}
+          floorId={id} // Use the floor's constant id
+          onMouseEnter={(e: React.MouseEvent<SVGElement>) => onMouseEnterRoom(roomData, { x: e.clientX, y: e.clientY })} // Pass room and event position
           onMouseLeave={onMouseLeaveRoom}
+          onClick={() => onRoomClick(roomData.id)}
         />
       )}
     </g>

@@ -1,4 +1,3 @@
-
 export interface Floor {
   id: string;
   name: string;
@@ -8,8 +7,10 @@ export interface Floor {
 export interface Room {
   id: string;
   name: string;
-  floorId: string;
-  notes?: string; // Added optional notes property
+  notes?: string;
+  color: string;
+  coords: [number, number, number, number];
+  floorId?: string; // Add optional floorId here
 }
 
 export interface FloorData {

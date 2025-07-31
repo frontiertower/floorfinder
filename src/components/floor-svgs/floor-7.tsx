@@ -7,8 +7,22 @@ export const name = 'Frontier Makerspace';
 export const level = 7;
 
 export const rooms: RoomType[] = [
-  { id: 'f7r1', name: '3D Printing Zone', floorId: '7', notes: 'Equipped with 3D printers.' },
-  { id: 'f7r2', name: 'Laser Cutting Area', floorId: '7', notes: 'Area for laser cutting.' },
+  {
+    id: 'f7r1',
+    name: '3D Printing Zone',
+    // Removed floorId: '7',
+    notes: 'Equipped with 3D printers.',
+    color: 'rgba(255, 255, 200, .5)', // Added color
+    coords: [5, 5, 10, 10], // Added coords
+  },
+  {
+    id: 'f7r2',
+    name: 'Laser Cutting Area',
+    // Removed floorId: '7',
+    notes: 'Area for laser cutting.',
+    color: 'rgba(255, 255, 200, .5)', // Added color
+    coords: [20, 5, 10, 10], // Added coords
+  },
 ];
 
 interface Floor7Props {
@@ -24,17 +38,19 @@ export const Floor7: React.FC<Floor7Props> = ({ highlightedRoomId, onRoomClick, 
   return (
     <g data-floor-id="7">
       <CommonUpper />
+      {/* Map over rooms array to render Room components */}
       {rooms.map(room => (
         <Room
           key={room.id}
           id={room.id}
           name={room.name}
-          coords={room.id === 'f7r1' ? [5, 5, 10, 10] : [20, 5, 10, 10]} // Example coordinates
-          color="rgba(255, 255, 200, .5)"
+          coords={room.coords} // Use coords from room data
+          color={room.color} // Use color from room data
           notes={room.notes}
-          floorId={room.floorId}
-          onMouseEnter={onMouseEnterRoom}
+          floorId={id} // Use the floor's constant id
+          onMouseEnter={(e) => onMouseEnterRoom(room, { x: e.clientX, y: e.clientY })} // Pass room and event position
           onMouseLeave={onMouseLeaveRoom}
+          onClick={() => onRoomClick(room.id)} // Use onRoomClick prop
         />
       ))}
     </g>

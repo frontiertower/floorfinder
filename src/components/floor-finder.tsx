@@ -147,7 +147,7 @@ export default function FloorFinder() {
                         onClick={() => handleSelectSearchResult(room)}
                       >
                         <div>
-                          <p className="font-semibold">{room.name}</p>
+                          <p className="font-semibold">{room.name} [{room.id}]</p> 
                           <p className="text-sm text-muted-foreground">
                             {room.floorId} - {allFloors.find(f => f.id === room.floorId)?.name}
                           </p>

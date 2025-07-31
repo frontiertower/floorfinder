@@ -1,15 +1,18 @@
 import React from 'react';
 import type { Room as RoomType } from '@/lib/types';
 
-interface RoomProps extends RoomType {
+interface RoomProps {
+  id: string;
+  name: string;
   coords: [number, number, number, number]; // [x, y, width, height]
   color?: string; // Optional color prop
+  notes?: string;
+  floorId: string; // Add floorId here
   onMouseEnter?: (room: RoomType, position: { x: number; y: number }) => void;
   onMouseLeave?: () => void;
-  notes?: string;
+  onClick?: () => void; // Add onClick here
 }
-
-export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100, 100, 100, .5)', notes, onMouseEnter, onMouseLeave, floorId }) => {
+export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100, 100, 100, .5)', notes, onMouseEnter, onMouseLeave, onClick, floorId }) => {
   const [x, y, width, height] = coords;
 
   // Calculate text position for the center of the rectangle
@@ -21,19 +24,19 @@ export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100,
 
   const handleMouseEnter = (event: React.MouseEvent<SVGRectElement, MouseEvent>) => {
     if (onMouseEnter) {
-      const rect = event.currentTarget.getBoundingClientRect();
-      // Calculate position relative to the SVG container
-      const position = {
-        x: event.clientX - rect.left, // Adjust as needed for accurate positioning within SVG
-        y: event.clientY - rect.top, // Adjust as needed
-      };
-      onMouseEnter({ id, name, floorId, notes }, { x: event.clientX, y: event.clientY });
+      onMouseEnter({ id, name, floorId, notes, coords, color }, { x: event.clientX, y: event.clientY });
     }
   };
 
   const handleMouseLeave = () => {
     if (onMouseLeave) {
       onMouseLeave();
+    }
+  };
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
     }
   };
 
@@ -51,6 +54,7 @@ export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100,
         data-room-name={name}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
       />
       <text
         x={textX}
@@ -58,7 +62,7 @@ export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100,
         dominantBaseline="middle"
         textAnchor="middle"
         fontSize={fontSize}
-        fill="hsl(var(--foreground))" // Adjust text color as needed
+        fill="hsl(var(--foreground))"
         className="pointer-events-none"
       >
         {name}

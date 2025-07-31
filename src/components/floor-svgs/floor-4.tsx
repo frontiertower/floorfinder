@@ -1,13 +1,22 @@
 import { CommonUpper } from './common-upper';
 import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
+import React from 'react';
 
 export const id = '4';
 export const name = 'Robotics & Hard Tech';
 export const level = 4;
 
 export const rooms: RoomType[] = [
-  { id: 'f4r1', name: 'Robotics Lab', floorId: '4', notes: 'This is the main robotics laboratory on floor 4.' },
+  {
+    id: 'f4r1',
+    name: 'Robotics Lab',
+    // Removed floorId: '4',
+    notes: 'This is the main robotics laboratory on floor 4.',
+    color: 'rgba(255, 200, 200, .5)',
+    coords: [33, 6, 13, 13],
+  },
+  // Add other rooms for floor 4 here
 ];
 
 interface Floor4Props {
@@ -19,25 +28,25 @@ interface Floor4Props {
 }
 
 export const Floor4: React.FC<Floor4Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }) => {
-  const roomData = rooms.find(room => room.id === 'f4r1');
 
   return (
     <g data-floor-id="4">
       <CommonUpper />
-      {/* Use the Room component and pass hover handlers */}
-      {roomData && (
+      {/* Map over rooms array to render Room components */}
+      {rooms.map(room => (
         <Room
-          key={roomData.id}
-          id={roomData.id}
-          name={roomData.name}
-          coords={[33, 6, 13, 13]}
-          color="rgba(255, 200, 200, .5)"
-          notes={roomData.notes}
-          floorId={roomData.floorId}
-          onMouseEnter={onMouseEnterRoom}
+          key={room.id}
+          id={room.id}
+          name={room.name}
+          coords={room.coords}
+          color={room.color}
+          notes={room.notes}
+          floorId={id} // Use the floor's constant id
+          onMouseEnter={(e: React.MouseEvent<SVGElement>) => onMouseEnterRoom(room, { x: e.clientX, y: e.clientY })} // Pass room and event position
           onMouseLeave={onMouseLeaveRoom}
+          onClick={() => onRoomClick(room.id)}
         />
-      )}
+      ))}
     </g>
   );
 };

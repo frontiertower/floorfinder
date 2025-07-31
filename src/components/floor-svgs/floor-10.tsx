@@ -7,7 +7,15 @@ export const name = 'Frontier @ Accerlate';
 export const level = 10;
 
 export const rooms: RoomType[] = [
-  { id: 'f10r1', name: 'Accelerator Hot Desks', floorId: '10', notes: 'Flexible workspace for startups.' },
+  {
+    id: 'f10r1',
+    name: 'Accelerator Hot Desks',
+    // Removed floorId: '10',
+    notes: 'Flexible workspace for startups.',
+    color: 'rgba(255, 200, 255, .5)', // Added color
+    coords: [15, 7, 10, 8], // Added coords
+  },
+  // Add other rooms for floor 10 here
 ];
 
 interface Floor10Props {
@@ -19,24 +27,25 @@ interface Floor10Props {
 }
 
 export const Floor10: React.FC<Floor10Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }) => {
-  const roomData = rooms.find(room => room.id === 'f10r1');
 
   return (
     <g data-floor-id="10">
       <CommonUpper />
-      {roomData && (
+      {/* Map over rooms array to render Room components */}
+      {rooms.map(room => (
         <Room
-          key={roomData.id}
-          id={roomData.id}
-          name={roomData.name}
-          coords={[15, 7, 10, 8]}
-          color="rgba(255, 200, 255, .5)"
-          notes={roomData.notes}
-          floorId={roomData.floorId}
-          onMouseEnter={onMouseEnterRoom}
+          key={room.id}
+          id={room.id}
+          name={room.name}
+          coords={room.coords} // Use coords from room data
+          color={room.color} // Use color from room data
+          notes={room.notes}
+          floorId={id} // Use the floor's constant id
+          onMouseEnter={(e) => onMouseEnterRoom(room, { x: e.clientX, y: e.clientY })} // Pass room and event position
           onMouseLeave={onMouseLeaveRoom}
+          onClick={() => onRoomClick(room.id)} // Use onRoomClick prop
         />
-      )}
+      ))}
     </g>
   );
 };

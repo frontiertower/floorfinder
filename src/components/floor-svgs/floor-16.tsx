@@ -7,7 +7,8 @@ export const name = 'd/acc Lounge';
 export const level = 16;
 
 export const rooms: RoomType[] = [
-  { id: 'f16r1', name: 'd/acc Lounge Area', floorId: '16', notes: 'Relaxation and social area.' },
+  { id: 'f16r1', name: 'Lounge', floorId: '16', notes: 'Relaxation and social area.' },
+  { id: 'f16r2', name: 'Dinning Hall', floorId: '16', notes: 'Group lunches and dinners are here.' },
 ];
 
 interface Floor16Props {
@@ -29,7 +30,7 @@ export const Floor16: React.FC<Floor16Props> = ({ highlightedRoomId, onRoomClick
           key={roomData.id}
           id={roomData.id}
           name={roomData.name}
-          coords={[10, 10, 20, 10]}
+          coords={[45, 20, 30, 20]}
           color="rgba(200, 200, 255, .5)"
           notes={roomData.notes}
           floorId={roomData.floorId}
