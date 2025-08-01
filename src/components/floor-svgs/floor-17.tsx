@@ -1,28 +1,28 @@
 
-import { Blueprint } from './blueprints/floor-10';
+import { Blueprint } from './blueprints/floor-17';
 import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
 
-export const id = '10';
-export const name = 'Frontier @ Accerlate';
-export const level = 10;
+export const id = '17';
+export const name = 'Roof';
+export const level = 17;
 export const rooms: RoomType[] = [
     {
-        "id": "f10r1",
-        "name": "Accelerator Hot Desks",
-        "floorId": "10",
-        "notes": "Flexible workspace for startups.",
+        "id": "f17r1",
+        "name": "BBQ",
+        "floorId": "17",
+        "notes": "BBQ",
         "color": "rgba(255, 200, 255, .5)",
         "coords": [
-            15,
-            7,
+            5,
+            56,
             10,
-            8
+            10
         ]
     }
 ];
 
-interface Floor10Props {
+interface Floor17Props {
   highlightedRoomId: string | null;
   onRoomClick: (roomId: string | null) => void;
   rooms: RoomType[];
@@ -31,10 +31,10 @@ interface Floor10Props {
   viewBox: string;
 }
 
-export const Floor10: React.FC<Floor10Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom, viewBox }) => {
+export const Floor17: React.FC<Floor17Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom, viewBox }) => {
 
   return (
-    <g data-floor-id="10">
+    <g data-floor-id="17">
       <Blueprint />
       {/* Map over rooms array to render Room components */}
       {rooms.map(room => (

@@ -1,5 +1,5 @@
 
-import { CommonUpper } from './blueprints/common-upper';
+import { Blueprint } from './blueprints/floor-5';
 import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
 import React from 'react';
@@ -36,7 +36,7 @@ export const Floor5: React.FC<Floor5Props> = ({ highlightedRoomId, onRoomClick, 
 
   return (
     <g data-floor-id="5">
-      <CommonUpper />
+      <Blueprint />
        {/* Map over rooms array to render Room components */}
        {rooms.map(room => (
         <Room

@@ -1,5 +1,5 @@
 
-import { CommonUpper } from './blueprints/common-upper';
+import { Blueprint } from './blueprints/floor-16';
 import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
 import React from 'react';
@@ -15,8 +15,8 @@ export const rooms: RoomType[] = [
         "notes": "Relaxation and social area.",
         "color": "rgba(200, 200, 255, .5)",
         "coords": [
-            47,
-            20,
+            51,
+            41,
             32,
             34
         ]
@@ -28,8 +28,8 @@ export const rooms: RoomType[] = [
         "notes": "Group lunches and dinners are here.",
         "color": "rgba(200, 200, 255, .5)",
         "coords": [
-            6,
-            42,
+            8,
+            20,
             40,
             12
         ]
@@ -49,7 +49,7 @@ export const Floor16: React.FC<Floor16Props> = ({ highlightedRoomId, onRoomClick
 
   return (
     <g data-floor-id="16">
-      <CommonUpper />
+      <Blueprint />
       {rooms.map(room => (
         <Room
           key={room.id}

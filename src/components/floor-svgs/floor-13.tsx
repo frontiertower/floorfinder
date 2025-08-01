@@ -1,5 +1,5 @@
 
-import { CommonUpper } from './blueprints/common-upper';
+import { Blueprint } from './blueprints/floor-13';
 import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
 

@@ -1,4 +1,4 @@
-import { Floor2Blueprint } from './blueprints/floor-2';
+import { Blueprint } from './blueprints/floor-2';
 import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
 import React from 'react';
@@ -46,7 +46,7 @@ export const Floor2: React.FC<Floor2Props> = ({ highlightedRoomId, onRoomClick, 
 
   return (
     <g data-floor-id="2">
-      <Floor2Blueprint />
+      <Blueprint />
       {/* Map over rooms array to render Room components */}
       {rooms.map(room => (
         <Room
