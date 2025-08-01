@@ -71,36 +71,45 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   const viewBox = useMemo(() => floor && floor.level < 4 ? lowerFloorViewBox : upperFloorViewBox, [floor]);
 
   useEffect(() => {
-    if (!svgRef.current || !viewBox) return;
+    if (!svgRef.current) return;
 
     const svg = svgRef.current;
-    const [vbX, vbY, vbWidth, vbHeight] = viewBox.split(' ').map(parseFloat);
+    const svgRect = svg.getBoundingClientRect();
 
     const paths = svg.querySelectorAll('path');
     
     paths.forEach((path, index) => {
-        try {
-            const bbox = path.getBBox();
-            
-            const isOutside = 
-                bbox.x < vbX || 
-                bbox.y < vbY || 
-                (bbox.x + bbox.width) > (vbX + vbWidth) || 
-                (bbox.y + bbox.height) > (vbY + vbHeight);
+        const pathRect = path.getBoundingClientRect();
+        
+        const isOutside = 
+            pathRect.left < svgRect.left || 
+            pathRect.right > svgRect.right || 
+            pathRect.top < svgRect.top || 
+            pathRect.bottom > svgRect.bottom;
 
-            if (isOutside) {
-                console.warn(`Path at index ${index} is outside the viewBox.`, {
-                    path: path,
-                    pathBBox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },
-                    viewBox: { x: vbX, y: vbY, width: vbWidth, height: vbHeight }
-                });
-            }
-        } catch (e) {
-            // getBBox can fail on paths with no dimensions.
-            // console.error(`Could not get bounding box for path at index ${index}`, path, e);
+        if (isOutside) {
+            console.warn(`Path at index ${index} may be outside the SVG's visible area.`, {
+                path: path,
+                pathRect: { 
+                    top: pathRect.top, 
+                    right: pathRect.right, 
+                    bottom: pathRect.bottom, 
+                    left: pathRect.left, 
+                    width: pathRect.width, 
+                    height: pathRect.height 
+                },
+                svgRect: { 
+                    top: svgRect.top, 
+                    right: svgRect.right, 
+                    bottom: svgRect.bottom, 
+                    left: svgRect.left, 
+                    width: svgRect.width, 
+                    height: svgRect.height 
+                }
+            });
         }
     });
-  }, [floorId, viewBox]);
+  }, [floorId]); // Re-run when floor changes
 
 
   const handleMouseEnterRoom = useCallback((room: Room) => {
