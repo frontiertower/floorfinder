@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import type { Room } from '@/lib/types';
 import { allFloors, floorComponentMap, upperFloorViewBox, lowerFloorViewBox } from '@/lib/config';
 
@@ -70,6 +70,39 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   const floor = useMemo(() => allFloors.find(f => f.id === floorId), [floorId]);
   const viewBox = useMemo(() => floor && floor.level < 4 ? lowerFloorViewBox : upperFloorViewBox, [floor]);
 
+  useEffect(() => {
+    if (!svgRef.current || !viewBox) return;
+
+    const svg = svgRef.current;
+    const [vbX, vbY, vbWidth, vbHeight] = viewBox.split(' ').map(parseFloat);
+
+    const paths = svg.querySelectorAll('path');
+    
+    paths.forEach((path, index) => {
+        try {
+            const bbox = path.getBBox();
+            
+            const isOutside = 
+                bbox.x < vbX || 
+                bbox.y < vbY || 
+                (bbox.x + bbox.width) > (vbX + vbWidth) || 
+                (bbox.y + bbox.height) > (vbY + vbHeight);
+
+            if (isOutside) {
+                console.warn(`Path at index ${index} is outside the viewBox.`, {
+                    path: path,
+                    pathBBox: { x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height },
+                    viewBox: { x: vbX, y: vbY, width: vbWidth, height: vbHeight }
+                });
+            }
+        } catch (e) {
+            // getBBox can fail on paths with no dimensions.
+            // console.error(`Could not get bounding box for path at index ${index}`, path, e);
+        }
+    });
+  }, [floorId, viewBox]);
+
+
   const handleMouseEnterRoom = useCallback((room: Room) => {
     setHoveredRoom(room);
   }, []);
@@ -115,7 +148,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
       <svg
         ref={svgRef}
         viewBox={viewBox}
-        className="w-full absolute p-10"
+        className="w-full h-full absolute p-10"
       >
           <Grid viewBox={viewBox} />
           <FloorComponent
