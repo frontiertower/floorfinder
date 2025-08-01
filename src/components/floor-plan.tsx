@@ -3,7 +3,7 @@
 
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import type { Room } from '@/lib/types';
-import { allFloors, floorComponentMap, upperFloorViewBox, lowerFloorViewBox } from '@/lib/config';
+import { allFloors, floorComponentMap } from '@/lib/config';
 
 import { InfoBox } from './infobox';
 
@@ -68,7 +68,17 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   const [coords, setCoords] = useState<{ x: number; y: number; z: number | null } | null>(null);
   
   const floor = useMemo(() => allFloors.find(f => f.id === floorId), [floorId]);
-  const viewBox = useMemo(() => floor && floor.level < 4 ? lowerFloorViewBox : upperFloorViewBox, [floor]);
+
+  
+  const basementViewBox = '0 0 205 100';
+  const lowerFloorViewBox = '0 0 180 90';
+  const upperFloorViewBox = '0 0 100 60';
+  let viewBox = basementViewBox;
+  if (floor?.level > 3) {
+    viewBox = upperFloorViewBox;
+  } else if (floor?.level > 0) {
+    viewBox = lowerFloorViewBox;
+  }
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -78,6 +88,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
 
     const paths = svg.querySelectorAll('path');
     
+    let str = "";
     paths.forEach((path, index) => {
         const pathRect = path.getBoundingClientRect();
         
@@ -87,28 +98,11 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
             pathRect.top < svgRect.top || 
             pathRect.bottom > svgRect.bottom;
 
-        if (isOutside) {
-            console.warn(`Path at index ${index} may be outside the SVG's visible area.`, {
-                path: path,
-                pathRect: { 
-                    top: pathRect.top, 
-                    right: pathRect.right, 
-                    bottom: pathRect.bottom, 
-                    left: pathRect.left, 
-                    width: pathRect.width, 
-                    height: pathRect.height 
-                },
-                svgRect: { 
-                    top: svgRect.top, 
-                    right: svgRect.right, 
-                    bottom: svgRect.bottom, 
-                    left: svgRect.left, 
-                    width: svgRect.width, 
-                    height: svgRect.height 
-                }
-            });
+        if (!isOutside) {
+          str += `<path d="${path.getAttribute('d')}" className="${path.getAttribute('class')}"/>\n`;
         }
     });
+    console.log(str);
   }, [floorId]); // Re-run when floor changes
 
 

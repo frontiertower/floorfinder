@@ -11,14 +11,9 @@ export const rooms: RoomType[] = [
         "id": "f17r1",
         "name": "BBQ",
         "floorId": "17",
-        "notes": "BBQ",
+        "notes": "BBQ & Rave",
         "color": "rgba(255, 200, 255, .5)",
-        "coords": [
-            5,
-            56,
-            10,
-            10
-        ]
+        "coords": [5, 56, 10,10]
     }
 ];
 

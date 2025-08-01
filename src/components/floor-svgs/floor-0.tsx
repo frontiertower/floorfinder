@@ -14,10 +14,10 @@ export const rooms: RoomType[] = [
         "notes": "First rule of Robot Fight Club: don't talk about robot fight club.",
         "color": "rgba(255, 200, 255, .5)",
         "coords": [
-            15,
-            7,
-            10,
-            8
+            115,
+            60,
+            40,
+            40
         ]
     }
 ];
