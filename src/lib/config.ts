@@ -1,6 +1,6 @@
 
 import type { Floor, Room } from './types';
-import { FloorB } from '@/components/floor-svgs/floor-b';
+import { Floor0 } from '@/components/floor-svgs/floor-0';
 import { Floor1 } from '@/components/floor-svgs/floor-1';
 import { Floor2 } from '@/components/floor-svgs/floor-2';
 import { Floor3 } from '@/components/floor-svgs/floor-3';
@@ -17,9 +17,9 @@ import { Floor13 } from '@/components/floor-svgs/floor-13';
 import { Floor14 } from '@/components/floor-svgs/floor-14';
 import { Floor15 } from '@/components/floor-svgs/floor-15';
 import { Floor16 } from '@/components/floor-svgs/floor-16';
-import { FloorRoof } from '@/components/floor-svgs/floor-roof';
+import { Floor17 } from '@/components/floor-svgs/floor-17';
 
-import * as floorBData from '@/components/floor-svgs/floor-b';
+import * as floor0Data from '@/components/floor-svgs/floor-0';
 import * as floor1Data from '@/components/floor-svgs/floor-1';
 import * as floor2Data from '@/components/floor-svgs/floor-2';
 import * as floor3Data from '@/components/floor-svgs/floor-3';
@@ -36,10 +36,10 @@ import * as floor13Data from '@/components/floor-svgs/floor-13';
 import * as floor14Data from '@/components/floor-svgs/floor-14';
 import * as floor15Data from '@/components/floor-svgs/floor-15';
 import * as floor16Data from '@/components/floor-svgs/floor-16';
-import * as floorRoofData from '@/components/floor-svgs/floor-roof';
+import * as floor17Data from '@/components/floor-svgs/floor-17';
 
 const floorModules = [
-  floorBData,
+  floor0Data,
   floor1Data,
   floor2Data,
   floor3Data,
@@ -56,7 +56,7 @@ const floorModules = [
   floor14Data,
   floor15Data,
   floor16Data,
-  floorRoofData,
+  floor17Data,
 ];
 
 export const allFloors: Floor[] = floorModules.map(module => ({
@@ -72,7 +72,7 @@ export const getRoomsForFloor = (floorId: string): Room[] => {
 }
   
 export const floorComponentMap: { [key: string]: React.ComponentType<any> } = {
-    'b': FloorB,
+    '0': Floor0,
     '1': Floor1,
     '2': Floor2,
     '3': Floor3,
@@ -89,7 +89,7 @@ export const floorComponentMap: { [key: string]: React.ComponentType<any> } = {
     '14': Floor14,
     '15': Floor15,
     '16': Floor16,
-    'roof': FloorRoof,
+    '17': Floor17,
 };
   
 export const lowerFloorViewBox = '0 0 180 90';

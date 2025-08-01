@@ -1,14 +1,5 @@
 svg {
 }
-.g0{fill:none;stroke:red;}
-.g1{fill:none;stroke:orange;}
-.g3{fill:none;stroke:yellow;}
-.g4{fill:none;stroke:#7e7e7e;}
-.g5{fill:#7e7e7e;stroke-width:0;}
-.g6{fill:none;stroke:#7e7e7e;}
-.g7{fill:none;stroke:violet;}
 
-
-.walls{fill:#7e7e7e;stroke-width:0;}
-.g2{fill:none;stroke:#7e7e7e;stroke-width:0.366;stroke-linecap:round;stroke-linejoin:round;}
-.pillars{fill:#7e7e7e;stroke-width:0;}
+.g1{fill:none;stroke:#000000; stroke-linecap: round; stroke-width: .6px;} /* Major infrastructure */
+.g2{fill:none;stroke:#555555; stroke-linecap: round; stroke-width: .4px;} /* Minor infrastructure */

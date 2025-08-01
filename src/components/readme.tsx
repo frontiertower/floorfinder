@@ -1,4 +1,4 @@
-import { CommonUpper } from './blueprints/common-upper';
+import { Blueprint } from './blueprints/floor-4';
 
 export const id = 'readme';
 export const name = 'App Design Summary';

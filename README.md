@@ -50,3 +50,26 @@ To run the application locally, follow these steps:
 - `src/ai/`: Includes all Genkit-related code, such as AI flows and prompts.
 - `public/`: Stores static assets like the `config.json` which contains floor and room data.
 - `tailwind.config.ts`: Configuration file for Tailwind CSS.
+
+## TODO
+Split upper blueprint into just core structures and optional items
+Clean up common blueprint.
+
+0. Add blueprint & rooms
+1. Add blueprint & rooms
+2. Add rooms
+3. Add blueprint & rooms
+4. Fix blueprint & Add rooms
+5. Fix blueprint & Add rooms
+6. Fix blueprint & Add rooms
+7. Fix blueprint & Add rooms
+8. Fix blueprint & Add rooms
+9. Fix blueprint & Add rooms
+10. Fix blueprint & Add rooms
+11. Fix blueprint & Add rooms
+12. Fix blueprint & Add rooms
+13. Fix blueprint & Add rooms
+14. Fix blueprint & Add rooms
+15. Fix blueprint & Add rooms
+16. Fix blueprint & Add rooms
+17. Add blueprint & rooms

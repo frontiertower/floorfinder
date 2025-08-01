@@ -1,5 +1,5 @@
 
-export const CommonUpper = () => (
+export const Blueprint = () => (
     <g>
       <g transform="translate(1 1) scale(.01 .01)">
         <path d='M464 156.9H414.3L464 172.3Zm-49.7 0L464 172.3H414.3Z' className='darkFloor'/>
