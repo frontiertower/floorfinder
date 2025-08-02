@@ -14,10 +14,10 @@ export const Readme: React.FC = () => {
         Search by room name or room id to find a given floor.
         Schematics of the floors are 99% accurate to real blueprints of the Tower.
       </p>
-      <p className="text-lg mb-4">
+      <div className="text-lg mb-4">
         To add a new room, you'll need to provide info in the form of
         <code>
-          <ul>
+          <ul className="text-base list-disc list-inside bg-gray-100 p-4 rounded-md mt-2">
             <li>"id": "f17r1"</li>
             <li>"name": "BBQ"</li>
             <li>"floorId": "17"</li>
@@ -26,7 +26,7 @@ export const Readme: React.FC = () => {
             <li>"coords": [5, 56, 10,10]</li>
           </ul>
         </code>
-      </p>
+      </div>
       <p className="text-lg mb-4">
         Contact <a href="http://t.me/SxP256" className='text-blue-500 underline'>Sameer</a> on Telegram or join the <b>VR/AR & Digital Twin</b> channel for more info.
       </p>

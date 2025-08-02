@@ -14,25 +14,23 @@ export const rooms: RoomType[] = [
         "name": "Coworking Space",
         "notes": "Open area with desks for coworking.",
         "color": "rgba(255, 255, 200, .5)",
-        "coords": [
-            5,
-            5,
-            15,
-            15
-        ]
+        "coords": [ 49, 40, 20, 20 ]
     },
     {
         "id": "f15r2",
         "floorId": "15",
-        "name": "Library",
+        "name": "Deep Work Space",
         "notes": "Quiet area for reading and focus.",
         "color": "rgba(255, 255, 200, .5)",
-        "coords": [
-            25,
-            5,
-            10,
-            15
-        ]
+        "coords": [ 7, 40, 15, 30 ]
+    },
+    {
+        "id": "f15r3",
+        "floorId": "15",
+        "name": "Blue Room",
+        "notes": "Reservable room.",
+        "color": "rgba(200, 200, 255, .5)",
+        "coords": [ 71, 15, 20, 10 ]
     }
 ];
 

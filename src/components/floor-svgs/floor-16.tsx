@@ -29,7 +29,7 @@ export const rooms: RoomType[] = [
         "color": "rgba(200, 200, 255, .5)",
         "coords": [
             8,
-            20,
+            19,
             40,
             12
         ]
