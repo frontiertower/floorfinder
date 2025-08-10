@@ -1,5 +1,7 @@
 svg {
 }
 
-.g1{fill:none;stroke:#000000; stroke-linecap: round; stroke-width: .6px;} /* Major infrastructure */
-.g2{fill:none;stroke:#555555; stroke-linecap: round; stroke-width: .4px;} /* Minor infrastructure */
+.g1{fill:none;stroke:#000000; stroke-linecap: round; stroke-width: .16px;} /* Major infrastructure */
+.g2{fill:none;stroke:#ff5555; stroke-linecap: round; stroke-width: .14px;} /* Minor infrastructure */
+
+.g0{fill:red;stroke:red; stroke-width: 1px;} /* Major infrastructure */

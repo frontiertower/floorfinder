@@ -85,7 +85,6 @@ export const floorComponentMap: { [key: string]: React.ComponentType<any> } = {
     '10': Floor10,
     '11': Floor11,
     '12': Floor12,
-    '13': Floor13,
     '14': Floor14,
     '15': Floor15,
     '16': Floor16,

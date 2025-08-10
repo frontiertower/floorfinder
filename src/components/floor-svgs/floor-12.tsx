@@ -8,19 +8,6 @@ export const id = '12';
 export const name = 'Ethereum & Decentralized Tech';
 export const level = 12;
 export const rooms: RoomType[] = [
-    {
-        "id": "f12r1",
-        "name": "Blockchain Dev Area",
-        "floorId": "12",
-        "notes": "Area for blockchain development and discussions.",
-        "color": "rgba(255, 200, 200, .5)",
-        "coords": [
-            10,
-            10,
-            15,
-            10
-        ]
-    }
 ];
 
 interface Floor12Props {

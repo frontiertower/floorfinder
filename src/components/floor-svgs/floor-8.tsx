@@ -7,32 +7,6 @@ export const id = '8';
 export const name = 'Neurotech & Biotech';
 export const level = 8;
 export const rooms: RoomType[] = [
-    {
-        "id": "f8r1",
-        "name": "Neuroscience Lab",
-        "floorId": "8",
-        "notes": "Lab for neuroscience research.",
-        "color": "rgba(200, 200, 200, .5)",
-        "coords": [
-            5,
-            5,
-            10,
-            10
-        ]
-    },
-    {
-        "id": "f8r2",
-        "name": "Biotech Lab",
-        "floorId": "8",
-        "notes": "Lab for biotechnology research.",
-        "color": "rgba(200, 200, 200, .5)",
-        "coords": [
-            20,
-            5,
-            10,
-            10
-        ]
-    }
 ];
 
 interface Floor8Props {

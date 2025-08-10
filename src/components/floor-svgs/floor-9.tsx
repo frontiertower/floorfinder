@@ -9,9 +9,9 @@ export const level = 9;
 export const rooms: RoomType[] = [
     {
         "id": "f9r1",
-        "name": "AI Development Lab",
+        "name": "Simmulation Annex",
         "floorId": "9",
-        "notes": "Lab for AI development.",
+        "notes": "VR Room",
         "color": "rgba(200, 255, 255, .5)",
         "coords": [
             5,
@@ -20,19 +20,6 @@ export const rooms: RoomType[] = [
             10
         ]
     },
-    {
-        "id": "f9r2",
-        "name": "Autonomous Systems Lab",
-        "floorId": "9",
-        "notes": "Lab for autonomous systems.",
-        "color": "rgba(200, 255, 255, .5)",
-        "coords": [
-            20,
-            5,
-            10,
-            10
-        ]
-    }
 ];
 
 interface Floor9Props {

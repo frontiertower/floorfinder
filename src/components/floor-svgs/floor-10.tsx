@@ -4,7 +4,7 @@ import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
 
 export const id = '10';
-export const name = 'Frontier @ Accerlate';
+export const name = 'Frontier @ Accelerate';
 export const level = 10;
 export const rooms: RoomType[] = [
     {

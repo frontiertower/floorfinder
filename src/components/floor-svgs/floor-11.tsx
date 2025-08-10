@@ -7,19 +7,6 @@ export const id = '11';
 export const name = 'Health & Longevity';
 export const level = 11;
 export const rooms: RoomType[] = [
-    {
-        "id": "f11r1",
-        "name": "Wellness Studio",
-        "floorId": "11",
-        "notes": "Space for relaxation and wellness activities.",
-        "color": "rgba(200, 255, 255, .5)",
-        "coords": [
-            20,
-            10,
-            8,
-            10
-        ]
-    }
 ];
 
 interface Floor11Props {

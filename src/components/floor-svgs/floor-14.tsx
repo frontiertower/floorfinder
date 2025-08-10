@@ -24,7 +24,7 @@ export const Floor14: React.FC<Floor14Props> = ({ highlightedRoomId, onRoomClick
 
   return (
     <g data-floor-id="14">
-      <Blueprint />
+      <Blueprint />``
       {roomData && (
         <Room
           key={roomData.id}

@@ -1,6 +1,6 @@
 
 export const Blueprint = () => (
-  <g transform={`translate(-458 -330) scale(.28)`}>
+  <g transform={`scale(.25) translate(-1641.1 -1172.8)`}>
     <path d="M1661.5 1233.7h7.9v13h-7.9m0-11.8h6.7v10.7h-6.7m0 63h7.9v9.3h-7m-.9-8h6.7v6.8h-4.3m-1.5 34.6h-.9m.9 13.7v-47.1m16 50v.8m37.3-57.7h2.7m-1.5-1.1h1.5" className="g2"/>
     <path d="M1662.4 1365h3.6v2.9" className="g2"/>
     <path d="M1665.6 1191.2v3.7h-4.1" className="g2"/>
