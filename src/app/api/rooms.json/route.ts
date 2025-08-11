@@ -18,11 +18,11 @@ if (!getApps().length) {
   initializeApp({
     credential: cert(serviceAccount),
     databaseURL: "https://floorfinder-qgjm6.firebaseio.com"
-  }, 'ft-app');
+  });
 }
 
 // Get a reference to the 'frontier-tower' Firestore database
-const db = getFirestore('ft-app');
+const db = getFirestore();
 
 export async function GET() {
   try {
