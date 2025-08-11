@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { initializeApp, getApps, cert, getApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import type { Room } from '@/lib/types';
 
@@ -14,15 +14,16 @@ const serviceAccount = JSON.parse(serviceAccountString);
 
 
 // Initialize Firebase Admin SDK if not already initialized
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(serviceAccount),
-    databaseURL: "https://floorfinder-qgjm6.firebaseio.com"
-  });
-}
+// and get a reference to the app.
+const app = !getApps().length
+  ? initializeApp({
+      credential: cert(serviceAccount),
+    })
+  : getApp();
 
-// Get a reference to the 'frontier-tower' Firestore database
-const db = getFirestore();
+
+// Get a reference to the Firestore database
+const db = getFirestore(app);
 
 export async function GET() {
   try {
