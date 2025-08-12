@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { initializeApp, getApps, cert, getApp } from 'firebase-admin/app';
+import { initializeApp, cert, getApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import type { Room } from '@/lib/types';
 
@@ -12,18 +12,19 @@ if (!serviceAccountString) {
 }
 const serviceAccount = JSON.parse(serviceAccountString);
 
-
 // Initialize Firebase Admin SDK if not already initialized
 // and get a reference to the app.
-const app = !getApps().length
-  ? initializeApp({
-      credential: cert(serviceAccount),
-    })
-  : getApp();
-
+try {
+  getApp();
+} catch (error) {
+  initializeApp({
+    credential: cert(serviceAccount),
+    databaseURL: process.env.FIREBASE_DATABASE_URL
+  });
+}
 
 // Get a reference to the Firestore database
-const db = getFirestore(app);
+const db = getFirestore();
 
 export async function GET() {
   try {
