@@ -7,8 +7,7 @@ import React from 'react';
 export const id = '5';
 export const name = 'Movement & Fitness';
 export const level = 5;
-export const rooms: RoomType[] = [
-];
+export const rooms: RoomType[] = [];
 
 interface Floor5Props {
   highlightedRoomId: string | null;

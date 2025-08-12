@@ -6,8 +6,7 @@ import type { Room as RoomType } from '@/lib/types';
 export const id = '7';
 export const name = 'Frontier Makerspace';
 export const level = 7;
-export const rooms: RoomType[] = [
-];
+export const rooms: RoomType[] = [];
 
 interface Floor7Props {
   highlightedRoomId: string | null;

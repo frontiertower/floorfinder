@@ -6,16 +6,7 @@ import type { Room as RoomType } from '@/lib/types';
 export const id = '17';
 export const name = 'Roof';
 export const level = 17;
-export const rooms: RoomType[] = [
-    {
-        "id": "f17r1",
-        "name": "BBQ",
-        "floorId": "17",
-        "notes": "BBQ & Rave",
-        "color": "rgba(255, 200, 255, .5)",
-        "coords": [5, 56, 10,10]
-    }
-];
+export const rooms: RoomType[] = [];
 
 interface Floor17Props {
   highlightedRoomId: string | null;
@@ -42,7 +33,7 @@ export const Floor17: React.FC<Floor17Props> = ({ highlightedRoomId, onRoomClick
           notes={room.notes}
           floorId={id} // Use the floor's constant id
           viewBox={viewBox}
-          onMouseEnter={onMouseEnterRoom}
+          onMouseEnter={() => onMouseEnterRoom(room)}
           onMouseLeave={onMouseLeaveRoom}
           onClick={() => onRoomClick(room.id)} // Use onRoomClick prop
         />

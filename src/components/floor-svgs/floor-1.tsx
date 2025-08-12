@@ -6,23 +6,23 @@ import { Blueprint } from './blueprints/floor-1';
 export const id = '1';
 export const name = 'Lobby';
 export const level = 1;
-export const rooms: Room[] = [
-];
+export const rooms: Room[] = [];
 
 interface FloorProps {
   highlightedRoomId: string | null;
   onRoomClick: (roomId: string) => void;
   rooms: Room[];
+  onMouseEnterRoom: (room: Room) => void;
+  onMouseLeaveRoom: () => void;
 }
 
-export const Floor1 = ({ highlightedRoomId, onRoomClick, rooms }: FloorProps) => {
-  const getRoomById = (id: string) => rooms.find(r => r.id === id);
+export const Floor1 = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom }: FloorProps) => {
 
   return (
     <g data-floor-id="1">
       <Blueprint />
       {rooms.map(room => (
-        <g key={room.id} onClick={() => onRoomClick(room.id)}>
+        <g key={room.id} onClick={() => onRoomClick(room.id)} onMouseEnter={() => onMouseEnterRoom(room)} onMouseLeave={onMouseLeaveRoom}>
             <rect
                 id={room.id}
                 x={room.coords[0]}

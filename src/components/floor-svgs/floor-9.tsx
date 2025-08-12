@@ -6,21 +6,7 @@ import type { Room as RoomType } from '@/lib/types';
 export const id = '9';
 export const name = 'AI & Autonomous Systems';
 export const level = 9;
-export const rooms: RoomType[] = [
-    {
-        "id": "f9r1",
-        "name": "Simmulation Annex",
-        "floorId": "9",
-        "notes": "VR Room",
-        "color": "rgba(200, 255, 255, .5)",
-        "coords": [
-            5,
-            5,
-            10,
-            10
-        ]
-    },
-];
+export const rooms: RoomType[] = [];
 
 interface Floor9Props {
   highlightedRoomId: string | null;

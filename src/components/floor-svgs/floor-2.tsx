@@ -1,3 +1,4 @@
+
 import { Blueprint } from './blueprints/floor-2';
 import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
@@ -6,32 +7,7 @@ import React from 'react';
 export const id = '2';
 export const name = 'Event Space';
 export const level = 2;
-export const rooms: RoomType[] = [
-  {
-      "id": "f2r1",
-      "name": "Spaceship",
-      "floorId": "2",
-      "coords": [
-          10,
-          30,
-          80,
-          22
-      ],
-      "color": "rgba(255, 255, 255, 1)"
-  },
-  {
-      "id": "f2r2",
-      "name": "Green Room",
-      "floorId": "2",
-      "coords": [
-          8,
-          56,
-          10,
-          10
-      ],
-      "color": "rgba(255, 255, 255, 1)"
-  },
-];
+export const rooms: RoomType[] = [];
 
 interface Floor2Props {
   highlightedRoomId: string | null;

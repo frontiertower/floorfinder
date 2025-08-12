@@ -6,8 +6,7 @@ import type { Room as RoomType } from '@/lib/types';
 export const id = '8';
 export const name = 'Neurotech & Biotech';
 export const level = 8;
-export const rooms: RoomType[] = [
-];
+export const rooms: RoomType[] = [];
 
 interface Floor8Props {
   highlightedRoomId: string | null;

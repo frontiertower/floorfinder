@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { allFloors, getRoomsForFloor } from '@/lib/config';
+import { allFloors } from '@/lib/config';
 import type { Room, Floor } from '@/lib/types';
 import { Search } from 'lucide-react';
 
@@ -10,6 +11,7 @@ import FloorPlan from './floor-plan';
 import { Readme } from './readme';
 
 const FloorFinder = () => {
+  const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Map<string, Room[]>>(new Map());
@@ -17,9 +19,35 @@ const FloorFinder = () => {
 
   const { toast } = useToast();
 
+  // Fetch all rooms from the API on initial load
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await fetch('/api/rooms.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch rooms');
+        }
+        const rooms = await response.json();
+        setAllRooms(rooms);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error loading room data",
+          description: "There was a problem fetching room information. Please try again later.",
+        });
+        console.error(error);
+      }
+    };
+    fetchRooms();
+  }, [toast]);
+
+  const getRoomsForFloor = useCallback((floorId: string) => {
+    return allRooms.filter(room => room.floorId === floorId);
+  }, [allRooms]);
+
   // Handle room search
   useEffect(() => {
-    if (searchQuery.length > 0) {
+    if (searchQuery.length > 0 && allRooms.length > 0) {
       const results = new Map<string, Room[]>();
       for (const floor of allFloors) {
         const floorRooms = getRoomsForFloor(floor.id);
@@ -36,7 +64,7 @@ const FloorFinder = () => {
       setSearchResults(new Map());
       setHighlightedRoom(null);
     }
-  }, [searchQuery]);
+  }, [searchQuery, allRooms, getRoomsForFloor]);
 
   // Auto-select and highlight room if only one search result
   useEffect(() => {

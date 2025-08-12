@@ -82,27 +82,24 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
 
   useEffect(() => {
     if (!svgRef.current) return;
-
     const svg = svgRef.current;
     const svgRect = svg.getBoundingClientRect();
 
     const paths = svg.querySelectorAll('path');
-    
-    let str = "";
-    paths.forEach((path, index) => {
-        const pathRect = path.getBoundingClientRect();
-        
-        const isOutside = 
-            pathRect.left < svgRect.left || 
-            pathRect.right > svgRect.right || 
-            pathRect.top < svgRect.top || 
-            pathRect.bottom > svgRect.bottom;
 
-        if (!isOutside) {
-          str += `<path d="${path.getAttribute('d')}" className="${path.getAttribute('class')}"/>\n`;
+    paths.forEach((path) => {
+        const pathRect = path.getBoundingClientRect();
+
+        const isOutside = 
+            pathRect.right < svgRect.left || 
+            pathRect.left > svgRect.right || 
+            pathRect.bottom < svgRect.top || 
+            pathRect.top > svgRect.bottom;
+
+        if (isOutside) {
+            console.warn('Path is outside SVG viewport:', path);
         }
     });
-    console.log(str);
   }, [floorId]); // Re-run when floor changes
 
 

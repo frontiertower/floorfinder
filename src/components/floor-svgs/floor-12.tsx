@@ -7,8 +7,7 @@ import React from 'react';
 export const id = '12';
 export const name = 'Ethereum & Decentralized Tech';
 export const level = 12;
-export const rooms: RoomType[] = [
-];
+export const rooms: RoomType[] = [];
 
 interface Floor12Props {
   highlightedRoomId: string | null;
@@ -20,26 +19,25 @@ interface Floor12Props {
 }
 
 export const Floor12: React.FC<Floor12Props> = ({ highlightedRoomId, onRoomClick, rooms, onMouseEnterRoom, onMouseLeaveRoom, viewBox }) => {
-   const roomData = rooms.find(room => room.id === 'f12r1');
-
+   
   return (
     <g data-floor-id="12">
       <Blueprint />
-      {roomData && (
+      {rooms.map(room => (
         <Room
-          key={roomData.id}
-          id={roomData.id}
-          name={roomData.name}
-          coords={roomData.coords} // Use coords from roomData
-          color={roomData.color} // Use color from roomData
-          notes={roomData.notes}
+          key={room.id}
+          id={room.id}
+          name={room.name}
+          coords={room.coords} // Use coords from roomData
+          color={room.color} // Use color from roomData
+          notes={room.notes}
           floorId={id} // Use the floor's constant id
           viewBox={viewBox}
-          onMouseEnter={() => onMouseEnterRoom(roomData)}
+          onMouseEnter={() => onMouseEnterRoom(room)}
           onMouseLeave={onMouseLeaveRoom}
-          onClick={() => onRoomClick(roomData.id)}
+          onClick={() => onRoomClick(room.id)}
         />
-      )}
+      ))}
     </g>
   );
 };
