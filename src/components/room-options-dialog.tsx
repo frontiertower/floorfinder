@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -41,14 +41,14 @@ export function RoomOptionsDialog({
   onDelete,
   room,
 }: RoomOptionsDialogProps) {
-  const [name, setName] = useState(room?.name || '');
-  const [teamName, setTeamName] = useState(room?.teamName || '');
-  const [notes, setNotes] = useState(room?.notes || '');
-  const [color, setColor] = useState(room?.color || predefinedColors[0].value);
+  const [name, setName] = useState('');
+  const [teamName, setTeamName] = useState('');
+  const [notes, setNotes] = useState('');
+  const [color, setColor] = useState(predefinedColors[0].value);
   const [customColor, setCustomColor] = useState('');
 
   // Update local state when room changes
-  useState(() => {
+  useEffect(() => {
     if (room) {
       setName(room.name);
       setTeamName(room.teamName || '');
@@ -56,7 +56,7 @@ export function RoomOptionsDialog({
       setColor(room.color || predefinedColors[0].value);
       setCustomColor('');
     }
-  });
+  }, [room]);
 
   if (!room) return null;
 
