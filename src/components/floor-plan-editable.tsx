@@ -5,6 +5,7 @@ import type { Room } from '@/lib/types';
 import { allFloors, floorComponentMap } from '@/lib/config';
 import { InfoBox } from './infobox';
 import { RoomEditorDialog } from './room-editor-dialog';
+import { RoomOptionsDialog } from './room-options-dialog';
 import '../app/svg.css';
 
 const DefaultFloor = () => (
@@ -58,6 +59,8 @@ interface FloorPlanEditableProps {
   rooms: Room[];
   isEditMode: boolean;
   onRoomCreated: (room: Partial<Room>) => void;
+  onRoomDeleted: (roomId: string) => void;
+  onRoomUpdated: (room: Room) => void;
 }
 
 const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
@@ -66,7 +69,9 @@ const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
   onRoomClick,
   rooms,
   isEditMode,
-  onRoomCreated
+  onRoomCreated,
+  onRoomDeleted,
+  onRoomUpdated
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoveredRoom, setHoveredRoom] = useState<Room | null>(null);
@@ -78,6 +83,8 @@ const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
   const [drawEnd, setDrawEnd] = useState<{ x: number; y: number } | null>(null);
   const [showRoomDialog, setShowRoomDialog] = useState(false);
   const [drawnCoords, setDrawnCoords] = useState<[number, number, number, number] | null>(null);
+  const [showOptionsDialog, setShowOptionsDialog] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
   const floor = useMemo(() => allFloors.find(f => f.id === floorId), [floorId]);
 
@@ -144,14 +151,20 @@ const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
 
     // Only create a room if the rectangle is large enough
     if (width > 1 && height > 1) {
-      setDrawnCoords([x1, y1, width, height]);
+      // Convert coordinates to match Room component expectations
+      // The Room component flips Y coordinates, so we need to account for that
+      const viewBoxParts = viewBox.split(' ').map(parseFloat);
+      const viewBoxHeight = viewBoxParts[3];
+      const adjustedY = viewBoxHeight - y1 - height; // Flip Y and adjust for height
+
+      setDrawnCoords([x1, adjustedY, width, height]);
       setShowRoomDialog(true);
     }
 
     // Reset drawing state
     setDrawStart(null);
     setDrawEnd(null);
-  }, [isDrawing, drawStart, drawEnd]);
+  }, [isDrawing, drawStart, drawEnd, viewBox]);
 
   const handleMouseLeave = useCallback(() => {
     setCoords(null);
@@ -163,10 +176,8 @@ const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
   }, [isDrawing]);
 
   const handleMouseEnterRoom = useCallback((room: Room) => {
-    if (!isEditMode) {
-      setHoveredRoom(room);
-    }
-  }, [isEditMode]);
+    setHoveredRoom(room);
+  }, []);
 
   const handleMouseLeaveRoom = useCallback(() => {
     setHoveredRoom(null);
@@ -176,6 +187,30 @@ const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
     onRoomCreated(room);
     setDrawnCoords(null);
   }, [onRoomCreated]);
+
+  const handleRoomClick = useCallback((roomId: string) => {
+    if (isEditMode) {
+      const room = rooms.find(r => r.id === roomId);
+      if (room) {
+        setSelectedRoom(room);
+        setShowOptionsDialog(true);
+      }
+    } else {
+      onRoomClick(roomId);
+    }
+  }, [isEditMode, onRoomClick, rooms]);
+
+  const handleRoomDelete = useCallback(() => {
+    if (selectedRoom) {
+      onRoomDeleted(selectedRoom.id);
+      setSelectedRoom(null);
+    }
+  }, [selectedRoom, onRoomDeleted]);
+
+  const handleRoomUpdate = useCallback((updatedRoom: Room) => {
+    onRoomUpdated(updatedRoom);
+    setSelectedRoom(null);
+  }, [onRoomUpdated]);
 
   const FloorComponent = useMemo(() => floorComponentMap[floorId] || DefaultFloor, [floorId]);
   const floorName = useMemo(() => floor?.name || 'Unknown Floor', [floor]);
@@ -204,7 +239,7 @@ const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
 
       {isEditMode && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-full z-10 shadow-lg">
-          Draw a rectangle to create a room
+          Draw a rectangle to create a room, or click existing rooms to delete them
         </div>
       )}
 
@@ -216,7 +251,7 @@ const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
         <Grid viewBox={viewBox} />
         <FloorComponent
           highlightedRoomId={highlightedRoomId}
-          onRoomClick={isEditMode ? undefined : onRoomClick}
+          onRoomClick={handleRoomClick}
           rooms={rooms}
           viewBox={viewBox}
           onMouseEnterRoom={handleMouseEnterRoom}
@@ -250,6 +285,17 @@ const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
           floorId={floorId}
         />
       )}
+
+      <RoomOptionsDialog
+        isOpen={showOptionsDialog}
+        onClose={() => {
+          setShowOptionsDialog(false);
+          setSelectedRoom(null);
+        }}
+        onSave={handleRoomUpdate}
+        onDelete={handleRoomDelete}
+        room={selectedRoom}
+      />
     </div>
   );
 };

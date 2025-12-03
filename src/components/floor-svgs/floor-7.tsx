@@ -4,7 +4,7 @@ import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
 
 export const id = '7';
-export const name = 'Biopunk Lab';
+export const name = 'Makerspace - Hacker Desk Area';
 export const level = 7;
 export const rooms: RoomType[] = [];
 

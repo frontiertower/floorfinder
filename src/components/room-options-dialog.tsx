@@ -1,0 +1,164 @@
+'use client';
+
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import type { Room } from '@/lib/types';
+
+interface RoomOptionsDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (updatedRoom: Room) => void;
+  onDelete: () => void;
+  room: Room | null;
+}
+
+const predefinedColors = [
+  { name: 'Green', value: 'rgba(76, 175, 80, 0.5)' },
+  { name: 'Blue', value: 'rgba(33, 150, 243, 0.5)' },
+  { name: 'Orange', value: 'rgba(255, 152, 0, 0.5)' },
+  { name: 'Purple', value: 'rgba(156, 39, 176, 0.5)' },
+  { name: 'Red', value: 'rgba(244, 67, 54, 0.5)' },
+  { name: 'Pink', value: 'rgba(255, 200, 255, 0.5)' },
+  { name: 'Yellow', value: 'rgba(255, 235, 59, 0.5)' },
+  { name: 'Teal', value: 'rgba(0, 150, 136, 0.5)' },
+];
+
+export function RoomOptionsDialog({
+  isOpen,
+  onClose,
+  onSave,
+  onDelete,
+  room,
+}: RoomOptionsDialogProps) {
+  const [name, setName] = useState(room?.name || '');
+  const [notes, setNotes] = useState(room?.notes || '');
+  const [color, setColor] = useState(room?.color || predefinedColors[0].value);
+  const [customColor, setCustomColor] = useState('');
+
+  // Update local state when room changes
+  useState(() => {
+    if (room) {
+      setName(room.name);
+      setNotes(room.notes || '');
+      setColor(room.color || predefinedColors[0].value);
+      setCustomColor('');
+    }
+  });
+
+  if (!room) return null;
+
+  const handleSave = () => {
+    const updatedRoom: Room = {
+      ...room,
+      name: name || 'Unnamed Room',
+      notes,
+      color: customColor || color,
+    };
+
+    onSave(updatedRoom);
+    onClose();
+  };
+
+  const handleDelete = () => {
+    onDelete();
+    onClose();
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Room</DialogTitle>
+          <DialogDescription>
+            Make changes to the room or delete it.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-name" className="text-right">
+              Name
+            </Label>
+            <Input
+              id="edit-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="col-span-3"
+              placeholder="Room name"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-notes" className="text-right">
+              Notes
+            </Label>
+            <Textarea
+              id="edit-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="col-span-3"
+              placeholder="Optional notes..."
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Color</Label>
+            <div className="col-span-3 space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {predefinedColors.map((c) => (
+                  <button
+                    key={c.value}
+                    onClick={() => {
+                      setColor(c.value);
+                      setCustomColor('');
+                    }}
+                    className={`w-8 h-8 rounded border-2 ${
+                      color === c.value && !customColor
+                        ? 'border-primary'
+                        : 'border-border'
+                    }`}
+                    style={{ backgroundColor: c.value }}
+                    title={c.name}
+                  />
+                ))}
+              </div>
+              <Input
+                value={customColor}
+                onChange={(e) => setCustomColor(e.target.value)}
+                placeholder="Custom color (e.g., rgba(255, 0, 0, 0.5))"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Info</Label>
+            <div className="col-span-3 text-sm text-muted-foreground space-y-1">
+              <div><strong>ID:</strong> {room.id}</div>
+              <div><strong>Coords:</strong> [{room.coords.map(c => c.toFixed(1)).join(', ')}]</div>
+            </div>
+          </div>
+        </div>
+        <DialogFooter className="flex justify-between">
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete Room
+          </Button>
+          <div className="space-x-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave}>
+              Save Changes
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
