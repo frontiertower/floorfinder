@@ -42,6 +42,7 @@ export function RoomOptionsDialog({
   room,
 }: RoomOptionsDialogProps) {
   const [name, setName] = useState(room?.name || '');
+  const [teamName, setTeamName] = useState(room?.teamName || '');
   const [notes, setNotes] = useState(room?.notes || '');
   const [color, setColor] = useState(room?.color || predefinedColors[0].value);
   const [customColor, setCustomColor] = useState('');
@@ -50,6 +51,7 @@ export function RoomOptionsDialog({
   useState(() => {
     if (room) {
       setName(room.name);
+      setTeamName(room.teamName || '');
       setNotes(room.notes || '');
       setColor(room.color || predefinedColors[0].value);
       setCustomColor('');
@@ -62,6 +64,7 @@ export function RoomOptionsDialog({
     const updatedRoom: Room = {
       ...room,
       name: name || 'Unnamed Room',
+      teamName,
       notes,
       color: customColor || color,
     };
@@ -95,6 +98,18 @@ export function RoomOptionsDialog({
               onChange={(e) => setName(e.target.value)}
               className="col-span-3"
               placeholder="Room name"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-teamName" className="text-right">
+              Team Name
+            </Label>
+            <Input
+              id="edit-teamName"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              className="col-span-3"
+              placeholder="Engineering Team"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

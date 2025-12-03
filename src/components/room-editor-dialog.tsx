@@ -42,6 +42,7 @@ export function RoomEditorDialog({
   floorId,
 }: RoomEditorDialogProps) {
   const [name, setName] = useState('');
+  const [teamName, setTeamName] = useState('');
   const [notes, setNotes] = useState('');
   const [color, setColor] = useState(predefinedColors[0].value);
   const [customColor, setCustomColor] = useState('');
@@ -53,6 +54,7 @@ export function RoomEditorDialog({
     onSave({
       id: roomId,
       name: name || 'Unnamed Room',
+      teamName,
       notes,
       color: customColor || color,
       coords,
@@ -61,6 +63,7 @@ export function RoomEditorDialog({
 
     // Reset form
     setName('');
+    setTeamName('');
     setNotes('');
     setColor(predefinedColors[0].value);
     setCustomColor('');
@@ -87,6 +90,18 @@ export function RoomEditorDialog({
               onChange={(e) => setName(e.target.value)}
               className="col-span-3"
               placeholder="Conference Room A"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="teamName" className="text-right">
+              Team Name
+            </Label>
+            <Input
+              id="teamName"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              className="col-span-3"
+              placeholder="Engineering Team"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

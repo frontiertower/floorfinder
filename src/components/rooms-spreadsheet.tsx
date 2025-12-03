@@ -9,6 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
 import type { Room, Floor } from '@/lib/types';
 import { allFloors } from '@/lib/config';
 
@@ -36,6 +38,43 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
       };
     });
   }, [rooms, customFloorNames]);
+
+  const exportToCSV = () => {
+    const headers = [
+      'Room ID',
+      'Name',
+      'Team Name',
+      'Floor',
+      'Dimensions',
+      'Area',
+      'Color',
+      'Notes',
+      'Coordinates'
+    ];
+
+    const csvData = sortedRooms.map(room => [
+      room.id,
+      room.name,
+      room.teamName || '',
+      room.floorName,
+      room.dimensions,
+      room.area,
+      room.color,
+      room.notes || '',
+      `"[${room.coords.map(c => c.toFixed(1)).join(', ')}]"`
+    ]);
+
+    const csvContent = [headers, ...csvData]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'rooms_data.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
 
   const sortedRooms = useMemo(() => {
     return roomsWithFloorData.sort((a, b) => {
@@ -86,8 +125,12 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
 
       {/* Rooms Table */}
       <div className="bg-card rounded-lg border">
-        <div className="p-4 border-b">
+        <div className="p-4 border-b flex justify-between items-center">
           <h3 className="font-semibold text-lg">All Rooms</h3>
+          <Button onClick={exportToCSV} variant="outline" size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
         </div>
         <div className="overflow-x-auto">
           <Table>
@@ -95,6 +138,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
               <TableRow>
                 <TableHead>Room ID</TableHead>
                 <TableHead>Name</TableHead>
+                <TableHead>Team Name</TableHead>
                 <TableHead>Floor</TableHead>
                 <TableHead>Dimensions</TableHead>
                 <TableHead>Area</TableHead>
@@ -108,6 +152,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
                 <TableRow key={room.id}>
                   <TableCell className="font-mono text-sm">{room.id}</TableCell>
                   <TableCell className="font-medium">{room.name}</TableCell>
+                  <TableCell>{room.teamName || '-'}</TableCell>
                   <TableCell>{room.floorName}</TableCell>
                   <TableCell className="font-mono text-sm">{room.dimensions}</TableCell>
                   <TableCell className="font-mono text-sm">{room.area}</TableCell>
@@ -131,7 +176,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
               ))}
               {sortedRooms.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                     No rooms found
                   </TableCell>
                 </TableRow>

@@ -7,6 +7,7 @@ export interface Floor {
 export interface Room {
   id: string;
   name: string;
+  teamName?: string;
   notes?: string;
   color: string;
   coords: [number, number, number, number];
