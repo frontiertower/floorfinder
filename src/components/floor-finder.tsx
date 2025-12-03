@@ -266,12 +266,12 @@ const FloorFinder = () => {
               onClick={() => setIsEditMode(!isEditMode)}
               variant={isEditMode ? "default" : "outline"}
               size="lg"
-              className="text-foreground"
+              className="text-foreground border-border"
             >
               {isEditMode ? (
-                <><Save className="mr-2 h-4 w-4 text-foreground" /> Exit Edit Mode</>
+                <><Save className="mr-2 h-4 w-4 text-black dark:text-white" /> Exit Edit Mode</>
               ) : (
-                <><Edit className="mr-2 h-4 w-4 text-foreground" /> Edit Mode</>
+                <><Edit className="mr-2 h-4 w-4 text-black dark:text-white" /> Edit Mode</>
               )}
             </Button>
           </div>
