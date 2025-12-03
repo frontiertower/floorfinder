@@ -13,7 +13,7 @@ interface InfoBoxProps {
 
 export const InfoBox = ({ floor, floorName, coords, hoveredRoom }: InfoBoxProps) => {
   return (
-    <div className={`absolute top-16 ${(floor && floor >=4) ? 'right-96': 'left-16'} bg-card p-3 rounded-lg shadow-lg w-64 text-sm z-10 pointer-events-none border border-border`}>
+    <div className={`absolute bottom-4 left-4 right-4 lg:top-16 lg:bottom-auto lg:left-auto lg:right-auto lg:w-64 ${(floor && floor >=4) ? 'lg:right-96': 'lg:left-16'} bg-card p-3 rounded-lg shadow-lg text-sm z-10 pointer-events-none border border-border`}>
       <h2 className="font-headline text-lg mb-2">{floorName}</h2>
       {coords && (
           <>

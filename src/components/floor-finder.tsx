@@ -22,6 +22,7 @@ const FloorFinder = () => {
   const [searchResults, setSearchResults] = useState<Map<string, Room[]>>(new Map());
   const [highlightedRoom, setHighlightedRoom] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditModeEnabled, setIsEditModeEnabled] = useState(false);
   const [customFloorNames, setCustomFloorNames] = useState<Record<string, string>>({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -136,6 +137,36 @@ const FloorFinder = () => {
     }
   }, []);
 
+  // Auto-close mobile menu when selectedFloor changes
+  useEffect(() => {
+    if (selectedFloor) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [selectedFloor]);
+
+  // Check URL parameters to enable edit mode
+  useEffect(() => {
+    const checkEditMode = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hash = window.location.hash.substring(1);
+
+      // Check for ?edit or #edit
+      const isEditEnabled = searchParams.has('edit') || hash === 'edit';
+      setIsEditModeEnabled(isEditEnabled);
+    };
+
+    // Check on mount
+    checkEditMode();
+
+    // Listen for hash changes
+    const handleHashChange = () => checkEditMode();
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+
   const roomsForSelectedFloor = selectedFloor && selectedFloor.id !== 'readme' ? getRoomsForFloor(selectedFloor.id) : [];
   
   // Flatten search results for rendering
@@ -154,6 +185,11 @@ const FloorFinder = () => {
         {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
 
+      {/* Mobile Theme Toggle */}
+      <div className="lg:hidden fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
@@ -163,7 +199,7 @@ const FloorFinder = () => {
       )}
 
       {/* Floor Selection Sidebar */}
-      <div className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative w-64 h-full bg-background dark:bg-black p-4 shadow-md flex flex-col border-r border-border z-50 transition-transform duration-300 ease-in-out`}>
+      <div className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative w-full lg:w-64 h-full bg-background dark:bg-black p-4 shadow-md flex flex-col border-r border-border z-50 transition-transform duration-300 ease-in-out`}>
       <a href="/"><h1 className="text-2xl lg:text-3xl font-headline text-center mb-4">SensAI Hack</h1></a>
       <a href="https://sensaihack.space" className="text-center text-blue-500 text-sm lg:text-base">(<span className="text-blue-500 underline text-center">sensaihack.space</span>)</a>
         
@@ -284,19 +320,23 @@ const FloorFinder = () => {
             )}
           </div>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Button
-              onClick={() => setIsEditMode(!isEditMode)}
-              variant={isEditMode ? "default" : "outline"}
-              size="lg"
-              className={`text-foreground border-border ${!isEditMode ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
-            >
+            <div className="hidden lg:block">
+              <ThemeToggle />
+            </div>
+            {isEditModeEnabled && (
+              <Button
+                onClick={() => setIsEditMode(!isEditMode)}
+                variant={isEditMode ? "default" : "outline"}
+                size="lg"
+                className={`hidden lg:flex text-foreground border-border ${!isEditMode ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+              >
               {isEditMode ? (
                 <><Save className="mr-2 h-4 w-4 text-black dark:text-white" /> Exit Edit Mode</>
               ) : (
                 <><Edit className="mr-2 h-4 w-4 text-black dark:text-white" /> Edit Mode</>
               )}
-            </Button>
+              </Button>
+            )}
           </div>
         </div>
 
