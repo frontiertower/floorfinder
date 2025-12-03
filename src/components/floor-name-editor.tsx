@@ -39,7 +39,7 @@ export function FloorNameEditor({
 
   if (!isEditMode) {
     return (
-      <h2 className="text-2xl font-bold text-primary">
+      <h2 className="text-2xl font-bold text-foreground">
         {floorId} - {floorName}
       </h2>
     );
@@ -48,7 +48,7 @@ export function FloorNameEditor({
   if (isEditing) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-2xl font-bold text-primary">{floorId} -</span>
+        <span className="text-2xl font-bold text-foreground">{floorId} -</span>
         <Input
           value={tempName}
           onChange={(e) => setTempName(e.target.value)}
@@ -71,7 +71,7 @@ export function FloorNameEditor({
 
   return (
     <div className="flex items-center gap-2">
-      <h2 className="text-2xl font-bold text-primary">
+      <h2 className="text-2xl font-bold text-foreground">
         {floorId} - {floorName}
       </h2>
       <Button
