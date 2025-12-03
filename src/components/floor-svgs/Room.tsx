@@ -19,8 +19,8 @@ export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100,
 
   if (viewBox) {
     const viewBoxParts = viewBox.split(' ').map(parseFloat);
-    const height = viewBoxParts[3];
-    y = height - y;
+    const viewBoxHeight = viewBoxParts[3];
+    y = viewBoxHeight - y;
   }
 
   // Calculate text position for the center of the rectangle

@@ -12,6 +12,7 @@ import FloorPlan from './floor-plan';
 import FloorPlanEditable from './floor-plan-editable';
 import { FloorNameEditor } from './floor-name-editor';
 import { Readme } from './readme';
+import { RoomsSpreadsheet } from './rooms-spreadsheet';
 
 const FloorFinder = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
@@ -121,7 +122,9 @@ const FloorFinder = () => {
       if (initialFloor) {
         setSelectedFloor(initialFloor);
       } else if (hash === 'readme') {
-        setSelectedFloor({ id: 'readme', name: 'App Design Summary', level: 0 }); // Assuming readme has a similar structure to Floor
+        setSelectedFloor({ id: 'readme', name: 'App Design Summary', level: 0 });
+      } else if (hash === 'spreadsheet') {
+        setSelectedFloor({ id: 'spreadsheet', name: 'Rooms Spreadsheet', level: 0 });
       }
     } else {
         setSelectedFloor({ id: 'readme', name: 'App Design Summary', level: 0 }); // Default to readme
@@ -195,6 +198,19 @@ const FloorFinder = () => {
                     </button>
                   </li>
                 ))}
+                <li className="mb-1">
+                  <button
+                    className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === 'spreadsheet' ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20'}`}
+                    onClick={() => {
+                      setSelectedFloor({ id: 'spreadsheet', name: 'Rooms Spreadsheet', level: 0 });
+                      setSearchQuery('');
+                      setHighlightedRoom(null);
+                      window.location.hash = 'spreadsheet';
+                    }}
+                  >
+                    📊 Spreadsheet View
+                  </button>
+                </li>
               </ul>
             </div>
           )}
@@ -207,7 +223,9 @@ const FloorFinder = () => {
         {/* Header with Floor Name and Edit Button */}
         <div className="flex justify-between items-center px-6 py-4 bg-background border-b">
           <div>
-            {selectedFloor && selectedFloor.id !== 'readme' && (
+            {selectedFloor && selectedFloor.id === 'spreadsheet' ? (
+              <h2 className="text-2xl font-bold text-primary">📊 Rooms Spreadsheet</h2>
+            ) : selectedFloor && selectedFloor.id !== 'readme' && selectedFloor.id !== 'spreadsheet' && (
               <FloorNameEditor
                 floorId={selectedFloor.id}
                 floorName={customFloorNames[selectedFloor.id] || selectedFloor.name}
@@ -260,6 +278,11 @@ const FloorFinder = () => {
         {selectedFloor ? (
             selectedFloor.id === 'readme' ? (
                 <Readme />
+            ) : selectedFloor.id === 'spreadsheet' ? (
+                <RoomsSpreadsheet
+                  rooms={allRooms}
+                  customFloorNames={customFloorNames}
+                />
             ) : (
                 isEditMode ? (
                   <FloorPlanEditable

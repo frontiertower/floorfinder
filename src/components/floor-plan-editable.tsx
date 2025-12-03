@@ -152,10 +152,16 @@ const FloorPlanEditable: React.FC<FloorPlanEditableProps> = ({
     // Only create a room if the rectangle is large enough
     if (width > 1 && height > 1) {
       // Convert coordinates to match Room component expectations
-      // The Room component flips Y coordinates, so we need to account for that
+      // The Room component flips Y coordinates with: y = viewBoxHeight - y
+      // So we need to store the Y coordinate that, when flipped, gives us the desired position
       const viewBoxParts = viewBox.split(' ').map(parseFloat);
       const viewBoxHeight = viewBoxParts[3];
-      const adjustedY = viewBoxHeight - y1 - height; // Flip Y and adjust for height
+
+      // We want the room to appear at y1 (top of drawn rectangle)
+      // Room component will do: displayY = viewBoxHeight - storedY
+      // So: y1 = viewBoxHeight - storedY
+      // Therefore: storedY = viewBoxHeight - y1
+      const adjustedY = viewBoxHeight - y1 - height; // Subtract height to account for room being drawn from top-left
 
       setDrawnCoords([x1, adjustedY, width, height]);
       setShowRoomDialog(true);
