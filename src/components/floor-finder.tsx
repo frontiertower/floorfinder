@@ -116,8 +116,8 @@ const FloorFinder = () => {
     <div className="flex h-screen bg-card/50">
       {/* Floor Selection Sidebar */}
       <div className="w-64 bg-white p-4 shadow-md flex flex-col bg-card/50">
-      <a href="/"><h1 className="text-3xl font-headline text-center mb-4">FloorFinder</h1></a>
-      <a href="/" className="text-center text-blue-500">(<span className="text-blue-500 underline text-center">ft0.sh/where</span>)</a>
+      <a href="/"><h1 className="text-3xl font-headline text-center mb-4">SensAI Hack</h1></a>
+      <a href="/" className="text-center text-blue-500">(<span className="text-blue-500 underline text-center">sensaihack.space</span>)</a>
         
         <div className="relative mb-4">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

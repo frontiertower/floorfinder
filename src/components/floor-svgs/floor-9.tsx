@@ -4,7 +4,7 @@ import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
 
 export const id = '9';
-export const name = 'AI & Autonomous Systems';
+export const name = 'AI Lab Desk Area';
 export const level = 9;
 export const rooms: RoomType[] = [];
 

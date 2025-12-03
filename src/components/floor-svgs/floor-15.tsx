@@ -5,7 +5,7 @@ import type { Room as RoomType } from '@/lib/types';
 import React from 'react';
 
 export const id = '15';
-export const name = 'Coworking & Library';
+export const name = 'Hackathon Desk Area';
 export const level = 15;
 export const rooms: RoomType[] = [];
 

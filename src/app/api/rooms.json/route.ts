@@ -1,55 +1,37 @@
 import { NextResponse } from 'next/server';
-import { initializeApp, cert, getApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { kv } from '@vercel/kv';
 import type { Room } from '@/lib/types';
 
-// IMPORTANT: Replace the placeholder in your .env file
-// with your actual Firebase service account JSON.
-const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-if (!serviceAccountString) {
-  throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON environment variable is not set. Please update your .env file.');
-}
-const serviceAccount = JSON.parse(serviceAccountString);
+// Hardcoded room data - this will be stored in Vercel KV on first access
+const defaultRooms: Room[] = [
+  // Floor 1 rooms
+  { id: "101", name: "Conference Room A", color: "#4CAF50", coords: [100, 100, 200, 150], floorId: "floor-1" },
+  { id: "102", name: "Office Space", color: "#2196F3", coords: [250, 100, 350, 150], floorId: "floor-1" },
+  { id: "103", name: "Break Room", color: "#FF9800", coords: [100, 200, 200, 250], floorId: "floor-1" },
 
-// Initialize Firebase Admin SDK if not already initialized
-// and get a reference to the app.
-try {
-  getApp();
-} catch (error) {
-  initializeApp({
-    credential: cert(serviceAccount),
-    databaseURL: process.env.FIREBASE_DATABASE_URL
-  });
-}
+  // Floor 2 rooms
+  { id: "201", name: "Executive Suite", color: "#9C27B0", coords: [100, 100, 250, 200], floorId: "floor-2" },
+  { id: "202", name: "Meeting Room B", color: "#4CAF50", coords: [300, 100, 400, 150], floorId: "floor-2" },
 
-// Get a reference to the Firestore database
-const db = getFirestore('frontier-tower');
+  // Add more rooms as needed for other floors
+];
 
 export async function GET() {
   try {
+    // Try to get rooms from Vercel KV
+    let rooms = await kv.get<Room[]>('rooms');
 
-    const roomsCollection = db.collection('rooms');
-    const snapshot = await roomsCollection.get();
-
-    if (snapshot.empty) {
-      return NextResponse.json([], { status: 200 });
+    // If no rooms exist in KV, initialize with default data
+    if (!rooms) {
+      await kv.set('rooms', defaultRooms);
+      rooms = defaultRooms;
     }
-
-    const rooms: Room[] = [];
-    snapshot.forEach(doc => {
-      // Assuming doc.data() matches the Room type structure
-      const roomData = doc.data() as Omit<Room, 'id'>;
-      rooms.push({
-        id: doc.id,
-        ...roomData
-      });
-    });
 
     return NextResponse.json(rooms);
 
   } catch (error) {
-    console.error("Error fetching rooms from Firestore:", error);
-    // It's good practice to not expose detailed error messages to the client
-    return NextResponse.json({ error: 'Failed to fetch rooms' }, { status: 500 });
+    // If KV is not configured (local development), return default rooms
+    console.log("Vercel KV not configured, using default rooms");
+    return NextResponse.json(defaultRooms);
   }
 }

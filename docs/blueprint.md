@@ -1,4 +1,4 @@
-# **App Name**: FloorFinder
+# **App Name**: SensAI Hack
 
 ## Core Features:
 

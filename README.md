@@ -1,6 +1,6 @@
-# FloorFinder
+# SensAI Hack
 
-FloorFinder is an interactive mapping application designed to help users navigate multi-story buildings. It provides a user-friendly interface to view floor plans, search for specific rooms, and get AI-enhanced information about different spaces.
+SensAI Hack is an interactive mapping application designed to help users navigate multi-story buildings. It provides a user-friendly interface to view floor plans, search for specific rooms, and get AI-enhanced information about different spaces.
 
 ## Features
 
