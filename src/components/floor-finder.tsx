@@ -174,7 +174,7 @@ const FloorFinder = () => {
                   {flatSearchResults.map(room => (
                     <li key={room.id} className="mb-2">
                       <button
-                        className="w-full text-left p-2 rounded hover:bg-gray-100"
+                        className="w-full text-left p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-foreground"
                         onClick={() => {
                           const floor = allFloors.find(f => f.id === room.floorId);
                           if (floor) {
@@ -198,7 +198,7 @@ const FloorFinder = () => {
                 {allFloors.map(floor => (
                   <li key={floor.id} className="mb-1">
                     <button
-                      className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === floor.id ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20'}`}
+                      className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === floor.id ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20 text-foreground'}`}
                       onClick={() => handleFloorChange(floor)}
                     >
                       {floor.id} - {customFloorNames[floor.id] || floor.name}
@@ -207,7 +207,7 @@ const FloorFinder = () => {
                 ))}
                 <li className="mb-1">
                   <button
-                    className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === 'spreadsheet' ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20'}`}
+                    className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === 'spreadsheet' ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20 text-foreground'}`}
                     onClick={() => {
                       setSelectedFloor({ id: 'spreadsheet', name: 'Rooms Spreadsheet', level: 0 });
                       setSearchQuery('');
