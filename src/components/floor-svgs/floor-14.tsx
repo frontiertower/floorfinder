@@ -28,15 +28,15 @@ export const Floor14: React.FC<Floor14Props> = ({ highlightedRoomId, onRoomClick
           key={room.id}
           id={room.id}
           name={room.name}
-          coords={room.coords} // Use coords from roomData
-          color={room.color} // Use color from roomData
+          coords={room.coords}
+          color={room.color}
           notes={room.notes}
-          floorId={id} // Use the floor's constant id
+          floorId={id}
           viewBox={viewBox}
           onMouseEnter={() => onMouseEnterRoom(room)}
           onMouseLeave={onMouseLeaveRoom}
           onClick={() => onRoomClick(room.id)}
-        
+
         />
       ))}
     </g>

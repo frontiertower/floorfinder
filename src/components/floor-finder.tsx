@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { allFloors } from '@/lib/config';
 import type { Room, Floor } from '@/lib/types';
-import { Search, Edit, Save } from 'lucide-react';
+import { Search, Edit, Save, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import FloorPlan from './floor-plan';
@@ -23,6 +23,7 @@ const FloorFinder = () => {
   const [highlightedRoom, setHighlightedRoom] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [customFloorNames, setCustomFloorNames] = useState<Record<string, string>>({});
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { toast } = useToast();
 
@@ -113,6 +114,8 @@ const FloorFinder = () => {
     setHighlightedRoom(null); // Clear highlight on floor change
     // Update URL hash with floor ID
     window.location.hash = floor.id;
+    // Close mobile menu after selection
+    setIsMobileMenuOpen(false);
   };
 
   // Read hash on initial load or default to spreadsheet
@@ -142,11 +145,27 @@ const FloorFinder = () => {
   });
 
   return (
-    <div className="flex h-screen bg-card/50">
+    <div className="flex h-screen bg-card/50 relative">
+      {/* Mobile Menu Toggle */}
+      <button
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-background rounded-md shadow-lg border border-border"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Floor Selection Sidebar */}
-      <div className="w-64 bg-background dark:bg-black p-4 shadow-md flex flex-col border-r border-border">
-      <a href="/"><h1 className="text-3xl font-headline text-center mb-4">SensAI Hack</h1></a>
-      <a href="https://sensaihack.space" className="text-center text-blue-500">(<span className="text-blue-500 underline text-center">sensaihack.space</span>)</a>
+      <div className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative w-64 h-full bg-background dark:bg-black p-4 shadow-md flex flex-col border-r border-border z-50 transition-transform duration-300 ease-in-out`}>
+      <a href="/"><h1 className="text-2xl lg:text-3xl font-headline text-center mb-4">SensAI Hack</h1></a>
+      <a href="https://sensaihack.space" className="text-center text-blue-500 text-sm lg:text-base">(<span className="text-blue-500 underline text-center">sensaihack.space</span>)</a>
         
         <div className="relative mb-4">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -176,6 +195,8 @@ const FloorFinder = () => {
                             setSelectedFloor(floor);
                           }
                           setHighlightedRoom(room.id);
+                          // Close mobile menu after selection
+                          setIsMobileMenuOpen(false);
                         }}
                       >
                         <div className="font-bold">{room.name} [{room.id}]</div>
@@ -208,6 +229,8 @@ const FloorFinder = () => {
                       setSearchQuery('');
                       setHighlightedRoom(null);
                       window.location.hash = 'spreadsheet';
+                      // Close mobile menu after selection
+                      setIsMobileMenuOpen(false);
                     }}
                   >
                     📊 Spreadsheet View
@@ -221,9 +244,9 @@ const FloorFinder = () => {
 
 
       {/* Main Floor Plan View */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        {/* Header with Floor Name and Edit Button */}
-        <div className="flex justify-between items-center px-6 py-4 bg-background border-b">
+      <div className="flex-1 flex flex-col overflow-hidden relative w-full lg:w-auto">
+        {/* Header with Floor Name and Edit Button - Add padding for mobile menu button */}
+        <div className="flex justify-between items-center px-4 lg:px-6 py-3 lg:py-4 bg-background border-b mt-14 lg:mt-0">
           <div>
             {selectedFloor && selectedFloor.id === 'spreadsheet' ? (
               <h2 className="text-2xl font-bold text-primary">📊 Rooms Spreadsheet</h2>
@@ -285,7 +308,7 @@ const FloorFinder = () => {
                   <Readme />
                 </div>
             ) : selectedFloor.id === 'spreadsheet' ? (
-                <div className="flex-1 overflow-y-auto p-6">
+                <div className="flex-1 overflow-y-auto p-2 lg:p-6">
                   <RoomsSpreadsheet
                     rooms={allRooms}
                     customFloorNames={customFloorNames}

@@ -63,13 +63,33 @@ interface FloorPlanProps {
 
 const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoomClick, rooms }) => {
   const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [hoveredRoom, setHoveredRoom] = useState<Room | null>(null);
   const [coords, setCoords] = useState<{ x: number; y: number; z: number | null } | null>(null);
+
+  // Zoom and pan state
+  const [scale, setScale] = useState(1);
+  const [translateX, setTranslateX] = useState(0);
+  const [translateY, setTranslateY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastPointer, setLastPointer] = useState<{ x: number; y: number } | null>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   
   const floor = useMemo(() => allFloors.find(f => f.id === floorId), [floorId]);
 
-  
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
+  // Reset zoom/pan when floor changes
+  useEffect(() => {
+    setScale(1);
+    setTranslateX(0);
+    setTranslateY(0);
+  }, [floorId]);
+
   const basementViewBox = '0 0 205 100';
   const lowerFloorViewBox = '0 0 180 90';
   const upperFloorViewBox = '0 0 100 60';
@@ -102,6 +122,88 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     });
   }, [floorId]); // Re-run when floor changes
 
+  // Zoom and pan handlers
+  const handleWheel = useCallback((event: React.WheelEvent) => {
+    if (!containerRef.current) return;
+    event.preventDefault();
+
+    const delta = event.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.min(Math.max(scale * delta, 0.5), 4);
+
+    setScale(newScale);
+  }, [scale]);
+
+  const getPointerPosition = (event: React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in event && event.touches.length > 0) {
+      return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    } else if ('clientX' in event) {
+      return { x: event.clientX, y: event.clientY };
+    }
+    return { x: 0, y: 0 };
+  };
+
+  const handlePointerDown = useCallback((event: React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in event && event.touches.length > 1) return; // Ignore multi-touch for now
+
+    setIsDragging(true);
+    setLastPointer(getPointerPosition(event));
+    event.preventDefault();
+  }, []);
+
+  const handlePointerMove = useCallback((event: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging || !lastPointer) return;
+
+    const currentPointer = getPointerPosition(event);
+    const deltaX = currentPointer.x - lastPointer.x;
+    const deltaY = currentPointer.y - lastPointer.y;
+
+    setTranslateX(prev => prev + deltaX);
+    setTranslateY(prev => prev + deltaY);
+    setLastPointer(currentPointer);
+
+    event.preventDefault();
+  }, [isDragging, lastPointer]);
+
+  const handlePointerUp = useCallback(() => {
+    setIsDragging(false);
+    setLastPointer(null);
+  }, []);
+
+  // Handle pinch-to-zoom on touch devices
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    if (event.touches.length === 2) {
+      // Calculate initial distance for pinch zoom
+      const touch1 = event.touches[0];
+      const touch2 = event.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      setLastPointer({ x: distance, y: 0 }); // Store distance in x for pinch
+    } else {
+      handlePointerDown(event);
+    }
+  }, [handlePointerDown]);
+
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    if (event.touches.length === 2 && lastPointer) {
+      // Handle pinch zoom
+      const touch1 = event.touches[0];
+      const touch2 = event.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+
+      const scaleDelta = distance / lastPointer.x;
+      const newScale = Math.min(Math.max(scale * scaleDelta, 0.5), 4);
+      setScale(newScale);
+      setLastPointer({ x: distance, y: 0 });
+      event.preventDefault();
+    } else {
+      handlePointerMove(event);
+    }
+  }, [lastPointer, scale, handlePointerMove]);
 
   const handleMouseEnterRoom = useCallback((room: Room) => {
     setHoveredRoom(room);
@@ -112,6 +214,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   }, []);
 
   const handleMouseMove = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    // Handle coordinate tracking for InfoBox
     if (!svgRef.current || !viewBox) return;
 
     const svg = svgRef.current;
@@ -120,7 +223,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
     pt.y = event.clientY;
 
     const svgPoint = pt.matrixTransform(svg.getScreenCTM()?.inverse());
-    
+
     const viewBoxParts = viewBox.split(' ').map(parseFloat);
     const viewBoxHeight = viewBoxParts[3];
 
@@ -129,7 +232,12 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
       y: viewBoxParts[1] + viewBoxHeight - svgPoint.y, // Invert Y and offset by viewbox start
       z: floor?.level ?? null
     });
-  }, [floor, viewBox]);
+
+    // Handle pan functionality if dragging
+    if (!isTouchDevice) {
+      handlePointerMove(event);
+    }
+  }, [floor, viewBox, isTouchDevice, handlePointerMove]);
 
   const handleMouseLeave = useCallback(() => {
     setCoords(null);
@@ -139,27 +247,79 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ floorId, highlightedRoomId, onRoo
   const floorName = useMemo(() => floor?.name || 'Unknown Floor', [floor]);
 
   return (
-    <div 
-      className="w-full h-full relative overflow-hidden bg-background"
+    <div
+      ref={containerRef}
+      className="w-full h-full relative overflow-hidden bg-background touch-none select-none"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onWheel={handleWheel}
+      onMouseDown={!isTouchDevice ? handlePointerDown : undefined}
+      onMouseUp={!isTouchDevice ? handlePointerUp : undefined}
+      onTouchStart={isTouchDevice ? handleTouchStart : undefined}
+      onTouchMove={isTouchDevice ? handleTouchMove : undefined}
+      onTouchEnd={isTouchDevice ? handlePointerUp : undefined}
     >
       <InfoBox floor={floor?.level}  floorName={floorName} coords={coords} hoveredRoom={hoveredRoom} />
-      <svg
-        ref={svgRef}
-        viewBox={viewBox}
-        className="w-full h-full absolute p-10"
+
+      {/* Zoom controls for mobile */}
+      {isTouchDevice && (
+        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+          <button
+            className="bg-background border border-border rounded p-2 shadow-lg"
+            onTouchStart={(e) => {
+              e.preventDefault();
+              setScale(prev => Math.min(prev * 1.2, 4));
+            }}
+          >
+            <span className="text-lg font-bold">+</span>
+          </button>
+          <button
+            className="bg-background border border-border rounded p-2 shadow-lg"
+            onTouchStart={(e) => {
+              e.preventDefault();
+              setScale(prev => Math.max(prev * 0.8, 0.5));
+            }}
+          >
+            <span className="text-lg font-bold">−</span>
+          </button>
+          <button
+            className="bg-background border border-border rounded p-1 shadow-lg text-xs"
+            onTouchStart={(e) => {
+              e.preventDefault();
+              setScale(1);
+              setTranslateX(0);
+              setTranslateY(0);
+            }}
+          >
+            Reset
+          </button>
+        </div>
+      )}
+
+      <div
+        className="w-full h-full absolute"
+        style={{
+          transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
+          transformOrigin: 'center center',
+          transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+        }}
       >
-          <Grid viewBox={viewBox} />
-          <FloorComponent
-            highlightedRoomId={highlightedRoomId}
-            onRoomClick={onRoomClick}
-            rooms={rooms}
-            viewBox={viewBox}
-            onMouseEnterRoom={handleMouseEnterRoom}
-            onMouseLeaveRoom={handleMouseLeaveRoom}
-          />
-      </svg>
+        <svg
+          ref={svgRef}
+          viewBox={viewBox}
+          className="w-full h-full p-10"
+        >
+            <Grid viewBox={viewBox} />
+            <FloorComponent
+              highlightedRoomId={highlightedRoomId}
+              onRoomClick={onRoomClick}
+              rooms={rooms}
+              viewBox={viewBox}
+              onMouseEnterRoom={handleMouseEnterRoom}
+              onMouseLeaveRoom={handleMouseLeaveRoom}
+            />
+        </svg>
+      </div>
     </div>
   );
 };

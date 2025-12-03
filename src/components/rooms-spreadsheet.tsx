@@ -259,20 +259,20 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
   }, {} as Record<string, number>);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-card p-4 rounded-lg border">
-          <h3 className="font-semibold text-lg">Total Rooms</h3>
-          <p className="text-2xl font-bold text-primary">{totalRooms}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-card p-3 md:p-4 rounded-lg border">
+          <h3 className="font-semibold text-sm md:text-lg">Total Rooms</h3>
+          <p className="text-xl md:text-2xl font-bold text-primary">{totalRooms}</p>
         </div>
-        <div className="bg-card p-4 rounded-lg border">
-          <h3 className="font-semibold text-lg">Total Teams</h3>
-          <p className="text-2xl font-bold text-primary">{totalTeams}</p>
+        <div className="bg-card p-3 md:p-4 rounded-lg border">
+          <h3 className="font-semibold text-sm md:text-lg">Total Teams</h3>
+          <p className="text-xl md:text-2xl font-bold text-primary">{totalTeams}</p>
         </div>
-        <div className="bg-card p-4 rounded-lg border">
-          <h3 className="font-semibold text-lg">Rooms with Teams</h3>
-          <p className="text-2xl font-bold text-primary">{totalRooms > 0 ? Math.round((totalTeams / totalRooms) * 100) : 0}%</p>
+        <div className="bg-card p-3 md:p-4 rounded-lg border sm:col-span-2 lg:col-span-1">
+          <h3 className="font-semibold text-sm md:text-lg">Rooms with Teams</h3>
+          <p className="text-xl md:text-2xl font-bold text-primary">{totalRooms > 0 ? Math.round((totalTeams / totalRooms) * 100) : 0}%</p>
         </div>
       </div>
 
@@ -290,38 +290,38 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
 
       {/* Rooms Table */}
       <div className="bg-card rounded-lg border">
-        <div className="p-4 border-b space-y-4">
-          <div className="flex justify-between items-center">
+        <div className="p-3 md:p-4 border-b space-y-3 md:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
             <div>
-              <h3 className="font-semibold text-lg">All Rooms</h3>
+              <h3 className="font-semibold text-lg md:text-xl">All Rooms</h3>
               {isEditMode && (
-                <p className="text-sm text-muted-foreground">Click any row to edit room details</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Tap any row to edit room details</p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
               {isEditMode && onRoomsImport && (
-                <Button onClick={importCSV} variant="outline" size="sm">
-                  <Upload className="mr-2 h-4 w-4" />
+                <Button onClick={importCSV} variant="outline" size="sm" className="w-full sm:w-auto text-xs md:text-sm">
+                  <Upload className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
                   Import CSV
                 </Button>
               )}
-              <Button onClick={exportToCSV} variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" />
+              <Button onClick={exportToCSV} variant="outline" size="sm" className="w-full sm:w-auto text-xs md:text-sm">
+                <Download className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
                 Export CSV
               </Button>
             </div>
           </div>
-          <div className="relative max-w-sm">
+          <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search rooms, teams, floors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8"
+              className="pl-8 text-sm md:text-base"
             />
           </div>
           {searchQuery && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs md:text-sm text-muted-foreground">
               Showing {filteredAndSortedRooms.length} of {totalRooms} rooms
             </p>
           )}
@@ -330,15 +330,15 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Room ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Team Name</TableHead>
-                <TableHead>Floor</TableHead>
-                <TableHead>Dimensions</TableHead>
-                <TableHead>Area</TableHead>
-                <TableHead>Color</TableHead>
-                <TableHead>Notes</TableHead>
-                <TableHead>Coordinates</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4">Room ID</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4">Name</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden sm:table-cell">Team</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4">Floor</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden md:table-cell">Size</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden lg:table-cell">Area</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden lg:table-cell">Color</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden xl:table-cell">Notes</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden xl:table-cell">Coordinates</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -348,33 +348,33 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
                   className={isEditMode ? 'cursor-pointer hover:bg-muted/50' : ''}
                   onClick={() => handleRoomClick(room)}
                 >
-                  <TableCell className="font-mono text-sm">{room.id}</TableCell>
-                  <TableCell className="font-medium">{room.name}</TableCell>
-                  <TableCell>{room.teamName || '-'}</TableCell>
-                  <TableCell>{room.floorName}</TableCell>
-                  <TableCell className="font-mono text-sm">{room.dimensions}</TableCell>
-                  <TableCell className="font-mono text-sm">{room.area}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
+                  <TableCell className="font-mono text-xs md:text-sm px-2 md:px-4 py-2 md:py-3">{room.id}</TableCell>
+                  <TableCell className="font-medium text-xs md:text-sm px-2 md:px-4 py-2 md:py-3">{room.name}</TableCell>
+                  <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 hidden sm:table-cell">{room.teamName || '-'}</TableCell>
+                  <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3">{room.floorName}</TableCell>
+                  <TableCell className="font-mono text-xs px-2 md:px-4 py-2 md:py-3 hidden md:table-cell">{room.dimensions}</TableCell>
+                  <TableCell className="font-mono text-xs px-2 md:px-4 py-2 md:py-3 hidden lg:table-cell">{room.area}</TableCell>
+                  <TableCell className="px-2 md:px-4 py-2 md:py-3 hidden lg:table-cell">
+                    <div className="flex items-center gap-1 md:gap-2">
                       <div
-                        className="w-4 h-4 border border-gray-300 rounded"
+                        className="w-3 h-3 md:w-4 md:h-4 border border-gray-300 rounded"
                         style={{ backgroundColor: room.color }}
                         title={room.color}
                       />
-                      <span className="text-xs text-muted-foreground">{room.color}</span>
+                      <span className="text-xs text-muted-foreground hidden xl:inline">{room.color}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-xs truncate" title={room.notes}>
+                  <TableCell className="max-w-xs truncate text-xs px-2 md:px-4 py-2 md:py-3 hidden xl:table-cell" title={room.notes}>
                     {room.notes || '-'}
                   </TableCell>
-                  <TableCell className="font-mono text-xs">
+                  <TableCell className="font-mono text-xs px-2 md:px-4 py-2 md:py-3 hidden xl:table-cell">
                     [{room.coords ? room.coords.map(c => (c ?? 0).toFixed(1)).join(', ') : '0.0, 0.0, 0.0, 0.0'}]
                   </TableCell>
                 </TableRow>
               ))}
               {filteredAndSortedRooms.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-6 md:py-8 text-sm">
                     {searchQuery ? 'No rooms found matching your search' : 'No rooms found'}
                   </TableCell>
                 </TableRow>
