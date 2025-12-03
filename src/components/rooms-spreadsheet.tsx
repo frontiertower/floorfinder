@@ -14,14 +14,20 @@ import { Input } from '@/components/ui/input';
 import { Download, Search } from 'lucide-react';
 import type { Room, Floor } from '@/lib/types';
 import { allFloors } from '@/lib/config';
+import { RoomOptionsDialog } from './room-options-dialog';
 
 interface RoomsSpreadsheetProps {
   rooms: Room[];
   customFloorNames: Record<string, string>;
+  isEditMode?: boolean;
+  onRoomUpdate?: (room: Room) => void;
+  onRoomDelete?: (roomId: string) => void;
 }
 
-export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetProps) {
+export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, onRoomUpdate, onRoomDelete }: RoomsSpreadsheetProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [showOptionsDialog, setShowOptionsDialog] = useState(false);
 
   const roomsWithFloorData = useMemo(() => {
     return rooms.map(room => {
@@ -103,6 +109,29 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
     });
   }, [roomsWithFloorData, searchQuery]);
 
+  const handleRoomClick = (room: Room) => {
+    if (isEditMode) {
+      setSelectedRoom(room);
+      setShowOptionsDialog(true);
+    }
+  };
+
+  const handleRoomUpdate = (updatedRoom: Room) => {
+    if (onRoomUpdate) {
+      onRoomUpdate(updatedRoom);
+    }
+    setSelectedRoom(null);
+    setShowOptionsDialog(false);
+  };
+
+  const handleRoomDelete = () => {
+    if (selectedRoom && onRoomDelete) {
+      onRoomDelete(selectedRoom.id);
+    }
+    setSelectedRoom(null);
+    setShowOptionsDialog(false);
+  };
+
   const totalRooms = rooms.length;
   const totalTeams = roomsWithFloorData.filter(room => room.teamName && room.teamName.trim()).length;
   const floorCounts = roomsWithFloorData.reduce((acc, room) => {
@@ -144,7 +173,12 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
       <div className="bg-card rounded-lg border">
         <div className="p-4 border-b space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold text-lg">All Rooms</h3>
+            <div>
+              <h3 className="font-semibold text-lg">All Rooms</h3>
+              {isEditMode && (
+                <p className="text-sm text-muted-foreground">Click any row to edit room details</p>
+              )}
+            </div>
             <Button onClick={exportToCSV} variant="outline" size="sm">
               <Download className="mr-2 h-4 w-4" />
               Export CSV
@@ -182,7 +216,11 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
             </TableHeader>
             <TableBody>
               {filteredAndSortedRooms.map((room) => (
-                <TableRow key={room.id}>
+                <TableRow
+                  key={room.id}
+                  className={isEditMode ? 'cursor-pointer hover:bg-muted/50' : ''}
+                  onClick={() => handleRoomClick(room)}
+                >
                   <TableCell className="font-mono text-sm">{room.id}</TableCell>
                   <TableCell className="font-medium">{room.name}</TableCell>
                   <TableCell>{room.teamName || '-'}</TableCell>
@@ -218,6 +256,18 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
           </Table>
         </div>
       </div>
+
+      {/* Room Options Dialog for Edit Mode */}
+      <RoomOptionsDialog
+        isOpen={showOptionsDialog}
+        onClose={() => {
+          setShowOptionsDialog(false);
+          setSelectedRoom(null);
+        }}
+        onSave={handleRoomUpdate}
+        onDelete={handleRoomDelete}
+        room={selectedRoom}
+      />
     </div>
   );
 }

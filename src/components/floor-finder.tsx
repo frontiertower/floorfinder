@@ -289,6 +289,57 @@ const FloorFinder = () => {
                   <RoomsSpreadsheet
                     rooms={allRooms}
                     customFloorNames={customFloorNames}
+                    isEditMode={isEditMode}
+                    onRoomUpdate={async (updatedRoom) => {
+                      try {
+                        const response = await fetch('/api/rooms.json', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(updatedRoom),
+                        });
+                        if (response.ok) {
+                          const updatedRooms = await response.json();
+                          setAllRooms(updatedRooms);
+                          toast({
+                            title: "Room updated",
+                            description: "The room has been successfully updated.",
+                          });
+                        } else {
+                          throw new Error('Failed to update room');
+                        }
+                      } catch (error) {
+                        toast({
+                          variant: "destructive",
+                          title: "Error",
+                          description: "Failed to update the room. Please try again.",
+                        });
+                      }
+                    }}
+                    onRoomDelete={async (roomId) => {
+                      try {
+                        const response = await fetch('/api/rooms.json', {
+                          method: 'DELETE',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ roomId }),
+                        });
+                        if (response.ok) {
+                          const updatedRooms = await response.json();
+                          setAllRooms(updatedRooms);
+                          toast({
+                            title: "Room deleted",
+                            description: "The room has been successfully deleted.",
+                          });
+                        } else {
+                          throw new Error('Failed to delete room');
+                        }
+                      } catch (error) {
+                        toast({
+                          variant: "destructive",
+                          title: "Error",
+                          description: "Failed to delete the room. Please try again.",
+                        });
+                      }
+                    }}
                   />
                 </div>
             ) : (
