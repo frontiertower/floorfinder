@@ -149,7 +149,7 @@ const FloorFinder = () => {
   return (
     <div className="flex h-screen bg-card/50">
       {/* Floor Selection Sidebar */}
-      <div className="w-64 bg-white p-4 shadow-md flex flex-col bg-card/50">
+      <div className="w-64 bg-background dark:bg-black p-4 shadow-md flex flex-col border-r border-border">
       <a href="/"><h1 className="text-3xl font-headline text-center mb-4">SensAI Hack</h1></a>
       <a href="https://sensaihack.space" className="text-center text-blue-500">(<span className="text-blue-500 underline text-center">sensaihack.space</span>)</a>
         
