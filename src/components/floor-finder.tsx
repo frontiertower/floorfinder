@@ -340,6 +340,32 @@ const FloorFinder = () => {
                         });
                       }
                     }}
+                    onRoomsImport={async (importedRooms) => {
+                      try {
+                        // Import all rooms at once
+                        const response = await fetch('/api/rooms.json/import', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ rooms: importedRooms }),
+                        });
+                        if (response.ok) {
+                          const updatedRooms = await response.json();
+                          setAllRooms(updatedRooms);
+                          toast({
+                            title: "Rooms imported",
+                            description: `Successfully imported ${importedRooms.length} rooms.`,
+                          });
+                        } else {
+                          throw new Error('Failed to import rooms');
+                        }
+                      } catch (error) {
+                        toast({
+                          variant: "destructive",
+                          title: "Error",
+                          description: "Failed to import rooms. Please try again.",
+                        });
+                      }
+                    }}
                   />
                 </div>
             ) : (

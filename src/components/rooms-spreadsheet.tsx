@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Download, Search } from 'lucide-react';
+import { Download, Search, Upload } from 'lucide-react';
 import type { Room, Floor } from '@/lib/types';
 import { allFloors } from '@/lib/config';
 import { RoomOptionsDialog } from './room-options-dialog';
@@ -22,9 +22,10 @@ interface RoomsSpreadsheetProps {
   isEditMode?: boolean;
   onRoomUpdate?: (room: Room) => void;
   onRoomDelete?: (roomId: string) => void;
+  onRoomsImport?: (rooms: Room[]) => void;
 }
 
-export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, onRoomUpdate, onRoomDelete }: RoomsSpreadsheetProps) {
+export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, onRoomUpdate, onRoomDelete, onRoomsImport }: RoomsSpreadsheetProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [showOptionsDialog, setShowOptionsDialog] = useState(false);
@@ -47,6 +48,75 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
       };
     });
   }, [rooms, customFloorNames]);
+
+  const importCSV = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const text = await file.text();
+      const lines = text.split('\n');
+
+      // Skip header row
+      const dataLines = lines.slice(1).filter(line => line.trim());
+
+      const importedRooms: Room[] = [];
+
+      dataLines.forEach(line => {
+        // Parse CSV line (handle quoted values)
+        const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+        if (!matches || matches.length < 9) return;
+
+        // Clean up values (remove quotes)
+        const values = matches.map(val => val.replace(/^"|"$/g, ''));
+
+        // Parse coordinates array
+        let coords: [number, number, number, number];
+        try {
+          const coordsStr = values[8].replace(/^\[|\]$/g, '');
+          const coordsArr = coordsStr.split(',').map(c => parseFloat(c.trim()));
+          if (coordsArr.length !== 4) return;
+          coords = coordsArr as [number, number, number, number];
+        } catch {
+          return;
+        }
+
+        // Find floor ID from floor name
+        let floorId = '';
+        for (const floor of allFloors) {
+          const floorName = customFloorNames[floor.id] || floor.name;
+          if (floorName === values[3]) {
+            floorId = floor.id;
+            break;
+          }
+        }
+
+        if (!floorId) return;
+
+        const room: Room = {
+          id: values[0],
+          name: values[1] || 'Unnamed Room',
+          teamName: values[2] || undefined,
+          floorId,
+          color: values[6] || 'rgba(76, 175, 80, 0.5)',
+          notes: values[7] || undefined,
+          coords
+        };
+
+        importedRooms.push(room);
+      });
+
+      if (importedRooms.length > 0 && onRoomsImport) {
+        onRoomsImport(importedRooms);
+      }
+    };
+
+    input.click();
+  };
 
   const exportToCSV = () => {
     const headers = [
@@ -179,10 +249,18 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
                 <p className="text-sm text-muted-foreground">Click any row to edit room details</p>
               )}
             </div>
-            <Button onClick={exportToCSV} variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" />
-              Export CSV
-            </Button>
+            <div className="flex gap-2">
+              {isEditMode && onRoomsImport && (
+                <Button onClick={importCSV} variant="outline" size="sm">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Import CSV
+                </Button>
+              )}
+              <Button onClick={exportToCSV} variant="outline" size="sm">
+                <Download className="mr-2 h-4 w-4" />
+                Export CSV
+              </Button>
+            </div>
           </div>
           <div className="relative max-w-sm">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

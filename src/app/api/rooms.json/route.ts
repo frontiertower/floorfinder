@@ -2,9 +2,56 @@ import { NextResponse } from 'next/server';
 import { kv } from '@vercel/kv';
 import type { Room } from '@/lib/types';
 
-// Hardcoded room data - this will be stored in Vercel KV on first access
+// Sample room data - this will be stored in Vercel KV on first access
 const defaultRooms: Room[] = [
-  // Start with empty rooms array - users can create their own
+  // Sample rooms for floor 2
+  {
+    id: "201",
+    name: "Conference Room A",
+    teamName: "Product Team",
+    floorId: "2",
+    color: "rgba(76, 175, 80, 0.5)",
+    notes: "Large conference room with projector",
+    coords: [100, 100, 200, 150]
+  },
+  {
+    id: "202",
+    name: "Open Workspace",
+    teamName: "Engineering",
+    floorId: "2",
+    color: "rgba(33, 150, 243, 0.5)",
+    notes: "Flexible seating area",
+    coords: [350, 100, 150, 200]
+  },
+  // Sample rooms for floor 7 (Makerspace)
+  {
+    id: "701",
+    name: "3D Printing Lab",
+    teamName: "Hardware Team",
+    floorId: "7",
+    color: "rgba(255, 152, 0, 0.5)",
+    notes: "Contains 3D printers and materials",
+    coords: [50, 50, 180, 120]
+  },
+  {
+    id: "702",
+    name: "Electronics Workshop",
+    teamName: "Robotics Team",
+    floorId: "7",
+    color: "rgba(156, 39, 176, 0.5)",
+    notes: "Soldering stations and components",
+    coords: [250, 50, 200, 120]
+  },
+  // Sample room for floor 12 (Ethereum House)
+  {
+    id: "1201",
+    name: "Main Hack Space",
+    teamName: "Blockchain Devs",
+    floorId: "12",
+    color: "rgba(244, 67, 54, 0.5)",
+    notes: "24/7 access for hackathon participants",
+    coords: [100, 200, 300, 200]
+  }
 ];
 
 export async function GET() {
