@@ -68,8 +68,9 @@ export async function GET() {
     return NextResponse.json(rooms);
 
   } catch (error) {
-    // If KV is not configured (local development), return default rooms
+    // If KV is not configured, return default rooms
     console.log("Vercel KV not configured, using default rooms");
+    console.log("To persist data across deployments, set up Vercel KV in your dashboard");
     return NextResponse.json(defaultRooms);
   }
 }

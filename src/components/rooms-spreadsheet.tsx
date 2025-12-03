@@ -36,7 +36,8 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
       const floorName = customFloorNames[room.floorId || ''] || floor?.name || 'Unknown';
 
       // Calculate room size (area) from coordinates
-      const [x, y, width, height] = room.coords;
+      const coords = room.coords || [0, 0, 0, 0];
+      const [x, y, width, height] = coords.map(c => c ?? 0);
       const area = width * height;
 
       return {
@@ -140,7 +141,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
       room.area,
       room.color,
       room.notes || '',
-      `"[${room.coords.map(c => c.toFixed(1)).join(', ')}]"`
+      `"[${room.coords ? room.coords.map(c => (c ?? 0).toFixed(1)).join(', ') : '0.0, 0.0, 0.0, 0.0'}]"`
     ]);
 
     const csvContent = [headers, ...csvData]
@@ -319,7 +320,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
                     {room.notes || '-'}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
-                    [{room.coords.map(c => c.toFixed(1)).join(', ')}]
+                    [{room.coords ? room.coords.map(c => (c ?? 0).toFixed(1)).join(', ') : '0.0, 0.0, 0.0, 0.0'}]
                   </TableCell>
                 </TableRow>
               ))}
