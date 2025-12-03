@@ -104,7 +104,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
   }, [roomsWithFloorData, searchQuery]);
 
   const totalRooms = rooms.length;
-  const totalArea = roomsWithFloorData.reduce((sum, room) => sum + parseFloat(room.area), 0);
+  const totalTeams = roomsWithFloorData.filter(room => room.teamName && room.teamName.trim()).length;
   const floorCounts = roomsWithFloorData.reduce((acc, room) => {
     acc[room.floorName] = (acc[room.floorName] || 0) + 1;
     return acc;
@@ -119,12 +119,12 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
           <p className="text-2xl font-bold text-primary">{totalRooms}</p>
         </div>
         <div className="bg-card p-4 rounded-lg border">
-          <h3 className="font-semibold text-lg">Total Area</h3>
-          <p className="text-2xl font-bold text-primary">{totalArea.toFixed(1)} sq units</p>
+          <h3 className="font-semibold text-lg">Total Teams</h3>
+          <p className="text-2xl font-bold text-primary">{totalTeams}</p>
         </div>
         <div className="bg-card p-4 rounded-lg border">
-          <h3 className="font-semibold text-lg">Average Room Size</h3>
-          <p className="text-2xl font-bold text-primary">{totalRooms > 0 ? (totalArea / totalRooms).toFixed(1) : '0'} sq units</p>
+          <h3 className="font-semibold text-lg">Rooms with Teams</h3>
+          <p className="text-2xl font-bold text-primary">{totalRooms > 0 ? Math.round((totalTeams / totalRooms) * 100) : 0}%</p>
         </div>
       </div>
 

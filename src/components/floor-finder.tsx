@@ -115,7 +115,7 @@ const FloorFinder = () => {
     window.location.hash = floor.id;
   };
 
-  // Read hash on initial load or default to floor 2
+  // Read hash on initial load or default to spreadsheet
   useEffect(() => {
     const hash = window.location.hash.substring(1);
     if (hash) {
@@ -128,13 +128,8 @@ const FloorFinder = () => {
         setSelectedFloor({ id: 'spreadsheet', name: 'Rooms Spreadsheet', level: 0 });
       }
     } else {
-        // Default to floor 2
-        const floor2 = allFloors.find(f => f.id === '2');
-        if (floor2) {
-          setSelectedFloor(floor2);
-        } else {
-          setSelectedFloor({ id: 'readme', name: 'App Design Summary', level: 0 });
-        }
+        // Default to spreadsheet
+        setSelectedFloor({ id: 'spreadsheet', name: 'Rooms Spreadsheet', level: 0 });
     }
   }, []);
 
@@ -282,18 +277,23 @@ const FloorFinder = () => {
         </div>
 
         {/* Floor Plan Content */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex flex-col overflow-hidden">
         {selectedFloor ? (
             selectedFloor.id === 'readme' ? (
-                <Readme />
+                <div className="flex-1 flex items-center justify-center">
+                  <Readme />
+                </div>
             ) : selectedFloor.id === 'spreadsheet' ? (
-                <RoomsSpreadsheet
-                  rooms={allRooms}
-                  customFloorNames={customFloorNames}
-                />
+                <div className="flex-1 overflow-y-auto p-6">
+                  <RoomsSpreadsheet
+                    rooms={allRooms}
+                    customFloorNames={customFloorNames}
+                  />
+                </div>
             ) : (
                 isEditMode ? (
-                  <FloorPlanEditable
+                  <div className="flex-1 flex items-center justify-center">
+                    <FloorPlanEditable
                     floorId={selectedFloor.id}
                     highlightedRoomId={highlightedRoom}
                     onRoomClick={(roomId) => {
@@ -379,20 +379,25 @@ const FloorFinder = () => {
                         });
                       }
                     }}
-                  />
+                    />
+                  </div>
                 ) : (
-                  <FloorPlan
-                    floorId={selectedFloor.id}
-                    highlightedRoomId={highlightedRoom}
-                    onRoomClick={(roomId) => {
-                        setHighlightedRoom(roomId);
-                    }}
-                    rooms={roomsForSelectedFloor}
-                  />
+                  <div className="flex-1 flex items-center justify-center">
+                    <FloorPlan
+                      floorId={selectedFloor.id}
+                      highlightedRoomId={highlightedRoom}
+                      onRoomClick={(roomId) => {
+                          setHighlightedRoom(roomId);
+                      }}
+                      rooms={roomsForSelectedFloor}
+                    />
+                  </div>
                 )
             )
         ) : (
-          <p>Select a floor to view the plan.</p>
+          <div className="flex-1 flex items-center justify-center">
+            <p>Select a floor to view the plan.</p>
+          </div>
         )}
         </div>
       </div>
