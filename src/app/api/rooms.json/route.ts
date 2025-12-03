@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 import type { Room } from '@/lib/types';
 
 // Sample room data - this will be stored in Vercel KV on first access
@@ -54,24 +54,45 @@ const defaultRooms: Room[] = [
   }
 ];
 
+let redisClient: any = null;
+
+async function getRedisClient() {
+  if (!redisClient && process.env.REDIS_URL) {
+    try {
+      redisClient = createClient({ url: process.env.REDIS_URL });
+      await redisClient.connect();
+      console.log("✅ Connected to Redis");
+    } catch (error) {
+      console.error("❌ Failed to connect to Redis:", error);
+      redisClient = null;
+    }
+  }
+  return redisClient;
+}
+
 export async function GET() {
   try {
-    // Try to get rooms from Vercel KV
-    let rooms = await kv.get<Room[]>('rooms');
+    const redis = await getRedisClient();
 
-    // If no rooms exist in KV, initialize with default data
+    if (!redis) {
+      console.log("⚠️  Redis not configured - rooms will not persist!");
+      return NextResponse.json(defaultRooms);
+    }
+
+    // Try to get rooms from Redis
+    const roomsData = await redis.get('rooms');
+    let rooms = roomsData ? JSON.parse(roomsData) : null;
+
+    // If no rooms exist, initialize with default data
     if (!rooms) {
-      await kv.set('rooms', defaultRooms);
+      await redis.set('rooms', JSON.stringify(defaultRooms));
       rooms = defaultRooms;
     }
 
     return NextResponse.json(rooms);
 
   } catch (error) {
-    // If KV is not configured, return default rooms
-    console.log("⚠️  Vercel KV not configured - rooms will not persist!");
-    console.log("📖 See VERCEL_KV_SETUP.md for setup instructions");
-    console.log("🔗 Or check /api/status for configuration status");
+    console.error("Error fetching rooms:", error);
     return NextResponse.json(defaultRooms);
   }
 }
@@ -88,23 +109,25 @@ export async function POST(request: Request) {
       );
     }
 
-    try {
-      // Try to get existing rooms from Vercel KV
-      let rooms = await kv.get<Room[]>('rooms') || defaultRooms;
+    const redis = await getRedisClient();
 
-      // Add the new room
-      rooms.push(newRoom);
-
-      // Save back to KV
-      await kv.set('rooms', rooms);
-
-      return NextResponse.json(rooms);
-    } catch (kvError) {
-      // If KV is not configured (local development), just add to defaultRooms
-      console.log("Vercel KV not configured, adding to in-memory rooms");
+    if (!redis) {
+      console.log("Redis not configured, adding to in-memory rooms");
       defaultRooms.push(newRoom);
       return NextResponse.json(defaultRooms);
     }
+
+    // Get existing rooms from Redis
+    const roomsData = await redis.get('rooms');
+    let rooms = roomsData ? JSON.parse(roomsData) : defaultRooms;
+
+    // Add the new room
+    rooms.push(newRoom);
+
+    // Save back to Redis
+    await redis.set('rooms', JSON.stringify(rooms));
+
+    return NextResponse.json(rooms);
 
   } catch (error) {
     console.error("Error adding room:", error);
@@ -127,34 +150,36 @@ export async function PUT(request: Request) {
       );
     }
 
-    try {
-      // Try to get existing rooms from Vercel KV
-      let rooms = await kv.get<Room[]>('rooms') || defaultRooms;
+    const redis = await getRedisClient();
 
-      // Find and update the room
-      const roomIndex = rooms.findIndex(room => room.id === updatedRoom.id);
-      if (roomIndex === -1) {
-        return NextResponse.json(
-          { error: 'Room not found' },
-          { status: 404 }
-        );
-      }
-
-      rooms[roomIndex] = updatedRoom;
-
-      // Save back to KV
-      await kv.set('rooms', rooms);
-
-      return NextResponse.json(rooms);
-    } catch (kvError) {
-      // If KV is not configured (local development), update in defaultRooms
-      console.log("Vercel KV not configured, updating in-memory rooms");
+    if (!redis) {
+      console.log("Redis not configured, updating in-memory rooms");
       const roomIndex = defaultRooms.findIndex(room => room.id === updatedRoom.id);
       if (roomIndex > -1) {
         defaultRooms[roomIndex] = updatedRoom;
       }
       return NextResponse.json(defaultRooms);
     }
+
+    // Get existing rooms from Redis
+    const roomsData = await redis.get('rooms');
+    let rooms = roomsData ? JSON.parse(roomsData) : defaultRooms;
+
+    // Find and update the room
+    const roomIndex = rooms.findIndex((room: Room) => room.id === updatedRoom.id);
+    if (roomIndex === -1) {
+      return NextResponse.json(
+        { error: 'Room not found' },
+        { status: 404 }
+      );
+    }
+
+    rooms[roomIndex] = updatedRoom;
+
+    // Save back to Redis
+    await redis.set('rooms', JSON.stringify(rooms));
+
+    return NextResponse.json(rooms);
 
   } catch (error) {
     console.error("Error updating room:", error);
@@ -176,26 +201,28 @@ export async function DELETE(request: Request) {
       );
     }
 
-    try {
-      // Try to get existing rooms from Vercel KV
-      let rooms = await kv.get<Room[]>('rooms') || defaultRooms;
+    const redis = await getRedisClient();
 
-      // Filter out the room to delete
-      rooms = rooms.filter(room => room.id !== roomId);
-
-      // Save back to KV
-      await kv.set('rooms', rooms);
-
-      return NextResponse.json(rooms);
-    } catch (kvError) {
-      // If KV is not configured (local development), filter from defaultRooms
-      console.log("Vercel KV not configured, removing from in-memory rooms");
+    if (!redis) {
+      console.log("Redis not configured, removing from in-memory rooms");
       const index = defaultRooms.findIndex(room => room.id === roomId);
       if (index > -1) {
         defaultRooms.splice(index, 1);
       }
       return NextResponse.json(defaultRooms);
     }
+
+    // Get existing rooms from Redis
+    const roomsData = await redis.get('rooms');
+    let rooms = roomsData ? JSON.parse(roomsData) : defaultRooms;
+
+    // Filter out the room to delete
+    rooms = rooms.filter((room: Room) => room.id !== roomId);
+
+    // Save back to Redis
+    await redis.set('rooms', JSON.stringify(rooms));
+
+    return NextResponse.json(rooms);
 
   } catch (error) {
     console.error("Error deleting room:", error);

@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 import type { Room } from '@/lib/types';
+
+let redisClient: any = null;
+
+async function getRedisClient() {
+  if (!redisClient && process.env.REDIS_URL) {
+    try {
+      redisClient = createClient({ url: process.env.REDIS_URL });
+      await redisClient.connect();
+    } catch (error) {
+      console.error("Failed to connect to Redis:", error);
+      redisClient = null;
+    }
+  }
+  return redisClient;
+}
 
 export async function POST(request: Request) {
   try {
@@ -13,36 +28,38 @@ export async function POST(request: Request) {
       );
     }
 
-    try {
-      // Try to get existing rooms from Vercel KV
-      let existingRooms = await kv.get<Room[]>('rooms') || [];
+    const redis = await getRedisClient();
 
-      // Merge imported rooms with existing ones (replace duplicates by ID)
-      const roomMap = new Map<string, Room>();
-
-      // Add existing rooms first
-      existingRooms.forEach(room => roomMap.set(room.id, room));
-
-      // Override with imported rooms (will replace existing ones with same ID)
-      importedRooms.forEach(room => {
-        // Validate required fields
-        if (room.id && room.coords && room.floorId) {
-          roomMap.set(room.id, room);
-        }
-      });
-
-      // Convert back to array
-      const mergedRooms = Array.from(roomMap.values());
-
-      // Save back to KV
-      await kv.set('rooms', mergedRooms);
-
-      return NextResponse.json(mergedRooms);
-    } catch (kvError) {
-      // If KV is not configured (local development), just return the imported rooms
-      console.log("Vercel KV not configured, returning imported rooms");
+    if (!redis) {
+      console.log("Redis not configured, returning imported rooms");
       return NextResponse.json(importedRooms);
     }
+
+    // Try to get existing rooms from Redis
+    const roomsData = await redis.get('rooms');
+    let existingRooms = roomsData ? JSON.parse(roomsData) : [];
+
+    // Merge imported rooms with existing ones (replace duplicates by ID)
+    const roomMap = new Map<string, Room>();
+
+    // Add existing rooms first
+    existingRooms.forEach((room: Room) => roomMap.set(room.id, room));
+
+    // Override with imported rooms (will replace existing ones with same ID)
+    importedRooms.forEach(room => {
+      // Validate required fields
+      if (room.id && room.coords && room.floorId) {
+        roomMap.set(room.id, room);
+      }
+    });
+
+    // Convert back to array
+    const mergedRooms = Array.from(roomMap.values());
+
+    // Save back to Redis
+    await redis.set('rooms', JSON.stringify(mergedRooms));
+
+    return NextResponse.json(mergedRooms);
 
   } catch (error) {
     console.error("Error importing rooms:", error);
