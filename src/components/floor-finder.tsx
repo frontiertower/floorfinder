@@ -261,7 +261,7 @@ const FloorFinder = () => {
                   <button
                     className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === 'spreadsheet' ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20 text-foreground'}`}
                     onClick={() => {
-                      setSelectedFloor({ id: 'spreadsheet', name: 'Rooms Spreadsheet', level: 0 });
+                      setSelectedFloor({ id: 'spreadsheet', name: 'SensAI Hack Spaces', level: 0 });
                       setSearchQuery('');
                       setHighlightedRoom(null);
                       window.location.hash = 'spreadsheet';
@@ -269,7 +269,7 @@ const FloorFinder = () => {
                       setIsMobileMenuOpen(false);
                     }}
                   >
-                    📊 Spreadsheet View
+                    📊 SensAI Hack Spaces
                   </button>
                 </li>
               </ul>
@@ -285,7 +285,7 @@ const FloorFinder = () => {
         <div className="flex justify-between items-center px-4 lg:px-6 py-3 lg:py-4 bg-background border-b mt-14 lg:mt-0">
           <div>
             {selectedFloor && selectedFloor.id === 'spreadsheet' ? (
-              <h2 className="text-2xl font-bold text-primary">📊 Rooms Spreadsheet</h2>
+              <h2 className="text-2xl font-bold text-primary">📊 SensAI Hack Spaces</h2>
             ) : selectedFloor && selectedFloor.id !== 'readme' && selectedFloor.id !== 'spreadsheet' && (
               <FloorNameEditor
                 floorId={selectedFloor.id}

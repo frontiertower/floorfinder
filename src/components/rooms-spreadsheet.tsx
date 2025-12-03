@@ -70,8 +70,8 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
       dataLines.forEach((line, index) => {
         // Parse CSV line (handle quoted values)
         const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-        if (!matches || matches.length < 9) {
-          console.warn(`Skipping line ${index + 2}: insufficient columns (${matches?.length || 0}/9)`);
+        if (!matches || matches.length < 10) {
+          console.warn(`Skipping line ${index + 2}: insufficient columns (${matches?.length || 0}/10)`);
           return;
         }
 
@@ -80,7 +80,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
 
         // Debug log the coordinates parsing
         console.log(`Parsing line ${index + 2}:`, {
-          originalCoords: values[8],
+          originalCoords: values[9],
           roomId: values[0],
           roomName: values[1]
         });
@@ -89,7 +89,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
         let coords: [number, number, number, number];
         try {
           // Handle multiple formats: ""[x, y, w, h]"", "[x, y, w, h]", "x, y, w, h"
-          let coordsStr = values[8];
+          let coordsStr = values[9];
 
           // Remove outer quotes first (handles both single and double quotes)
           while ((coordsStr.startsWith('"') && coordsStr.endsWith('"')) ||
@@ -138,7 +138,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
         let floorId = '';
         for (const floor of allFloors) {
           const floorName = customFloorNames[floor.id] || floor.name;
-          if (floorName === values[3]) {
+          if (floorName === values[4]) {
             floorId = floor.id;
             break;
           }
@@ -150,9 +150,10 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
           id: values[0],
           name: values[1] || 'Unnamed Room',
           teamName: values[2] || undefined,
+          type: values[3] || undefined,
           floorId,
-          color: values[6] || 'rgba(76, 175, 80, 0.5)',
-          notes: values[7] || undefined,
+          color: values[7] || 'rgba(76, 175, 80, 0.5)',
+          notes: values[8] || undefined,
           coords
         };
 
@@ -172,6 +173,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
       'Room ID',
       'Name',
       'Team Name',
+      'Type',
       'Floor',
       'Dimensions',
       'Area',
@@ -184,6 +186,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
       room.id,
       room.name,
       room.teamName || '',
+      room.type || '',
       room.floorName,
       room.dimensions,
       room.area,
@@ -214,6 +217,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
         room.name.toLowerCase().includes(query) ||
         room.id.toLowerCase().includes(query) ||
         (room.teamName && room.teamName.toLowerCase().includes(query)) ||
+        (room.type && room.type.toLowerCase().includes(query)) ||
         (room.notes && room.notes.toLowerCase().includes(query)) ||
         room.floorName.toLowerCase().includes(query)
       );
@@ -261,18 +265,18 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-        <div className="bg-card p-3 md:p-4 rounded-lg border">
-          <h3 className="font-semibold text-sm md:text-lg">Total Rooms</h3>
-          <p className="text-xl md:text-2xl font-bold text-primary">{totalRooms}</p>
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+        <div className="bg-card p-2 sm:p-3 md:p-4 rounded-lg border">
+          <h3 className="font-semibold text-xs sm:text-sm md:text-lg">Total Rooms</h3>
+          <p className="text-lg sm:text-xl md:text-2xl font-bold text-primary">{totalRooms}</p>
         </div>
-        <div className="bg-card p-3 md:p-4 rounded-lg border">
-          <h3 className="font-semibold text-sm md:text-lg">Total Teams</h3>
-          <p className="text-xl md:text-2xl font-bold text-primary">{totalTeams}</p>
+        <div className="bg-card p-2 sm:p-3 md:p-4 rounded-lg border">
+          <h3 className="font-semibold text-xs sm:text-sm md:text-lg">Total Teams</h3>
+          <p className="text-lg sm:text-xl md:text-2xl font-bold text-primary">{totalTeams}</p>
         </div>
-        <div className="bg-card p-3 md:p-4 rounded-lg border sm:col-span-2 lg:col-span-1">
-          <h3 className="font-semibold text-sm md:text-lg">Rooms with Teams</h3>
-          <p className="text-xl md:text-2xl font-bold text-primary">{totalRooms > 0 ? Math.round((totalTeams / totalRooms) * 100) : 0}%</p>
+        <div className="bg-card p-2 sm:p-3 md:p-4 rounded-lg border">
+          <h3 className="font-semibold text-xs sm:text-sm md:text-lg">Rooms with Teams</h3>
+          <p className="text-lg sm:text-xl md:text-2xl font-bold text-primary">{totalRooms > 0 ? Math.round((totalTeams / totalRooms) * 100) : 0}%</p>
         </div>
       </div>
 
@@ -330,10 +334,12 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs md:text-sm px-2 md:px-4">Room ID</TableHead>
-                <TableHead className="text-xs md:text-sm px-2 md:px-4">Name</TableHead>
-                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden sm:table-cell">Team</TableHead>
-                <TableHead className="text-xs md:text-sm px-2 md:px-4">Floor</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden md:table-cell">Room ID</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4">Room</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4">Team</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden sm:table-cell">Type</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden sm:table-cell">Floor</TableHead>
+                <TableHead className="text-xs md:text-sm px-2 md:px-4 sm:hidden">Floor#</TableHead>
                 <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden md:table-cell">Size</TableHead>
                 <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden lg:table-cell">Area</TableHead>
                 <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden lg:table-cell">Color</TableHead>
@@ -348,10 +354,12 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
                   className={isEditMode ? 'cursor-pointer hover:bg-muted/50' : ''}
                   onClick={() => handleRoomClick(room)}
                 >
-                  <TableCell className="font-mono text-xs md:text-sm px-2 md:px-4 py-2 md:py-3">{room.id}</TableCell>
+                  <TableCell className="font-mono text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 hidden md:table-cell">{room.id}</TableCell>
                   <TableCell className="font-medium text-xs md:text-sm px-2 md:px-4 py-2 md:py-3">{room.name}</TableCell>
-                  <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 hidden sm:table-cell">{room.teamName || '-'}</TableCell>
-                  <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3">{room.floorName}</TableCell>
+                  <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3">{room.teamName || '-'}</TableCell>
+                  <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 hidden sm:table-cell">{room.type || '-'}</TableCell>
+                  <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 hidden sm:table-cell">{room.floorName}</TableCell>
+                  <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 sm:hidden">{room.floorLevel}</TableCell>
                   <TableCell className="font-mono text-xs px-2 md:px-4 py-2 md:py-3 hidden md:table-cell">{room.dimensions}</TableCell>
                   <TableCell className="font-mono text-xs px-2 md:px-4 py-2 md:py-3 hidden lg:table-cell">{room.area}</TableCell>
                   <TableCell className="px-2 md:px-4 py-2 md:py-3 hidden lg:table-cell">

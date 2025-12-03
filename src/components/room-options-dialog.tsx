@@ -13,7 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Room } from '@/lib/types';
+import { ROOM_TYPES } from '@/lib/types';
 
 interface RoomOptionsDialogProps {
   isOpen: boolean;
@@ -43,6 +45,7 @@ export function RoomOptionsDialog({
 }: RoomOptionsDialogProps) {
   const [name, setName] = useState('');
   const [teamName, setTeamName] = useState('');
+  const [type, setType] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [color, setColor] = useState(predefinedColors[0].value);
   const [customColor, setCustomColor] = useState('');
@@ -52,6 +55,7 @@ export function RoomOptionsDialog({
     if (room) {
       setName(room.name);
       setTeamName(room.teamName || '');
+      setType(room.type || '');
       setNotes(room.notes || '');
       setColor(room.color || predefinedColors[0].value);
       setCustomColor('');
@@ -65,6 +69,7 @@ export function RoomOptionsDialog({
       ...room,
       name: name || 'Unnamed Room',
       teamName,
+      type: type || undefined,
       notes,
       color: customColor || color,
     };
@@ -111,6 +116,23 @@ export function RoomOptionsDialog({
               className="col-span-3"
               placeholder="Engineering Team"
             />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-type" className="text-right">
+              Type
+            </Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select room type..." />
+              </SelectTrigger>
+              <SelectContent>
+                {ROOM_TYPES.map((roomType) => (
+                  <SelectItem key={roomType} value={roomType}>
+                    {roomType}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="edit-notes" className="text-right">

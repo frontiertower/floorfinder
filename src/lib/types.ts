@@ -8,11 +8,33 @@ export interface Room {
   id: string;
   name: string;
   teamName?: string;
+  type?: string;
   notes?: string;
   color: string;
   coords: [number, number, number, number];
   floorId?: string; // Add optional floorId here
 }
+
+export const ROOM_TYPES = [
+  'Office',
+  'Meeting Room',
+  'Conference Room',
+  'Open Workspace',
+  'Cubicle',
+  'Break Room',
+  'Kitchen',
+  'Restroom',
+  'Storage',
+  'Reception',
+  'Phone Booth',
+  'Collaboration Space',
+  'Training Room',
+  'Server Room',
+  'Utility',
+  'Other'
+] as const;
+
+export type RoomType = typeof ROOM_TYPES[number];
 
 export interface FloorData {
   floors: Floor[];

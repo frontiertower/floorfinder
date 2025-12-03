@@ -13,7 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Room } from '@/lib/types';
+import { ROOM_TYPES } from '@/lib/types';
 
 interface RoomEditorDialogProps {
   isOpen: boolean;
@@ -43,6 +45,7 @@ export function RoomEditorDialog({
 }: RoomEditorDialogProps) {
   const [name, setName] = useState('');
   const [teamName, setTeamName] = useState('');
+  const [type, setType] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [color, setColor] = useState(predefinedColors[0].value);
   const [customColor, setCustomColor] = useState('');
@@ -55,6 +58,7 @@ export function RoomEditorDialog({
       id: roomId,
       name: name || 'Unnamed Room',
       teamName,
+      type: type || undefined,
       notes,
       color: customColor || color,
       coords,
@@ -64,6 +68,7 @@ export function RoomEditorDialog({
     // Reset form
     setName('');
     setTeamName('');
+    setType('');
     setNotes('');
     setColor(predefinedColors[0].value);
     setCustomColor('');
@@ -103,6 +108,23 @@ export function RoomEditorDialog({
               className="col-span-3"
               placeholder="Engineering Team"
             />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="type" className="text-right">
+              Type
+            </Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select room type..." />
+              </SelectTrigger>
+              <SelectContent>
+                {ROOM_TYPES.map((roomType) => (
+                  <SelectItem key={roomType} value={roomType}>
+                    {roomType}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="notes" className="text-right">
