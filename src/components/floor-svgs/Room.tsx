@@ -17,12 +17,7 @@ interface RoomProps {
 export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100, 100, 100, .5)', notes, onMouseEnter, onMouseLeave, onClick, floorId, viewBox }) => {
   let [x, y, width, height] = coords;
 
-  if (viewBox) {
-    const viewBoxParts = viewBox.split(' ').map(parseFloat);
-    const viewBoxHeight = viewBoxParts[3];
-    // Flip Y coordinate: bottom of drawn rectangle should be at viewBoxHeight - y
-    y = viewBoxHeight - y - height;
-  }
+  // No Y coordinate transformation needed - use coordinates as drawn
 
   // Calculate text position for the center of the rectangle
   const textX = x + width / 2;
