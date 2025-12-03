@@ -88,19 +88,46 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
         // Parse coordinates array
         let coords: [number, number, number, number];
         try {
-          // Handle both "[x, y, w, h]" and "x, y, w, h" formats
+          // Handle multiple formats: ""[x, y, w, h]"", "[x, y, w, h]", "x, y, w, h"
           let coordsStr = values[8];
+
+          // Remove outer quotes first (handles both single and double quotes)
+          while ((coordsStr.startsWith('"') && coordsStr.endsWith('"')) ||
+                 (coordsStr.startsWith("'") && coordsStr.endsWith("'"))) {
+            coordsStr = coordsStr.slice(1, -1);
+          }
+
+          // Remove brackets if present
           if (coordsStr.startsWith('[') && coordsStr.endsWith(']')) {
             coordsStr = coordsStr.slice(1, -1);
           }
 
           const coordsArr = coordsStr.split(',').map(c => parseFloat(c.trim()));
-          console.log(`Parsed coordinates for ${values[0]}:`, coordsArr);
+          console.log(`Parsed coordinates for ${values[0]}:`, {
+            original: values[8],
+            cleaned: coordsStr,
+            parsed: coordsArr,
+            types: coordsArr.map(c => typeof c),
+            isNaN: coordsArr.map(c => isNaN(c))
+          });
 
-          if (coordsArr.length !== 4 || coordsArr.some(isNaN)) {
-            console.warn(`Invalid coordinates for ${values[0]}:`, coordsArr);
+          if (coordsArr.length !== 4) {
+            console.warn(`Wrong number of coordinates for ${values[0]}: expected 4, got ${coordsArr.length}`);
             return;
           }
+
+          if (coordsArr.some(isNaN)) {
+            console.warn(`NaN coordinates found for ${values[0]}:`, coordsArr);
+            return;
+          }
+
+          // Additional validation: all coordinates should be finite numbers
+          if (coordsArr.some(c => !Number.isFinite(c))) {
+            console.warn(`Non-finite coordinates for ${values[0]}:`, coordsArr);
+            return;
+          }
+
+          console.log(`✅ Valid coordinates for ${values[0]}:`, coordsArr);
           coords = coordsArr as [number, number, number, number];
         } catch (error) {
           console.error(`Error parsing coordinates for ${values[0]}:`, error);
