@@ -69,8 +69,9 @@ export async function GET() {
 
   } catch (error) {
     // If KV is not configured, return default rooms
-    console.log("Vercel KV not configured, using default rooms");
-    console.log("To persist data across deployments, set up Vercel KV in your dashboard");
+    console.log("⚠️  Vercel KV not configured - rooms will not persist!");
+    console.log("📖 See VERCEL_KV_SETUP.md for setup instructions");
+    console.log("🔗 Or check /api/status for configuration status");
     return NextResponse.json(defaultRooms);
   }
 }

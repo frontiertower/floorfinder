@@ -67,22 +67,43 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
 
       const importedRooms: Room[] = [];
 
-      dataLines.forEach(line => {
+      dataLines.forEach((line, index) => {
         // Parse CSV line (handle quoted values)
         const matches = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-        if (!matches || matches.length < 9) return;
+        if (!matches || matches.length < 9) {
+          console.warn(`Skipping line ${index + 2}: insufficient columns (${matches?.length || 0}/9)`);
+          return;
+        }
 
         // Clean up values (remove quotes)
         const values = matches.map(val => val.replace(/^"|"$/g, ''));
 
+        // Debug log the coordinates parsing
+        console.log(`Parsing line ${index + 2}:`, {
+          originalCoords: values[8],
+          roomId: values[0],
+          roomName: values[1]
+        });
+
         // Parse coordinates array
         let coords: [number, number, number, number];
         try {
-          const coordsStr = values[8].replace(/^\[|\]$/g, '');
+          // Handle both "[x, y, w, h]" and "x, y, w, h" formats
+          let coordsStr = values[8];
+          if (coordsStr.startsWith('[') && coordsStr.endsWith(']')) {
+            coordsStr = coordsStr.slice(1, -1);
+          }
+
           const coordsArr = coordsStr.split(',').map(c => parseFloat(c.trim()));
-          if (coordsArr.length !== 4) return;
+          console.log(`Parsed coordinates for ${values[0]}:`, coordsArr);
+
+          if (coordsArr.length !== 4 || coordsArr.some(isNaN)) {
+            console.warn(`Invalid coordinates for ${values[0]}:`, coordsArr);
+            return;
+          }
           coords = coordsArr as [number, number, number, number];
-        } catch {
+        } catch (error) {
+          console.error(`Error parsing coordinates for ${values[0]}:`, error);
           return;
         }
 
