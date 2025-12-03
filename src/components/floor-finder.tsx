@@ -13,6 +13,7 @@ import FloorPlanEditable from './floor-plan-editable';
 import { FloorNameEditor } from './floor-name-editor';
 import { Readme } from './readme';
 import { RoomsSpreadsheet } from './rooms-spreadsheet';
+import { ThemeToggle } from './theme-toggle';
 
 const FloorFinder = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
@@ -114,7 +115,7 @@ const FloorFinder = () => {
     window.location.hash = floor.id;
   };
 
-  // Read hash on initial load or default to readme
+  // Read hash on initial load or default to floor 2
   useEffect(() => {
     const hash = window.location.hash.substring(1);
     if (hash) {
@@ -127,7 +128,13 @@ const FloorFinder = () => {
         setSelectedFloor({ id: 'spreadsheet', name: 'Rooms Spreadsheet', level: 0 });
       }
     } else {
-        setSelectedFloor({ id: 'readme', name: 'App Design Summary', level: 0 }); // Default to readme
+        // Default to floor 2
+        const floor2 = allFloors.find(f => f.id === '2');
+        if (floor2) {
+          setSelectedFloor(floor2);
+        } else {
+          setSelectedFloor({ id: 'readme', name: 'App Design Summary', level: 0 });
+        }
     }
   }, []);
 
@@ -258,18 +265,19 @@ const FloorFinder = () => {
               />
             )}
           </div>
-          <div>
-          <Button
-            onClick={() => setIsEditMode(!isEditMode)}
-            variant={isEditMode ? "default" : "outline"}
-            size="lg"
-          >
-            {isEditMode ? (
-              <><Save className="mr-2 h-4 w-4" /> Exit Edit Mode</>
-            ) : (
-              <><Edit className="mr-2 h-4 w-4" /> Edit Mode</>
-            )}
-          </Button>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <Button
+              onClick={() => setIsEditMode(!isEditMode)}
+              variant={isEditMode ? "default" : "outline"}
+              size="lg"
+            >
+              {isEditMode ? (
+                <><Save className="mr-2 h-4 w-4" /> Exit Edit Mode</>
+              ) : (
+                <><Edit className="mr-2 h-4 w-4" /> Edit Mode</>
+              )}
+            </Button>
           </div>
         </div>
 

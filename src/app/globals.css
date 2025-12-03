@@ -67,4 +67,16 @@
   .clickable-room:hover {
     @apply fill-primary;
   }
+
+  /* SVG image inversion for dark mode */
+  .dark svg {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  /* Prevent double inversion of room overlays and UI elements */
+  .dark svg .room,
+  .dark svg rect[data-room-id],
+  .dark svg text {
+    filter: invert(1) hue-rotate(180deg);
+  }
 }

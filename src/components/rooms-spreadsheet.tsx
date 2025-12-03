@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -10,7 +10,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Download, Search } from 'lucide-react';
 import type { Room, Floor } from '@/lib/types';
 import { allFloors } from '@/lib/config';
 
@@ -20,6 +21,8 @@ interface RoomsSpreadsheetProps {
 }
 
 export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
   const roomsWithFloorData = useMemo(() => {
     return rooms.map(room => {
       const floor = allFloors.find(f => f.id === room.floorId?.replace('floor-', ''));
@@ -52,7 +55,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
       'Coordinates'
     ];
 
-    const csvData = sortedRooms.map(room => [
+    const csvData = filteredAndSortedRooms.map(room => [
       room.id,
       room.name,
       room.teamName || '',
@@ -76,15 +79,29 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
     URL.revokeObjectURL(link.href);
   };
 
-  const sortedRooms = useMemo(() => {
-    return roomsWithFloorData.sort((a, b) => {
-      // Sort by floor level first, then by room name
+  const filteredAndSortedRooms = useMemo(() => {
+    let filtered = roomsWithFloorData;
+
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = roomsWithFloorData.filter(room =>
+        room.name.toLowerCase().includes(query) ||
+        room.id.toLowerCase().includes(query) ||
+        (room.teamName && room.teamName.toLowerCase().includes(query)) ||
+        (room.notes && room.notes.toLowerCase().includes(query)) ||
+        room.floorName.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort by floor level first, then by room name
+    return filtered.sort((a, b) => {
       if (a.floorLevel !== b.floorLevel) {
         return a.floorLevel - b.floorLevel;
       }
       return a.name.localeCompare(b.name);
     });
-  }, [roomsWithFloorData]);
+  }, [roomsWithFloorData, searchQuery]);
 
   const totalRooms = rooms.length;
   const totalArea = roomsWithFloorData.reduce((sum, room) => sum + parseFloat(room.area), 0);
@@ -125,12 +142,28 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
 
       {/* Rooms Table */}
       <div className="bg-card rounded-lg border">
-        <div className="p-4 border-b flex justify-between items-center">
-          <h3 className="font-semibold text-lg">All Rooms</h3>
-          <Button onClick={exportToCSV} variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
-          </Button>
+        <div className="p-4 border-b space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold text-lg">All Rooms</h3>
+            <Button onClick={exportToCSV} variant="outline" size="sm">
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
+          <div className="relative max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search rooms, teams, floors..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          {searchQuery && (
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredAndSortedRooms.length} of {totalRooms} rooms
+            </p>
+          )}
         </div>
         <div className="overflow-x-auto">
           <Table>
@@ -148,7 +181,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedRooms.map((room) => (
+              {filteredAndSortedRooms.map((room) => (
                 <TableRow key={room.id}>
                   <TableCell className="font-mono text-sm">{room.id}</TableCell>
                   <TableCell className="font-medium">{room.name}</TableCell>
@@ -174,10 +207,10 @@ export function RoomsSpreadsheet({ rooms, customFloorNames }: RoomsSpreadsheetPr
                   </TableCell>
                 </TableRow>
               ))}
-              {sortedRooms.length === 0 && (
+              {filteredAndSortedRooms.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
-                    No rooms found
+                    {searchQuery ? 'No rooms found matching your search' : 'No rooms found'}
                   </TableCell>
                 </TableRow>
               )}
