@@ -35,3 +35,42 @@ export async function GET() {
     return NextResponse.json(defaultRooms);
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const newRoom = await request.json() as Room;
+
+    // Validate required fields
+    if (!newRoom.id || !newRoom.coords || !newRoom.floorId) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    try {
+      // Try to get existing rooms from Vercel KV
+      let rooms = await kv.get<Room[]>('rooms') || defaultRooms;
+
+      // Add the new room
+      rooms.push(newRoom);
+
+      // Save back to KV
+      await kv.set('rooms', rooms);
+
+      return NextResponse.json(rooms);
+    } catch (kvError) {
+      // If KV is not configured (local development), just add to defaultRooms
+      console.log("Vercel KV not configured, adding to in-memory rooms");
+      defaultRooms.push(newRoom);
+      return NextResponse.json(defaultRooms);
+    }
+
+  } catch (error) {
+    console.error("Error adding room:", error);
+    return NextResponse.json(
+      { error: 'Failed to add room' },
+      { status: 500 }
+    );
+  }
+}

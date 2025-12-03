@@ -5,7 +5,7 @@ import type { Room as RoomType } from '@/lib/types';
 import React from 'react';
 
 export const id = '12';
-export const name = 'Ethereum & Decentralized Tech';
+export const name = 'Ethereum House - Hack Space';
 export const level = 12;
 export const rooms: RoomType[] = [];
 

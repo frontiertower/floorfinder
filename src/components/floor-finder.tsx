@@ -1,13 +1,16 @@
 
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { allFloors } from '@/lib/config';
 import type { Room, Floor } from '@/lib/types';
-import { Search } from 'lucide-react';
+import { Search, Edit, Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 import FloorPlan from './floor-plan';
+import FloorPlanEditable from './floor-plan-editable';
+import { FloorNameEditor } from './floor-name-editor';
 import { Readme } from './readme';
 
 const FloorFinder = () => {
@@ -16,8 +19,30 @@ const FloorFinder = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Map<string, Room[]>>(new Map());
   const [highlightedRoom, setHighlightedRoom] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [customFloorNames, setCustomFloorNames] = useState<Record<string, string>>({});
 
   const { toast } = useToast();
+
+  // Fetch custom floor names on initial load
+  useEffect(() => {
+    const fetchFloorNames = async () => {
+      try {
+        const response = await fetch('/api/floors');
+        if (response.ok) {
+          const floors = await response.json();
+          const names: Record<string, string> = {};
+          floors.forEach((floor: Floor) => {
+            names[floor.id] = floor.name;
+          });
+          setCustomFloorNames(names);
+        }
+      } catch (error) {
+        console.error('Failed to fetch floor names', error);
+      }
+    };
+    fetchFloorNames();
+  }, []);
 
   // Fetch all rooms from the API on initial load
   useEffect(() => {
@@ -167,7 +192,7 @@ const FloorFinder = () => {
                       className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === floor.id ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20'}`}
                       onClick={() => handleFloorChange(floor)}
                     >
-                      {floor.id} - {floor.name}
+                      {floor.id} - {customFloorNames[floor.id] || floor.name}
                     </button>
                   </li>
                 ))}
@@ -179,23 +204,114 @@ const FloorFinder = () => {
 
 
       {/* Main Floor Plan View */}
-      <div className="flex-1 flex items-center justify-center overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Header with Floor Name and Edit Button */}
+        <div className="flex justify-between items-center px-6 py-4 bg-background border-b">
+          <div>
+            {selectedFloor && selectedFloor.id !== 'readme' && (
+              <FloorNameEditor
+                floorId={selectedFloor.id}
+                floorName={customFloorNames[selectedFloor.id] || selectedFloor.name}
+                isEditMode={isEditMode}
+                onNameChange={async (newName) => {
+                  try {
+                    const response = await fetch('/api/floors', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ floorId: selectedFloor.id, name: newName }),
+                    });
+                    if (response.ok) {
+                      setCustomFloorNames(prev => ({
+                        ...prev,
+                        [selectedFloor.id]: newName
+                      }));
+                      toast({
+                        title: "Floor renamed",
+                        description: `Floor name updated to "${newName}"`,
+                      });
+                    }
+                  } catch (error) {
+                    toast({
+                      variant: "destructive",
+                      title: "Error",
+                      description: "Failed to update floor name.",
+                    });
+                  }
+                }}
+              />
+            )}
+          </div>
+          <Button
+            onClick={() => setIsEditMode(!isEditMode)}
+            variant={isEditMode ? "default" : "outline"}
+            size="lg"
+          >
+            {isEditMode ? (
+              <><Save className="mr-2 h-4 w-4" /> Exit Edit Mode</>
+            ) : (
+              <><Edit className="mr-2 h-4 w-4" /> Edit Mode</>
+            )}
+          </Button>
+          </div>
+        </div>
+
+        {/* Floor Plan Content */}
+        <div className="flex-1 flex items-center justify-center">
         {selectedFloor ? (
             selectedFloor.id === 'readme' ? (
                 <Readme />
             ) : (
-                <FloorPlan
-                  floorId={selectedFloor.id}
-                  highlightedRoomId={highlightedRoom}
-                  onRoomClick={(roomId) => {
-                      setHighlightedRoom(roomId);
-                  }}
-                  rooms={roomsForSelectedFloor}
-                />
+                {isEditMode ? (
+                  <FloorPlanEditable
+                    floorId={selectedFloor.id}
+                    highlightedRoomId={highlightedRoom}
+                    onRoomClick={(roomId) => {
+                        setHighlightedRoom(roomId);
+                    }}
+                    rooms={roomsForSelectedFloor}
+                    isEditMode={isEditMode}
+                    onRoomCreated={async (newRoom) => {
+                      try {
+                        const response = await fetch('/api/rooms.json', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(newRoom),
+                        });
+                        if (response.ok) {
+                          // Refresh rooms list
+                          const updatedRooms = await response.json();
+                          setAllRooms(updatedRooms);
+                          toast({
+                            title: "Room created",
+                            description: "The room has been successfully added.",
+                          });
+                        } else {
+                          throw new Error('Failed to save room');
+                        }
+                      } catch (error) {
+                        toast({
+                          variant: "destructive",
+                          title: "Error",
+                          description: "Failed to save the room. Please try again.",
+                        });
+                      }
+                    }}
+                  />
+                ) : (
+                  <FloorPlan
+                    floorId={selectedFloor.id}
+                    highlightedRoomId={highlightedRoom}
+                    onRoomClick={(roomId) => {
+                        setHighlightedRoom(roomId);
+                    }}
+                    rooms={roomsForSelectedFloor}
+                  />
+                )}
             )
         ) : (
           <p>Select a floor to view the plan.</p>
         )}
+        </div>
       </div>
     </div>
   );

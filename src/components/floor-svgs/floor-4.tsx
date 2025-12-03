@@ -5,7 +5,7 @@ import type { Room as RoomType } from '@/lib/types';
 import React from 'react';
 
 export const id = '4';
-export const name = 'Robotics & Hard Tech';
+export const name = 'Cyberpunk Robotics Lab';
 export const level = 4;
 export const rooms: RoomType[] = [];
 

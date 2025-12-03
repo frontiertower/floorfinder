@@ -4,7 +4,7 @@ import { Room } from './Room';
 import type { Room as RoomType } from '@/lib/types';
 
 export const id = '6';
-export const name = 'Arts & Music';
+export const name = 'Music Arts Social Space (MASS)';
 export const level = 6;
 export const rooms: RoomType[] = [];
 
