@@ -153,7 +153,7 @@ const FloorFinder = () => {
           <input
             type="text"
             placeholder="Search by room name or ID..."
-            className="w-full p-2 pl-8 border rounded mb-2"
+            className="w-full p-2 pl-8 border rounded mb-2 bg-background text-foreground border-border"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -266,11 +266,12 @@ const FloorFinder = () => {
               onClick={() => setIsEditMode(!isEditMode)}
               variant={isEditMode ? "default" : "outline"}
               size="lg"
+              className="text-foreground"
             >
               {isEditMode ? (
-                <><Save className="mr-2 h-4 w-4" /> Exit Edit Mode</>
+                <><Save className="mr-2 h-4 w-4 text-foreground" /> Exit Edit Mode</>
               ) : (
-                <><Edit className="mr-2 h-4 w-4" /> Edit Mode</>
+                <><Edit className="mr-2 h-4 w-4 text-foreground" /> Edit Mode</>
               )}
             </Button>
           </div>
