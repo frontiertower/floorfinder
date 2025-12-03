@@ -136,6 +136,7 @@ const FloorFinder = () => {
       return rooms.map(room => ({ ...room, floorName: floor?.name || 'Unknown' }));
   });
 
+
   return (
     <div className="flex h-screen bg-card/50">
       {/* Floor Selection Sidebar */}
@@ -240,7 +241,6 @@ const FloorFinder = () => {
               />
             )}
           </div>
-          <div>
           <Button
             onClick={() => setIsEditMode(!isEditMode)}
             variant={isEditMode ? "default" : "outline"}
