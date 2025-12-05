@@ -28,6 +28,7 @@ export const Floor14: React.FC<Floor14Props> = ({ highlightedRoomId, onRoomClick
           key={room.id}
           id={room.id}
           name={room.name}
+          teamName={room.teamName}
           coords={room.coords}
           color={room.color}
           notes={room.notes}

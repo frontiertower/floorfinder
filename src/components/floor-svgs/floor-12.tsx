@@ -28,6 +28,7 @@ export const Floor12: React.FC<Floor12Props> = ({ highlightedRoomId, onRoomClick
           key={room.id}
           id={room.id}
           name={room.name}
+          teamName={room.teamName}
           coords={room.coords} // Use coords from roomData
           color={room.color} // Use color from roomData
           notes={room.notes}

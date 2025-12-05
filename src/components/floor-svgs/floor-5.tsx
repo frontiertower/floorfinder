@@ -29,6 +29,7 @@ export const Floor5: React.FC<Floor5Props> = ({ highlightedRoomId, onRoomClick, 
           key={room.id}
           id={room.id}
           name={room.name}
+          teamName={room.teamName}
           coords={room.coords} // Use coords from room data
           color={room.color} // Use color from room data
           notes={room.notes}

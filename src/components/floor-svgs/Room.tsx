@@ -5,16 +5,17 @@ import type { Room as RoomType } from '@/lib/types';
 interface RoomProps {
   id: string;
   name: string;
+  teamName?: string;
   coords: [number, number, number, number]; // [x, y, width, height]
   color?: string; // Optional color prop
   notes?: string;
   floorId: string;
-  viewBox: string; 
+  viewBox: string;
   onMouseEnter?: (room: RoomType) => void;
   onMouseLeave?: () => void;
   onClick?: () => void; // Add onClick here
 }
-export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100, 100, 100, .5)', notes, onMouseEnter, onMouseLeave, onClick, floorId, viewBox }) => {
+export const Room: React.FC<RoomProps> = ({ id, name, teamName, coords, color = 'rgba(100, 100, 100, .5)', notes, onMouseEnter, onMouseLeave, onClick, floorId, viewBox }) => {
   let [x, y, width, height] = coords;
 
   // No Y coordinate transformation needed - use coordinates as drawn
@@ -28,7 +29,7 @@ export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100,
 
   const handleMouseEnter = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
     if (onMouseEnter) {
-      onMouseEnter({ id, name, floorId, notes, coords, color });
+      onMouseEnter({ id, name, teamName, floorId, notes, coords, color });
     }
   };
 
@@ -69,7 +70,12 @@ export const Room: React.FC<RoomProps> = ({ id, name, coords, color = 'rgba(100,
         fill="hsl(var(--foreground))"
         className="pointer-events-none"
       >
-        {name}
+        <tspan x={textX} dy={teamName ? `-${fontSize * 0.5}` : "0"}>
+          {teamName || ''}
+        </tspan>
+        <tspan x={textX} dy={teamName ? `${fontSize * 1.2}` : "0"}>
+          {name}
+        </tspan>
       </text>
     </g>
   );
