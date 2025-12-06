@@ -9,7 +9,7 @@ import { Floor2 } from '@/components/floor-svgs/floor-2';
 // import { Floor6 } from '@/components/floor-svgs/floor-6';
 import { Floor7 } from '@/components/floor-svgs/floor-7';
 // import { Floor8 } from '@/components/floor-svgs/floor-8';
-import { Floor9 } from '@/components/floor-svgs/floor-9';
+// import { Floor9 } from '@/components/floor-svgs/floor-9';
 // import { Floor10 } from '@/components/floor-svgs/floor-10';
 // import { Floor11 } from '@/components/floor-svgs/floor-11';
 import { Floor12 } from '@/components/floor-svgs/floor-12';
@@ -28,7 +28,7 @@ import * as floor2Data from '@/components/floor-svgs/floor-2';
 // import * as floor6Data from '@/components/floor-svgs/floor-6';
 import * as floor7Data from '@/components/floor-svgs/floor-7';
 // import * as floor8Data from '@/components/floor-svgs/floor-8';
-import * as floor9Data from '@/components/floor-svgs/floor-9';
+// import * as floor9Data from '@/components/floor-svgs/floor-9';
 // import * as floor10Data from '@/components/floor-svgs/floor-10';
 // import * as floor11Data from '@/components/floor-svgs/floor-11';
 import * as floor12Data from '@/components/floor-svgs/floor-12';
@@ -48,7 +48,7 @@ const floorModules = [
 //  floor6Data,
   floor7Data,
 //  floor8Data,
-  floor9Data,
+//  floor9Data,
 //  floor10Data,
 //  floor11Data,
   floor12Data,
@@ -75,7 +75,7 @@ export const floorComponentMap: { [key: string]: React.ComponentType<any> } = {
 //    '6': Floor6,
     '7': Floor7,
 //    '8': Floor8,
-    '9': Floor9,
+//    '9': Floor9,
 //    '10': Floor10,
 //    '11': Floor11,
     '12': Floor12,
