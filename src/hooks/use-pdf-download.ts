@@ -1,10 +1,14 @@
 import { useCallback } from 'react';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 export const usePdfDownload = () => {
   const downloadPdf = useCallback(async (elementId: string, filename: string) => {
     try {
+      // Dynamically import the libraries only when needed
+      const [{ default: jsPDF }, { default: html2canvas }] = await Promise.all([
+        import('jspdf'),
+        import('html2canvas')
+      ]);
+
       const element = document.getElementById(elementId);
       if (!element) {
         console.error('Element not found:', elementId);
