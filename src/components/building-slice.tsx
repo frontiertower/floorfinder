@@ -5,7 +5,7 @@ import { allFloors } from '@/lib/config';
 import type { Room, Floor } from '@/lib/types';
 import { ThemeToggle } from './theme-toggle';
 
-const SELECTED_FLOORS = ['2', '7', '12', '14', '15', '16'];
+const SELECTED_FLOORS = ['2', '7', '12', '15', '16'];
 
 export const BuildingSlice = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
