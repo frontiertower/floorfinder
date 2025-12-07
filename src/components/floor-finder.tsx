@@ -14,6 +14,7 @@ import { FloorNameEditor } from './floor-name-editor';
 import { Readme } from './readme';
 import { RoomsSpreadsheet } from './rooms-spreadsheet';
 import { ThemeToggle } from './theme-toggle';
+import { DownloadButton } from './download-button';
 
 const FloorFinder = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
@@ -332,6 +333,13 @@ const FloorFinder = () => {
             <div className="hidden lg:block">
               <ThemeToggle />
             </div>
+            {selectedFloor && selectedFloor.id !== 'readme' && selectedFloor.id !== 'spreadsheet' && (
+              <DownloadButton
+                elementId="floor-plan-container"
+                filename={`floor-${selectedFloor.id}-${customFloorNames[selectedFloor.id]?.replace(/\s+/g, '-').toLowerCase() || 'plan'}.pdf`}
+                label="Download PDF"
+              />
+            )}
             {isEditModeEnabled && (
               <Button
                 onClick={() => setIsEditMode(!isEditMode)}
@@ -442,7 +450,7 @@ const FloorFinder = () => {
                 </div>
             ) : (
                 isEditMode ? (
-                  <div className="flex-1 flex items-center justify-center">
+                  <div id="floor-plan-container" className="flex-1 flex items-center justify-center">
                     <FloorPlanEditable
                     floorId={selectedFloor.id}
                     highlightedRoomId={highlightedRoom}
@@ -532,7 +540,7 @@ const FloorFinder = () => {
                     />
                   </div>
                 ) : (
-                  <div className="flex-1 flex items-center justify-center">
+                  <div id="floor-plan-container" className="flex-1 flex items-center justify-center">
                     <FloorPlan
                       floorId={selectedFloor.id}
                       highlightedRoomId={highlightedRoom}
