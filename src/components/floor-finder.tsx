@@ -245,6 +245,30 @@ const FloorFinder = () => {
             </div>
           ) : (
             <div>
+              {/* SensAI Hack Spaces - moved to top */}
+              <div className="mb-4 space-y-2">
+                <button
+                  className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === 'spreadsheet' ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20 text-foreground'}`}
+                  onClick={() => {
+                    setSelectedFloor({ id: 'spreadsheet', name: 'SensAI Hack Spaces', level: 0 });
+                    setSearchQuery('');
+                    setHighlightedRoom(null);
+                    window.location.hash = 'spreadsheet';
+                    // Close mobile menu after selection
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  📊 SensAI Hack Spaces
+                </button>
+
+                <a
+                  href="/building-slice"
+                  className="w-full block text-left py-2 px-4 rounded transition-colors hover:bg-primary/20 text-foreground"
+                >
+                  🏢 Building Slice View
+                </a>
+              </div>
+
               <h2 className="text-xl font-bold mb-2">Floors</h2>
               <ul className="overflow-y-auto">
                 {allFloors.map(floor => (
@@ -257,21 +281,6 @@ const FloorFinder = () => {
                     </button>
                   </li>
                 ))}
-                <li className="mb-1">
-                  <button
-                    className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === 'spreadsheet' ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20 text-foreground'}`}
-                    onClick={() => {
-                      setSelectedFloor({ id: 'spreadsheet', name: 'SensAI Hack Spaces', level: 0 });
-                      setSearchQuery('');
-                      setHighlightedRoom(null);
-                      window.location.hash = 'spreadsheet';
-                      // Close mobile menu after selection
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    📊 SensAI Hack Spaces
-                  </button>
-                </li>
               </ul>
             </div>
           )}

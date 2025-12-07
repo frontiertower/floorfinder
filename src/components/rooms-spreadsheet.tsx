@@ -11,9 +11,11 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Download, Search, Upload } from 'lucide-react';
 import type { Room, Floor } from '@/lib/types';
 import { allFloors } from '@/lib/config';
+import { ROOM_TYPES } from '@/lib/types';
 import { RoomOptionsDialog } from './room-options-dialog';
 
 interface RoomsSpreadsheetProps {
@@ -29,6 +31,7 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [showOptionsDialog, setShowOptionsDialog] = useState(false);
+  const [selectedRoomType, setSelectedRoomType] = useState<string>('all');
 
   const roomsWithFloorData = useMemo(() => {
     return rooms.map(room => {
@@ -257,10 +260,17 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
 
   const totalRooms = rooms.length;
   const totalTeams = roomsWithFloorData.filter(room => room.teamName && room.teamName.trim()).length;
-  const floorCounts = roomsWithFloorData.reduce((acc, room) => {
-    acc[room.floorName] = (acc[room.floorName] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+
+  // Calculate available rooms by floor (rooms without team names)
+  const availableFloorCounts = useMemo(() => {
+    return roomsWithFloorData
+      .filter(room => !room.teamName || !room.teamName.trim()) // Only available rooms
+      .filter(room => selectedRoomType === 'all' || room.type === selectedRoomType) // Filter by room type
+      .reduce((acc, room) => {
+        acc[room.floorName] = (acc[room.floorName] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+  }, [roomsWithFloorData, selectedRoomType]);
 
   return (
     <div className="space-y-4 lg:space-y-6">
@@ -280,15 +290,37 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
         </div>
       </div>
 
-      {/* Rooms by Floor */}
+      {/* Available Rooms by Floor */}
       <div className="bg-card p-4 rounded-lg border">
-        <h3 className="font-semibold text-lg mb-3">Rooms by Floor</h3>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3">
+          <h3 className="font-semibold text-lg">Available Rooms by Floor</h3>
+          <div className="w-full sm:w-48">
+            <Select value={selectedRoomType} onValueChange={setSelectedRoomType}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by room type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Room Types</SelectItem>
+                {ROOM_TYPES.map((roomType) => (
+                  <SelectItem key={roomType} value={roomType}>
+                    {roomType}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-          {Object.entries(floorCounts).map(([floorName, count]) => (
+          {Object.entries(availableFloorCounts).map(([floorName, count]) => (
             <div key={floorName} className="text-sm">
               <span className="font-medium">{floorName}:</span> {count}
             </div>
           ))}
+          {Object.keys(availableFloorCounts).length === 0 && (
+            <div className="col-span-full text-center text-muted-foreground text-sm py-4">
+              {selectedRoomType === 'all' ? 'No available rooms found' : `No available ${selectedRoomType.toLowerCase()} rooms found`}
+            </div>
+          )}
         </div>
       </div>
 
