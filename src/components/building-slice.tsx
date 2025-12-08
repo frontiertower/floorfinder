@@ -56,7 +56,7 @@ export const BuildingSlice = () => {
     if (!floor) return null;
 
     const rooms = allRooms.filter(room => room.floorId === floorId);
-    const teams = [...new Set(rooms.filter(r => r.teamName).map(r => r.teamName))];
+    const teams = [...new Set(rooms.filter(r => r.teamName && r.teamName !== 'Private').map(r => r.teamName))];
 
     return {
       ...floor,
@@ -223,7 +223,7 @@ export const BuildingSlice = () => {
                       strokeWidth="1"
                     />
 
-                    {/* Floor number - left side */}
+                    {/* Floor number and elevation - left side */}
                     <circle
                       cx="-40"
                       cy={y + FLOOR_HEIGHT / 2 - 5}
@@ -234,16 +234,42 @@ export const BuildingSlice = () => {
                     />
                     <text
                       x="-40"
-                      cy={y + FLOOR_HEIGHT / 2 - 5}
+                      cy={y + FLOOR_HEIGHT / 2 - 8}
                       dy="5"
                       fill="white"
-                      fontSize="14"
+                      fontSize="12"
                       fontWeight="bold"
                       textAnchor="middle"
                       className="blueprint-text"
                     >
                       {floor.id}
                     </text>
+
+                    {/* Floor elevation */}
+                    <text
+                      x="-70"
+                      y={y + FLOOR_HEIGHT - 5}
+                      fill="white"
+                      fontSize="9"
+                      className="blueprint-text"
+                    >
+                      +{(parseInt(floor.id) * 3.5).toFixed(1)}m
+                    </text>
+
+                    {/* Horizontal elevation line */}
+                    <line
+                      x1="-60"
+                      y1={y + FLOOR_HEIGHT - 10}
+                      x2="0"
+                      y2={y + FLOOR_HEIGHT - 10}
+                      stroke="white"
+                      strokeWidth="0.5"
+                      strokeDasharray="2,1"
+                    />
+                    <polygon
+                      points="-60,${y + FLOOR_HEIGHT - 12} -55,${y + FLOOR_HEIGHT - 10} -60,${y + FLOOR_HEIGHT - 8}"
+                      fill="white"
+                    />
 
                     {/* Floor name */}
                     <text
@@ -260,12 +286,15 @@ export const BuildingSlice = () => {
                     {/* Team spaces */}
                     {floor.teams.length > 0 && (
                       <g>
-                        {floor.teams.slice(0, 8).map((team, teamIndex) => {
-                          const roomsPerRow = 4;
+                        {floor.teams.slice(0, 6).map((team, teamIndex) => {
+                          const roomsPerRow = 3;
                           const row = Math.floor(teamIndex / roomsPerRow);
                           const col = teamIndex % roomsPerRow;
-                          const roomWidth = (BUILDING_WIDTH - 60) / roomsPerRow;
-                          const x = 30 + col * roomWidth;
+                          // Avoid elevator (60-100) and stair (110-160) areas
+                          const usableWidth = BUILDING_WIDTH - 200; // Leave space for elevator/stair
+                          const roomWidth = usableWidth / roomsPerRow;
+                          const startX = 180; // Start after elevator and stair
+                          const x = startX + col * roomWidth;
                           const y2 = y + 30 + row * 20;
 
                           return (
@@ -273,7 +302,7 @@ export const BuildingSlice = () => {
                               <rect
                                 x={x}
                                 y={y2}
-                                width={roomWidth - 5}
+                                width={roomWidth - 10}
                                 height="18"
                                 fill="none"
                                 stroke="rgba(255,255,255,0.5)"
@@ -281,13 +310,13 @@ export const BuildingSlice = () => {
                                 strokeDasharray="2,2"
                               />
                               <text
-                                x={x + 3}
+                                x={x + 5}
                                 y={y2 + 12}
                                 fill="rgba(255,255,255,0.9)"
-                                fontSize="9"
+                                fontSize="10"
                                 className="blueprint-text"
                               >
-                                {team?.substring(0, 20)}
+                                {team?.substring(0, 16)}
                               </text>
                             </g>
                           );
