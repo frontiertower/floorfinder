@@ -6,6 +6,8 @@ import type { Room, Floor } from '@/lib/types';
 import { ThemeToggle } from './theme-toggle';
 
 const SELECTED_FLOORS = ['2', '7', '12', '15', '16'];
+const FLOOR_HEIGHT = 80; // Height of each floor in pixels
+const BUILDING_WIDTH = 800; // Width of building in pixels
 
 export const BuildingSlice = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
@@ -64,113 +66,400 @@ export const BuildingSlice = () => {
     };
   }).filter(Boolean).reverse(); // Reverse to show top floor first
 
+  const totalHeight = floorsWithRooms.length * FLOOR_HEIGHT + 100;
+
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-blue-50 dark:bg-slate-950 p-8">
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap');
+
+        .blueprint-bg {
+          background-color: #0d47a1;
+          background-image:
+            linear-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, .03) 1px, transparent 1px);
+          background-size: 20px 20px;
+        }
+
+        .blueprint-text {
+          font-family: 'Courier New', monospace;
+          letter-spacing: 1px;
+        }
+
+        .architect-font {
+          font-family: 'Architects Daughter', cursive;
+        }
+
+        .hatching {
+          background-image: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 3px,
+            rgba(255, 255, 255, 0.1) 3px,
+            rgba(255, 255, 255, 0.1) 4px
+          );
+        }
+      `}</style>
+
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Building Slice View</h1>
-            <p className="text-muted-foreground">Vertical cross-section showing teams by floor</p>
+            <h1 className="text-4xl font-bold mb-2 architect-font text-blue-900 dark:text-blue-100">
+              BUILDING SECTION A-A'
+            </h1>
+            <p className="text-blue-700 dark:text-blue-300 blueprint-text text-sm">
+              SCALE: 1:200 | DATE: {new Date().toLocaleDateString()} | DWG NO: BS-001
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <a
               href="/"
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              className="px-4 py-2 bg-blue-800 text-white rounded-md hover:bg-blue-700 transition-colors blueprint-text"
             >
-              Back to Floor Plans
+              FLOOR PLANS
             </a>
           </div>
         </div>
 
-        {/* Building Visualization */}
-        <div className="relative">
-          {/* Building outline */}
-          <div className="absolute inset-0 border-4 border-border rounded-lg"></div>
+        {/* Blueprint Drawing */}
+        <div className="blueprint-bg rounded-lg p-8 shadow-2xl">
+          <svg
+            width="100%"
+            viewBox={`0 0 ${BUILDING_WIDTH + 200} ${totalHeight}`}
+            className="w-full"
+          >
+            {/* Grid lines */}
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5"/>
+              </pattern>
 
-          {/* Floors */}
-          <div className="relative z-10">
-            {floorsWithRooms.map((floor, index) => {
-              if (!floor) return null;
+              {/* Hatching pattern for walls */}
+              <pattern id="wall-hatch" patternUnits="userSpaceOnUse" width="4" height="4">
+                <line x1="0" y1="0" x2="4" y2="4" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5"/>
+              </pattern>
 
-              return (
-                <div
-                  key={floor.id}
-                  className="border-b-2 border-border last:border-b-0"
-                  style={{ minHeight: '120px' }}
-                >
-                  <div className="p-6">
-                    {/* Floor Header */}
-                    <div className="flex items-baseline gap-3 mb-3">
-                      <span className="text-2xl font-bold text-primary">
-                        Floor {floor.id}
-                      </span>
-                      <span className="text-lg text-muted-foreground">
-                        {floor.customName}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        ({floor.rooms.length} rooms)
-                      </span>
-                    </div>
+              {/* Concrete pattern for slabs */}
+              <pattern id="concrete" patternUnits="userSpaceOnUse" width="10" height="10">
+                <circle cx="2" cy="2" r="0.5" fill="rgba(255,255,255,0.2)"/>
+                <circle cx="7" cy="5" r="0.5" fill="rgba(255,255,255,0.2)"/>
+                <circle cx="5" cy="8" r="0.5" fill="rgba(255,255,255,0.2)"/>
+              </pattern>
+            </defs>
 
-                    {/* Teams Grid */}
-                    {floor.teams.length > 0 ? (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {floor.teams.sort().map((team) => {
-                          const teamRooms = floor.rooms.filter(r => r.teamName === team);
+            <rect width="100%" height="100%" fill="url(#grid)" />
+
+            {/* Building outline */}
+            <g transform="translate(100, 50)">
+              {/* Foundation */}
+              <rect
+                x="-20"
+                y={floorsWithRooms.length * FLOOR_HEIGHT}
+                width={BUILDING_WIDTH + 40}
+                height="20"
+                fill="url(#concrete)"
+                stroke="white"
+                strokeWidth="2"
+              />
+              <text
+                x={BUILDING_WIDTH / 2}
+                y={floorsWithRooms.length * FLOOR_HEIGHT + 15}
+                fill="white"
+                fontSize="10"
+                textAnchor="middle"
+                className="blueprint-text"
+              >
+                FOUNDATION
+              </text>
+
+              {/* Floors */}
+              {floorsWithRooms.map((floor, index) => {
+                if (!floor) return null;
+                const y = index * FLOOR_HEIGHT;
+
+                return (
+                  <g key={floor.id}>
+                    {/* Floor slab */}
+                    <rect
+                      x="0"
+                      y={y + FLOOR_HEIGHT - 10}
+                      width={BUILDING_WIDTH}
+                      height="10"
+                      fill="url(#concrete)"
+                      stroke="white"
+                      strokeWidth="1"
+                    />
+
+                    {/* Floor space */}
+                    <rect
+                      x="0"
+                      y={y}
+                      width={BUILDING_WIDTH}
+                      height={FLOOR_HEIGHT - 10}
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                    />
+
+                    {/* Side walls */}
+                    <rect
+                      x="0"
+                      y={y}
+                      width="15"
+                      height={FLOOR_HEIGHT - 10}
+                      fill="url(#wall-hatch)"
+                      stroke="white"
+                      strokeWidth="1"
+                    />
+                    <rect
+                      x={BUILDING_WIDTH - 15}
+                      y={y}
+                      width="15"
+                      height={FLOOR_HEIGHT - 10}
+                      fill="url(#wall-hatch)"
+                      stroke="white"
+                      strokeWidth="1"
+                    />
+
+                    {/* Floor number - left side */}
+                    <circle
+                      cx="-40"
+                      cy={y + FLOOR_HEIGHT / 2 - 5}
+                      r="15"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="1.5"
+                    />
+                    <text
+                      x="-40"
+                      cy={y + FLOOR_HEIGHT / 2 - 5}
+                      dy="5"
+                      fill="white"
+                      fontSize="14"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      className="blueprint-text"
+                    >
+                      {floor.id}
+                    </text>
+
+                    {/* Floor name */}
+                    <text
+                      x="30"
+                      y={y + 20}
+                      fill="white"
+                      fontSize="12"
+                      fontWeight="bold"
+                      className="blueprint-text"
+                    >
+                      {floor.customName.toUpperCase()}
+                    </text>
+
+                    {/* Team spaces */}
+                    {floor.teams.length > 0 && (
+                      <g>
+                        {floor.teams.slice(0, 8).map((team, teamIndex) => {
+                          const roomsPerRow = 4;
+                          const row = Math.floor(teamIndex / roomsPerRow);
+                          const col = teamIndex % roomsPerRow;
+                          const roomWidth = (BUILDING_WIDTH - 60) / roomsPerRow;
+                          const x = 30 + col * roomWidth;
+                          const y2 = y + 30 + row * 20;
+
                           return (
-                            <div
-                              key={team}
-                              className="bg-card p-3 rounded-md border border-border hover:bg-accent transition-colors"
-                            >
-                              <div className="font-semibold text-foreground">
-                                {team}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {teamRooms.length} {teamRooms.length === 1 ? 'room' : 'rooms'}
-                              </div>
-                            </div>
+                            <g key={team}>
+                              <rect
+                                x={x}
+                                y={y2}
+                                width={roomWidth - 5}
+                                height="18"
+                                fill="none"
+                                stroke="rgba(255,255,255,0.5)"
+                                strokeWidth="0.5"
+                                strokeDasharray="2,2"
+                              />
+                              <text
+                                x={x + 3}
+                                y={y2 + 12}
+                                fill="rgba(255,255,255,0.9)"
+                                fontSize="9"
+                                className="blueprint-text"
+                              >
+                                {team?.substring(0, 20)}
+                              </text>
+                            </g>
                           );
                         })}
-                      </div>
-                    ) : (
-                      <div className="text-muted-foreground italic">
-                        No teams assigned to this floor
-                      </div>
+                      </g>
                     )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
 
-          {/* Elevator shaft visual */}
-          <div className="absolute left-8 top-0 bottom-0 w-12 bg-muted/20 border-x-2 border-border">
-            <div className="flex flex-col items-center justify-center h-full">
-              <div className="writing-mode-vertical text-xs text-muted-foreground font-semibold tracking-wider"
-                   style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
-                ELEVATOR
-              </div>
-            </div>
-          </div>
+                    {/* Dimension line - right side */}
+                    <line
+                      x1={BUILDING_WIDTH + 20}
+                      y1={y}
+                      x2={BUILDING_WIDTH + 20}
+                      y2={y + FLOOR_HEIGHT}
+                      stroke="white"
+                      strokeWidth="0.5"
+                    />
+                    <line
+                      x1={BUILDING_WIDTH + 15}
+                      y1={y}
+                      x2={BUILDING_WIDTH + 25}
+                      y2={y}
+                      stroke="white"
+                      strokeWidth="0.5"
+                    />
+                    <line
+                      x1={BUILDING_WIDTH + 15}
+                      y1={y + FLOOR_HEIGHT}
+                      x2={BUILDING_WIDTH + 25}
+                      y2={y + FLOOR_HEIGHT}
+                      stroke="white"
+                      strokeWidth="0.5"
+                    />
+                    <text
+                      x={BUILDING_WIDTH + 30}
+                      y={y + FLOOR_HEIGHT / 2}
+                      fill="white"
+                      fontSize="8"
+                      className="blueprint-text"
+                    >
+                      3.5m
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* Elevator shaft */}
+              <g>
+                <rect
+                  x="60"
+                  y="0"
+                  width="40"
+                  height={floorsWithRooms.length * FLOOR_HEIGHT}
+                  fill="rgba(0,0,0,0.3)"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeDasharray="5,3"
+                />
+                <text
+                  x="80"
+                  y="-10"
+                  fill="white"
+                  fontSize="10"
+                  textAnchor="middle"
+                  className="blueprint-text"
+                >
+                  ELEV.
+                </text>
+
+                {/* Elevator car */}
+                <rect
+                  x="65"
+                  y={(floorsWithRooms.length - 2) * FLOOR_HEIGHT + 10}
+                  width="30"
+                  height="40"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="1"
+                />
+              </g>
+
+              {/* Stairwell */}
+              <g>
+                <rect
+                  x="110"
+                  y="0"
+                  width="50"
+                  height={floorsWithRooms.length * FLOOR_HEIGHT}
+                  fill="rgba(0,0,0,0.2)"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeDasharray="5,3"
+                />
+                <text
+                  x="135"
+                  y="-10"
+                  fill="white"
+                  fontSize="10"
+                  textAnchor="middle"
+                  className="blueprint-text"
+                >
+                  STAIR
+                </text>
+
+                {/* Stair lines */}
+                {floorsWithRooms.map((floor, index) => (
+                  <g key={`stair-${index}`}>
+                    {[0, 1, 2, 3, 4].map(step => (
+                      <line
+                        key={step}
+                        x1="115"
+                        y1={index * FLOOR_HEIGHT + step * 14 + 10}
+                        x2="155"
+                        y2={index * FLOOR_HEIGHT + step * 14 + 10}
+                        stroke="white"
+                        strokeWidth="0.5"
+                      />
+                    ))}
+                  </g>
+                ))}
+              </g>
+
+              {/* Section cut indicators */}
+              <g>
+                <line
+                  x1="-80"
+                  y1="-20"
+                  x2="-80"
+                  y2={floorsWithRooms.length * FLOOR_HEIGHT + 40}
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeDasharray="10,5"
+                />
+                <circle cx="-80" cy="-20" r="8" fill="white"/>
+                <text x="-80" y="-16" fill="#0d47a1" fontSize="12" fontWeight="bold" textAnchor="middle">A</text>
+
+                <circle cx="-80" cy={floorsWithRooms.length * FLOOR_HEIGHT + 40} r="8" fill="white"/>
+                <text x="-80" y={floorsWithRooms.length * FLOOR_HEIGHT + 44} fill="#0d47a1" fontSize="12" fontWeight="bold" textAnchor="middle">A'</text>
+              </g>
+            </g>
+
+            {/* Title block */}
+            <g transform={`translate(${BUILDING_WIDTH - 150}, ${totalHeight - 40})`}>
+              <rect x="0" y="0" width="200" height="30" fill="white" stroke="white" strokeWidth="1"/>
+              <text x="10" y="12" fill="#0d47a1" fontSize="8" className="blueprint-text">PROJECT: SENSAI HACK</text>
+              <text x="10" y="22" fill="#0d47a1" fontSize="8" className="blueprint-text">DRAWN BY: AI ARCHITECT</text>
+              <text x="130" y="12" fill="#0d47a1" fontSize="8" className="blueprint-text">SHEET: 1 OF 1</text>
+              <text x="130" y="22" fill="#0d47a1" fontSize="8" className="blueprint-text">REV: A</text>
+            </g>
+          </svg>
         </div>
 
         {/* Legend */}
-        <div className="mt-8 p-4 bg-card rounded-lg border border-border">
-          <h3 className="font-semibold mb-2">Legend</h3>
-          <div className="flex flex-wrap gap-4 text-sm">
+        <div className="mt-8 p-4 bg-white dark:bg-slate-900 rounded-lg shadow-lg">
+          <h3 className="font-bold mb-3 text-blue-900 dark:text-blue-100 blueprint-text">LEGEND:</h3>
+          <div className="grid grid-cols-3 gap-4 text-sm blueprint-text">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-primary rounded"></div>
-              <span>Floor Number</span>
+              <svg width="30" height="15">
+                <rect width="30" height="15" fill="url(#wall-hatch)" stroke="black" strokeWidth="1"/>
+              </svg>
+              <span className="text-gray-700 dark:text-gray-300">STRUCTURAL WALL</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-card border border-border rounded"></div>
-              <span>Team Space</span>
+              <svg width="30" height="15">
+                <rect width="30" height="15" fill="url(#concrete)" stroke="black" strokeWidth="1"/>
+              </svg>
+              <span className="text-gray-700 dark:text-gray-300">CONCRETE SLAB</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-muted/20 rounded"></div>
-              <span>Elevator Shaft</span>
+              <svg width="30" height="15">
+                <rect width="30" height="15" fill="none" stroke="black" strokeWidth="1" strokeDasharray="2,2"/>
+              </svg>
+              <span className="text-gray-700 dark:text-gray-300">TEAM SPACE</span>
             </div>
           </div>
         </div>
