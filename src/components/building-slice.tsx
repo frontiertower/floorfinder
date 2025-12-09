@@ -227,17 +227,17 @@ export const BuildingSlice = () => {
                     <circle
                       cx="-40"
                       cy={y + FLOOR_HEIGHT / 2 - 5}
-                      r="15"
-                      fill="none"
+                      r="18"
+                      fill="rgba(255,255,255,0.1)"
                       stroke="white"
-                      strokeWidth="1.5"
+                      strokeWidth="2"
                     />
                     <text
                       x="-40"
                       cy={y + FLOOR_HEIGHT / 2 - 8}
                       dy="5"
                       fill="white"
-                      fontSize="12"
+                      fontSize="14"
                       fontWeight="bold"
                       textAnchor="middle"
                       className="blueprint-text"
@@ -274,9 +274,9 @@ export const BuildingSlice = () => {
                     {/* Floor name */}
                     <text
                       x="30"
-                      y={y + 20}
+                      y={y + 25}
                       fill="white"
-                      fontSize="12"
+                      fontSize="16"
                       fontWeight="bold"
                       className="blueprint-text"
                     >
@@ -290,10 +290,10 @@ export const BuildingSlice = () => {
                           const roomsPerRow = 3;
                           const row = Math.floor(teamIndex / roomsPerRow);
                           const col = teamIndex % roomsPerRow;
-                          // Avoid elevator (60-100) and stair (110-160) areas
-                          const usableWidth = BUILDING_WIDTH - 200; // Leave space for elevator/stair
+                          // Full width for team spaces
+                          const usableWidth = BUILDING_WIDTH - 60; // Leave space for margins
                           const roomWidth = usableWidth / roomsPerRow;
-                          const startX = 180; // Start after elevator and stair
+                          const startX = 30; // Start with margin
                           const x = startX + col * roomWidth;
                           const y2 = y + 30 + row * 20;
 
@@ -310,13 +310,14 @@ export const BuildingSlice = () => {
                                 strokeDasharray="2,2"
                               />
                               <text
-                                x={x + 5}
-                                y={y2 + 12}
-                                fill="rgba(255,255,255,0.9)"
-                                fontSize="10"
+                                x={x + 8}
+                                y={y2 + 13}
+                                fill="rgba(255,255,255,0.95)"
+                                fontSize="12"
+                                fontWeight="500"
                                 className="blueprint-text"
                               >
-                                {team?.substring(0, 16)}
+                                {team?.substring(0, 20)}
                               </text>
                             </g>
                           );
@@ -362,81 +363,6 @@ export const BuildingSlice = () => {
                 );
               })}
 
-              {/* Elevator shaft */}
-              <g>
-                <rect
-                  x="60"
-                  y="0"
-                  width="40"
-                  height={floorsWithRooms.length * FLOOR_HEIGHT}
-                  fill="rgba(0,0,0,0.3)"
-                  stroke="white"
-                  strokeWidth="1.5"
-                  strokeDasharray="5,3"
-                />
-                <text
-                  x="80"
-                  y="-10"
-                  fill="white"
-                  fontSize="10"
-                  textAnchor="middle"
-                  className="blueprint-text"
-                >
-                  ELEV.
-                </text>
-
-                {/* Elevator car */}
-                <rect
-                  x="65"
-                  y={(floorsWithRooms.length - 2) * FLOOR_HEIGHT + 10}
-                  width="30"
-                  height="40"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="1"
-                />
-              </g>
-
-              {/* Stairwell */}
-              <g>
-                <rect
-                  x="110"
-                  y="0"
-                  width="50"
-                  height={floorsWithRooms.length * FLOOR_HEIGHT}
-                  fill="rgba(0,0,0,0.2)"
-                  stroke="white"
-                  strokeWidth="1.5"
-                  strokeDasharray="5,3"
-                />
-                <text
-                  x="135"
-                  y="-10"
-                  fill="white"
-                  fontSize="10"
-                  textAnchor="middle"
-                  className="blueprint-text"
-                >
-                  STAIR
-                </text>
-
-                {/* Stair lines */}
-                {floorsWithRooms.map((floor, index) => (
-                  <g key={`stair-${index}`}>
-                    {[0, 1, 2, 3, 4].map(step => (
-                      <line
-                        key={step}
-                        x1="115"
-                        y1={index * FLOOR_HEIGHT + step * 14 + 10}
-                        x2="155"
-                        y2={index * FLOOR_HEIGHT + step * 14 + 10}
-                        stroke="white"
-                        strokeWidth="0.5"
-                      />
-                    ))}
-                  </g>
-                ))}
-              </g>
 
               {/* Section cut indicators */}
               <g>
