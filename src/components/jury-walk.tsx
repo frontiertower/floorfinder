@@ -429,7 +429,7 @@ export const JuryWalk = () => {
       return;
     }
 
-    const headers = ['Team', 'Team #', 'Project', 'Room', 'Tracks', 'Add-on Tracks', 'Concept', 'Quality', 'Implementation', 'Passthrough Camera API', 'Immersive Entertainment', 'Hand Tracking', 'Average', 'Notes'];
+    const headers = ['Team', 'Room', 'Team #', 'Project', 'Tracks', 'Add-on Tracks', 'Concept', 'Quality', 'Implementation', 'Passthrough Camera API', 'Immersive Entertainment', 'Hand Tracking', 'Average', 'Notes'];
     const csvContent = [
       headers.join(','),
       ...sortedTeams.map(team => {
@@ -444,9 +444,9 @@ export const JuryWalk = () => {
 
           return [
             `"${team.teamName}"`,
+            team.roomNumber,
             `"${team.teamNumber}"`,
             `"${team.projectName}"`,
-            team.roomNumber,
             `"${getMostCommonTrack(key, 'tracks')}"`,
             `"${getMostCommonTrack(key, 'addonTracks')}"`,
             calculateFieldAverage(key, 'concept').toFixed(1),
@@ -464,9 +464,9 @@ export const JuryWalk = () => {
           if (!r) return null;
           return [
             `"${r.teamName}"`,
+            r.roomNumber,
             `"${r.teamNumber}"`,
             `"${r.projectName}"`,
-            r.roomNumber,
             `"${r.tracks}"`,
             `"${r.addonTracks}"`,
             r.concept,
@@ -748,15 +748,16 @@ export const JuryWalk = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="mb-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {team.teamNumber && (
-                                <span className="font-bold text-sm lg:text-base text-purple-600 dark:text-purple-400">{team.teamNumber}</span>
+                            <div className="grid grid-cols-[1fr,auto,auto,1fr] gap-3 items-center">
+                              <span className="font-medium text-sm lg:text-base truncate">{team.teamName}</span>
+                              <span className="text-sm lg:text-base text-muted-foreground whitespace-nowrap">Room {team.roomNumber}</span>
+                              {team.teamNumber ? (
+                                <span className="font-bold text-sm lg:text-base text-purple-600 dark:text-purple-400 whitespace-nowrap">{team.teamNumber}</span>
+                              ) : (
+                                <span></span>
                               )}
-                              <span className="text-sm lg:text-base text-muted-foreground">Room {team.roomNumber}</span>
-                              <span className="text-muted-foreground">•</span>
-                              <span className="font-medium text-sm lg:text-base">{team.teamName}</span>
                               {team.projectName && (
-                                <span className="text-xs lg:text-sm text-blue-600 dark:text-blue-400">• {team.projectName}</span>
+                                <span className="text-xs lg:text-sm text-blue-600 dark:text-blue-400 truncate ml-2">{team.projectName}</span>
                               )}
                             </div>
                           </div>
