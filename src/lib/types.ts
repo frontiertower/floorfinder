@@ -8,6 +8,8 @@ export interface Room {
   id: string;
   name: string;
   teamName?: string;
+  teamNumber?: string;
+  projectName?: string;
   type?: string;
   notes?: string;
   color: string;

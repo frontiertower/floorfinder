@@ -3,9 +3,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { allFloors } from '@/lib/config';
+import { allFloors as defaultFloors } from '@/lib/config';
 import type { Room, Floor } from '@/lib/types';
-import { Search, Edit, Save, Menu, X } from 'lucide-react';
+import { Search, Edit, Save, Menu, X, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import FloorPlan from './floor-plan';
@@ -15,9 +15,12 @@ import { Readme } from './readme';
 import { RoomsSpreadsheet } from './rooms-spreadsheet';
 import { ThemeToggle } from './theme-toggle';
 import { DownloadButton } from './download-button';
+import { FloorUploadDialog } from './floor-upload-dialog';
+import { CustomFloorPlan } from './custom-floor-plan';
 
 const FloorFinder = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
+  const [allFloors, setAllFloors] = useState<(Floor & { imageUrl?: string; isCustom?: boolean })[]>([]);
   const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Map<string, Room[]>>(new Map());
@@ -26,27 +29,31 @@ const FloorFinder = () => {
   const [isEditModeEnabled, setIsEditModeEnabled] = useState(false);
   const [customFloorNames, setCustomFloorNames] = useState<Record<string, string>>({});
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
   const { toast } = useToast();
 
-  // Fetch custom floor names on initial load
+  // Fetch all floors (default and custom) on initial load
   useEffect(() => {
-    const fetchFloorNames = async () => {
+    const fetchFloors = async () => {
       try {
         const response = await fetch('/api/floors');
         if (response.ok) {
           const floors = await response.json();
-          const names: Record<string, string> = {};
-          floors.forEach((floor: Floor) => {
-            names[floor.id] = floor.name;
-          });
-          setCustomFloorNames(names);
+          setAllFloors(floors);
+        } else {
+          // Fallback to default floors from config
+          const fallbackFloors = defaultFloors.map(floor => ({ ...floor, isCustom: false }));
+          setAllFloors(fallbackFloors);
         }
       } catch (error) {
-        console.error('Failed to fetch floor names', error);
+        console.error('Failed to fetch floors', error);
+        // Fallback to default floors from config
+        const fallbackFloors = defaultFloors.map(floor => ({ ...floor, isCustom: false }));
+        setAllFloors(fallbackFloors);
       }
     };
-    fetchFloorNames();
+    fetchFloors();
   }, []);
 
   // Fetch all rooms from the API on initial load
@@ -94,7 +101,7 @@ const FloorFinder = () => {
       setSearchResults(new Map());
       setHighlightedRoom(null);
     }
-  }, [searchQuery, allRooms, getRoomsForFloor]);
+  }, [searchQuery, allRooms, allFloors, getRoomsForFloor]);
 
   // Auto-select and highlight room if only one search result
   useEffect(() => {
@@ -136,7 +143,7 @@ const FloorFinder = () => {
         // Default to spreadsheet
         setSelectedFloor({ id: 'spreadsheet', name: 'Rooms Spreadsheet', level: 0 });
     }
-  }, []);
+  }, [allFloors]);
 
   // Auto-close mobile menu when selectedFloor changes
   useEffect(() => {
@@ -145,27 +152,9 @@ const FloorFinder = () => {
     }
   }, [selectedFloor]);
 
-  // Check URL parameters to enable edit mode
+  // Enable edit mode by default
   useEffect(() => {
-    const checkEditMode = () => {
-      const searchParams = new URLSearchParams(window.location.search);
-      const hash = window.location.hash.substring(1);
-
-      // Check for ?edit or #edit
-      const isEditEnabled = searchParams.has('edit') || hash === 'edit';
-      setIsEditModeEnabled(isEditEnabled);
-    };
-
-    // Check on mount
-    checkEditMode();
-
-    // Listen for hash changes
-    const handleHashChange = () => checkEditMode();
-    window.addEventListener('hashchange', handleHashChange);
-
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
+    setIsEditModeEnabled(true);
   }, []);
 
   const roomsForSelectedFloor = selectedFloor && selectedFloor.id !== 'readme' ? getRoomsForFloor(selectedFloor.id) : [];
@@ -285,11 +274,24 @@ const FloorFinder = () => {
                       className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === floor.id ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20 text-foreground'}`}
                       onClick={() => handleFloorChange(floor)}
                     >
-                      {floor.id} - {customFloorNames[floor.id] || floor.name}
+                      {floor.id} - {floor.name}{floor.isCustom ? ' (Custom)' : ''}
                     </button>
                   </li>
                 ))}
               </ul>
+
+              {isEditModeEnabled && (
+                <div className="mt-4 pt-2 border-t border-border">
+                  <Button
+                    onClick={() => setIsUploadDialogOpen(true)}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Add Custom Floor
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -458,14 +460,30 @@ const FloorFinder = () => {
             ) : (
                 isEditMode ? (
                   <div id="floor-plan-container" className="flex-1 flex items-center justify-center">
-                    <FloorPlanEditable
-                    floorId={selectedFloor.id}
-                    highlightedRoomId={highlightedRoom}
-                    onRoomClick={(roomId) => {
-                        setHighlightedRoom(roomId);
-                    }}
-                    rooms={roomsForSelectedFloor}
-                    isEditMode={isEditMode}
+                    {selectedFloor.isCustom && selectedFloor.imageUrl ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center">
+                        <p className="mb-4 text-muted-foreground">Custom floors do not support edit mode yet</p>
+                        <CustomFloorPlan
+                          floorId={selectedFloor.id}
+                          imageUrl={selectedFloor.imageUrl}
+                          rooms={roomsForSelectedFloor}
+                          searchQuery={searchQuery}
+                          highlightedRoom={highlightedRoom}
+                          onRoomClick={(room) => {
+                            setHighlightedRoom(room.id);
+                          }}
+                          className="max-w-full max-h-full"
+                        />
+                      </div>
+                    ) : (
+                      <FloorPlanEditable
+                      floorId={selectedFloor.id}
+                      highlightedRoomId={highlightedRoom}
+                      onRoomClick={(roomId) => {
+                          setHighlightedRoom(roomId);
+                      }}
+                      rooms={roomsForSelectedFloor}
+                      isEditMode={isEditMode}
                     onRoomCreated={async (newRoom) => {
                       try {
                         const response = await fetch('/api/rooms.json', {
@@ -545,17 +563,32 @@ const FloorFinder = () => {
                       }
                     }}
                     />
+                    )}
                   </div>
                 ) : (
                   <div id="floor-plan-container" className="flex-1 flex items-center justify-center">
-                    <FloorPlan
-                      floorId={selectedFloor.id}
-                      highlightedRoomId={highlightedRoom}
-                      onRoomClick={(roomId) => {
-                          setHighlightedRoom(roomId);
-                      }}
-                      rooms={roomsForSelectedFloor}
-                    />
+                    {selectedFloor.isCustom && selectedFloor.imageUrl ? (
+                      <CustomFloorPlan
+                        floorId={selectedFloor.id}
+                        imageUrl={selectedFloor.imageUrl}
+                        rooms={roomsForSelectedFloor}
+                        searchQuery={searchQuery}
+                        highlightedRoom={highlightedRoom}
+                        onRoomClick={(room) => {
+                          setHighlightedRoom(room.id);
+                        }}
+                        className="max-w-full max-h-full"
+                      />
+                    ) : (
+                      <FloorPlan
+                        floorId={selectedFloor.id}
+                        highlightedRoomId={highlightedRoom}
+                        onRoomClick={(roomId) => {
+                            setHighlightedRoom(roomId);
+                        }}
+                        rooms={roomsForSelectedFloor}
+                      />
+                    )}
                   </div>
                 )
             )
@@ -566,6 +599,27 @@ const FloorFinder = () => {
         )}
         </div>
       </div>
+
+      {/* Upload Dialog */}
+      <FloorUploadDialog
+        isOpen={isUploadDialogOpen}
+        onClose={() => setIsUploadDialogOpen(false)}
+        onSuccess={() => {
+          // Refresh floors list after successful upload
+          const fetchFloors = async () => {
+            try {
+              const response = await fetch('/api/floors');
+              if (response.ok) {
+                const floors = await response.json();
+                setAllFloors(floors);
+              }
+            } catch (error) {
+              console.error('Failed to refresh floors', error);
+            }
+          };
+          fetchFloors();
+        }}
+      />
     </div>
   );
 };

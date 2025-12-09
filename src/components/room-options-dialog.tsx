@@ -45,6 +45,8 @@ export function RoomOptionsDialog({
 }: RoomOptionsDialogProps) {
   const [name, setName] = useState('');
   const [teamName, setTeamName] = useState('');
+  const [teamNumber, setTeamNumber] = useState('');
+  const [projectName, setProjectName] = useState('');
   const [type, setType] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [color, setColor] = useState(predefinedColors[0].value);
@@ -55,6 +57,18 @@ export function RoomOptionsDialog({
     if (room) {
       setName(room.name);
       setTeamName(room.teamName || '');
+
+      // Extract team number from room name if not already set
+      let teamNum = room.teamNumber || '';
+      if (!teamNum && room.name) {
+        const match = room.name.match(/SF\d+/i);
+        if (match) {
+          teamNum = match[0].toUpperCase();
+        }
+      }
+      setTeamNumber(teamNum);
+
+      setProjectName(room.projectName || '');
       setType(room.type || '');
       setNotes(room.notes || '');
       setColor(room.color || predefinedColors[0].value);
@@ -69,6 +83,8 @@ export function RoomOptionsDialog({
       ...room,
       name: name || 'Unnamed Room',
       teamName,
+      teamNumber,
+      projectName,
       type: type || undefined,
       notes,
       color: customColor || color,
@@ -106,6 +122,33 @@ export function RoomOptionsDialog({
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-teamNumber" className="text-right">
+              Team Number
+            </Label>
+            <div className="col-span-3 space-y-1">
+              <Input
+                id="edit-teamNumber"
+                value={teamNumber}
+                onChange={(e) => setTeamNumber(e.target.value)}
+                placeholder="SF20"
+              />
+              {name && name.match(/SF\d+/i) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const match = name.match(/SF\d+/i);
+                    if (match) {
+                      setTeamNumber(match[0].toUpperCase());
+                    }
+                  }}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Extract from room name ({name.match(/SF\d+/i)?.[0].toUpperCase()})
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="edit-teamName" className="text-right">
               Team Name
             </Label>
@@ -115,6 +158,18 @@ export function RoomOptionsDialog({
               onChange={(e) => setTeamName(e.target.value)}
               className="col-span-3"
               placeholder="Engineering Team"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-projectName" className="text-right">
+              Project Name
+            </Label>
+            <Input
+              id="edit-projectName"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              className="col-span-3"
+              placeholder="Project or product name"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

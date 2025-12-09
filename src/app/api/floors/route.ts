@@ -3,22 +3,28 @@ import { kv } from '@vercel/kv';
 import type { Floor } from '@/lib/types';
 import { allFloors } from '@/lib/config';
 
-// Store custom floor names
+// Store custom floor names and custom floors
 export async function GET() {
   try {
     const customFloorNames = await kv.get<Record<string, string>>('floorNames') || {};
+    const customFloors = await kv.get<(Floor & { imageUrl?: string; isCustom?: boolean })[]>('customFloors') || [];
 
     // Merge custom names with default floors
-    const floors = allFloors.map(floor => ({
+    const defaultFloors = allFloors.map(floor => ({
       ...floor,
-      name: customFloorNames[floor.id] || floor.name
+      name: customFloorNames[floor.id] || floor.name,
+      isCustom: false
     }));
 
-    return NextResponse.json(floors);
+    // Combine default and custom floors, sort by level
+    const allCombinedFloors = [...defaultFloors, ...customFloors].sort((a, b) => a.level - b.level);
+
+    return NextResponse.json(allCombinedFloors);
   } catch (error) {
     // If KV is not configured, return default floors
     console.log("Vercel KV not configured, using default floors");
-    return NextResponse.json(allFloors);
+    const defaultFloors = allFloors.map(floor => ({ ...floor, isCustom: false }));
+    return NextResponse.json(defaultFloors);
   }
 }
 
