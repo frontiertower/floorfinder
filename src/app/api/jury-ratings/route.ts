@@ -21,7 +21,7 @@ export interface JuryRating {
   lastUpdated: string;
 }
 
-// GET - Retrieve all ratings for a specific judge
+// GET - Retrieve all ratings for a specific juror
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Save or update ratings for a specific judge
+// POST - Save or update ratings for a specific juror
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT - Update a specific team rating for a judge
+// PUT - Update a specific team rating for a juror
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
@@ -148,7 +148,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE - Remove all ratings for a judge (optional, for cleanup)
+// DELETE - Remove all ratings for a juror (optional, for cleanup)
 export async function DELETE(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;

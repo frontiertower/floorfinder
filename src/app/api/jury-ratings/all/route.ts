@@ -2,33 +2,33 @@ import { NextResponse } from 'next/server';
 import { kv } from '@vercel/kv';
 import type { JuryRating } from '../route';
 
-// GET - Retrieve all ratings from all judges for the overall view
+// GET - Retrieve all ratings from all jurors for the overall view
 export async function GET() {
   try {
-    const judgeIds = [
-      'Judge 1', 'Judge 2', 'Judge 3', 'Judge 4', 'Judge 5',
-      'Judge 6', 'Judge 7', 'Judge 8', 'Judge 9', 'Judge 10',
-      'Judge 11', 'Judge 12', 'Judge 13', 'Judge 14', 'Judge 15'
+    const jurorIds = [
+      'Juror 1', 'Juror 2', 'Juror 3', 'Juror 4', 'Juror 5',
+      'Juror 6', 'Juror 7', 'Juror 8', 'Juror 9', 'Juror 10',
+      'Juror 11', 'Juror 12', 'Juror 13', 'Juror 14', 'Juror 15'
     ];
 
     const allRatings: Record<string, Record<string, JuryRating>> = {};
 
     try {
-      // Fetch ratings for all judges
-      const promises = judgeIds.map(async (judgeId) => {
+      // Fetch ratings for all jurors
+      const promises = jurorIds.map(async (jurorId) => {
         try {
-          const ratings = await kv.get<Record<string, JuryRating>>(`juryRatings_${judgeId}`) || {};
-          return { judgeId, ratings };
+          const ratings = await kv.get<Record<string, JuryRating>>(`juryRatings_${jurorId}`) || {};
+          return { jurorId, ratings };
         } catch (error) {
-          console.log(`Failed to get ratings for ${judgeId}`);
-          return { judgeId, ratings: {} };
+          console.log(`Failed to get ratings for ${jurorId}`);
+          return { jurorId, ratings: {} };
         }
       });
 
       const results = await Promise.all(promises);
 
-      results.forEach(({ judgeId, ratings }) => {
-        allRatings[judgeId] = ratings;
+      results.forEach(({ jurorId, ratings }) => {
+        allRatings[jurorId] = ratings;
       });
 
     } catch (kvError) {

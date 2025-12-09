@@ -37,27 +37,27 @@ const SCORE_OPTIONS = [
 
 const JURY_MEMBERS = [
   'Overall',
-  'Judge 1',
-  'Judge 2',
-  'Judge 3',
-  'Judge 4',
-  'Judge 5',
-  'Judge 6',
-  'Judge 7',
-  'Judge 8',
-  'Judge 9',
-  'Judge 10',
-  'Judge 11',
-  'Judge 12',
-  'Judge 13',
-  'Judge 14',
-  'Judge 15'
+  'Juror 1',
+  'Juror 2',
+  'Juror 3',
+  'Juror 4',
+  'Juror 5',
+  'Juror 6',
+  'Juror 7',
+  'Juror 8',
+  'Juror 9',
+  'Juror 10',
+  'Juror 11',
+  'Juror 12',
+  'Juror 13',
+  'Juror 14',
+  'Juror 15'
 ];
 
 export const JuryWalk = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [ratings, setRatings] = useState<Record<string, TeamRating>>({});
-  const [allJudgeRatings, setAllJudgeRatings] = useState<Record<string, Record<string, TeamRating>>>({});
+  const [allJurorRatings, setAllJurorRatings] = useState<Record<string, Record<string, TeamRating>>>({});
   const [selectedJuryMember, setSelectedJuryMember] = useState<string>('Overall');
   const [sortField, setSortField] = useState<string>('teamName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -67,12 +67,12 @@ export const JuryWalk = () => {
   const { toast } = useToast();
 
   // Load ratings from database
-  const loadRatings = async (judgeId: string) => {
-    if (!judgeId || judgeId === 'Overall') return;
+  const loadRatings = async (jurorId: string) => {
+    if (!jurorId || jurorId === 'Overall') return;
 
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/jury-ratings?judgeId=${encodeURIComponent(judgeId)}`);
+      const response = await fetch(`/api/jury-ratings?judgeId=${encodeURIComponent(jurorId)}`);
       if (response.ok) {
         const savedRatings = await response.json();
         setRatings(savedRatings);
@@ -95,28 +95,28 @@ export const JuryWalk = () => {
       const response = await fetch('/api/jury-ratings/all');
       if (response.ok) {
         const allRatings = await response.json();
-        setAllJudgeRatings(allRatings);
+        setAllJurorRatings(allRatings);
       } else {
         console.error('Failed to load all ratings:', response.statusText);
-        setAllJudgeRatings({});
+        setAllJurorRatings({});
       }
     } catch (error) {
       console.error('Error loading all ratings:', error);
-      setAllJudgeRatings({});
+      setAllJurorRatings({});
     } finally {
       setIsLoading(false);
     }
   };
 
   // Save ratings to database
-  const saveRatings = async (judgeId: string, ratingsToSave: Record<string, TeamRating>) => {
-    if (!judgeId || judgeId === 'Overall') return;
+  const saveRatings = async (jurorId: string, ratingsToSave: Record<string, TeamRating>) => {
+    if (!jurorId || jurorId === 'Overall') return;
 
     try {
       const response = await fetch('/api/jury-ratings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ judgeId, ratings: ratingsToSave }),
+        body: JSON.stringify({ judgeId: jurorId, ratings: ratingsToSave }),
       });
 
       if (response.ok) {
@@ -141,14 +141,14 @@ export const JuryWalk = () => {
   };
 
   // Update a specific rating in database
-  const updateRatingInDB = async (judgeId: string, teamKey: string, rating: TeamRating) => {
-    if (!judgeId || judgeId === 'Overall') return;
+  const updateRatingInDB = async (jurorId: string, teamKey: string, rating: TeamRating) => {
+    if (!jurorId || jurorId === 'Overall') return;
 
     try {
       const response = await fetch('/api/jury-ratings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ judgeId, teamKey, rating }),
+        body: JSON.stringify({ judgeId: jurorId, teamKey, rating }),
       });
 
       if (!response.ok) {
@@ -369,37 +369,37 @@ export const JuryWalk = () => {
       const nonZeroScores = scores.filter(score => score > 0);
       r.total = nonZeroScores.length > 0 ? nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length : 0;
 
-      // Auto-save to localStorage immediately
+      // Auto-save to database immediately
       if (selectedJuryMember && selectedJuryMember !== 'Overall') {
-        localStorage.setItem(`juryWalkRatings_${selectedJuryMember}`, JSON.stringify(newRatings));
+        saveRatings(selectedJuryMember, newRatings);
       }
 
       return newRatings;
     });
   };
 
-  // Calculate average across all judges for a team
+  // Calculate average across all jurors for a team
   const calculateTeamAverage = (teamKey: string): number => {
-    const judgeScores = JURY_MEMBERS
-      .filter(judge => judge !== 'Overall')
-      .map(judge => {
-        const judgeRatings = allJudgeRatings[judge];
-        return judgeRatings?.[teamKey]?.total || 0;
+    const jurorScores = JURY_MEMBERS
+      .filter(juror => juror !== 'Overall')
+      .map(juror => {
+        const jurorRatings = allJurorRatings[juror];
+        return jurorRatings?.[teamKey]?.total || 0;
       })
       .filter(total => total > 0); // Only count rated entries
 
-    if (judgeScores.length === 0) return 0;
-    return judgeScores.reduce((sum, total) => sum + total, 0) / judgeScores.length;
+    if (jurorScores.length === 0) return 0;
+    return jurorScores.reduce((sum, total) => sum + total, 0) / jurorScores.length;
   };
 
-  // Calculate average for a specific field across all judges
+  // Calculate average for a specific field across all jurors
   const calculateFieldAverage = (teamKey: string, field: keyof TeamRating): number => {
     if (typeof field === 'string' && ['concept', 'quality', 'implementation', 'passthroughCameraAPI', 'immersiveEntertainment', 'handTracking'].includes(field)) {
       const fieldScores = JURY_MEMBERS
-        .filter(judge => judge !== 'Overall')
-        .map(judge => {
-          const judgeRatings = allJudgeRatings[judge];
-          const rating = judgeRatings?.[teamKey];
+        .filter(juror => juror !== 'Overall')
+        .map(juror => {
+          const jurorRatings = allJurorRatings[juror];
+          const rating = jurorRatings?.[teamKey];
           return rating?.[field] || 0;
         })
         .filter(score => score > 0); // Only count rated entries
@@ -410,15 +410,15 @@ export const JuryWalk = () => {
     return 0;
   };
 
-  // Get most common track selection across all judges
+  // Get most common track selection across all jurors
   const getMostCommonTrack = (teamKey: string, field: 'tracks' | 'addonTracks'): string => {
     const trackCounts: Record<string, number> = {};
 
     JURY_MEMBERS
-      .filter(judge => judge !== 'Overall')
-      .forEach(judge => {
-        const judgeRatings = allJudgeRatings[judge];
-        const track = judgeRatings?.[teamKey]?.[field];
+      .filter(juror => juror !== 'Overall')
+      .forEach(juror => {
+        const jurorRatings = allJurorRatings[juror];
+        const track = jurorRatings?.[teamKey]?.[field];
         if (track && track !== '') {
           trackCounts[track] = (trackCounts[track] || 0) + 1;
         }
@@ -436,17 +436,17 @@ export const JuryWalk = () => {
     return mostCommon;
   };
 
-  // Get all notes from all judges for overall view
-  const getAllNotes = (teamKey: string): Array<{ judge: string; notes: string }> => {
-    const allNotes: Array<{ judge: string; notes: string }> = [];
+  // Get all notes from all jurors for overall view
+  const getAllNotes = (teamKey: string): Array<{ juror: string; notes: string }> => {
+    const allNotes: Array<{ juror: string; notes: string }> = [];
 
     JURY_MEMBERS
-      .filter(judge => judge !== 'Overall')
-      .forEach(judge => {
-        const judgeRatings = allJudgeRatings[judge];
-        const notes = judgeRatings?.[teamKey]?.notes;
+      .filter(juror => juror !== 'Overall')
+      .forEach(juror => {
+        const jurorRatings = allJurorRatings[juror];
+        const notes = jurorRatings?.[teamKey]?.notes;
         if (notes && notes.trim() !== '') {
-          allNotes.push({ judge, notes: notes.trim() });
+          allNotes.push({ juror, notes: notes.trim() });
         }
       });
 
@@ -458,7 +458,7 @@ export const JuryWalk = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Cannot save in Overall view. Please select a specific jury member.",
+        description: "Cannot save in Overall view. Please select a specific juror.",
       });
       return;
     }
@@ -478,22 +478,44 @@ export const JuryWalk = () => {
     }
   };
 
-  const clearRatings = () => {
+  const clearRatings = async () => {
     if (!selectedJuryMember || selectedJuryMember === 'Overall') {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Cannot clear ratings in Overall view. Please select a specific jury member.",
+        description: "Cannot clear ratings in Overall view. Please select a specific juror.",
       });
       return;
     }
     if (confirm(`Are you sure you want to clear all ratings for ${selectedJuryMember}?`)) {
-      setRatings({});
-      localStorage.removeItem(`juryWalkRatings_${selectedJuryMember}`);
-      toast({
-        title: "Ratings cleared",
-        description: `All ratings for ${selectedJuryMember} have been removed.`,
-      });
+      try {
+        setRatings({});
+
+        // Clear from database
+        const response = await fetch(`/api/jury-ratings?judgeId=${encodeURIComponent(selectedJuryMember)}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          toast({
+            title: "Ratings cleared",
+            description: `All ratings for ${selectedJuryMember} have been removed.`,
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Clear failed",
+            description: "Failed to clear ratings from database.",
+          });
+        }
+      } catch (error) {
+        console.error('Error clearing ratings:', error);
+        toast({
+          variant: "destructive",
+          title: "Clear error",
+          description: "Network error while clearing ratings.",
+        });
+      }
     }
   };
 
@@ -517,7 +539,7 @@ export const JuryWalk = () => {
           // Export aggregate data for Overall view
           const allNotes = getAllNotes(key);
           const aggregatedNotes = allNotes
-            .map(note => `${note.judge}: ${note.notes}`)
+            .map(note => `${note.juror}: ${note.notes}`)
             .join(' | ');
 
           return [
@@ -585,7 +607,7 @@ export const JuryWalk = () => {
 
             {/* Jury Member Selection */}
             <div className="mt-4">
-              <label className="block text-sm font-semibold mb-2">Select Jury Member:</label>
+              <label className="block text-sm font-semibold mb-2">Select Juror:</label>
               <select
                 value={selectedJuryMember}
                 onChange={(e) => setSelectedJuryMember(e.target.value)}
@@ -766,7 +788,7 @@ export const JuryWalk = () => {
                   // Show aggregate data for Overall view
                   const allNotes = getAllNotes(key);
                   const aggregatedNotes = allNotes
-                    .map(note => `${note.judge}: ${note.notes}`)
+                    .map(note => `${note.juror}: ${note.notes}`)
                     .join(' | ');
 
                   rating = {
@@ -884,7 +906,7 @@ export const JuryWalk = () => {
                           {/* Scoring Grid */}
                           <div className="space-y-3">
                             <h4 className="font-medium text-sm">
-                              {selectedJuryMember === 'Overall' ? 'Average Scores (All Judges)' : 'Scores (1-5)'}
+                              {selectedJuryMember === 'Overall' ? 'Average Scores (All Jurors)' : 'Scores (1-5)'}
                             </h4>
                             <div className="grid grid-cols-2 gap-3">
                               <div>
@@ -1023,7 +1045,7 @@ export const JuryWalk = () => {
                         {/* Notes Section */}
                         <div className="mt-4">
                           <h4 className="font-medium text-sm mb-2">
-                            {selectedJuryMember === 'Overall' ? 'All Judge Notes' : 'Notes'}
+                            {selectedJuryMember === 'Overall' ? 'All Juror Notes' : 'Notes'}
                           </h4>
                           {selectedJuryMember === 'Overall' ? (
                             <div className="w-full px-3 py-2 border rounded bg-muted/20 text-sm min-h-[60px]">
@@ -1031,12 +1053,12 @@ export const JuryWalk = () => {
                                 <div className="space-y-2">
                                   {getAllNotes(key).map((note, idx) => (
                                     <div key={idx} className="border-b border-muted pb-1 last:border-b-0">
-                                      <span className="font-medium text-primary">{note.judge}:</span> {note.notes}
+                                      <span className="font-medium text-primary">{note.juror}:</span> {note.notes}
                                     </div>
                                   ))}
                                 </div>
                               ) : (
-                                'No notes from any judges yet'
+                                'No notes from any jurors yet'
                               )}
                             </div>
                           ) : (
