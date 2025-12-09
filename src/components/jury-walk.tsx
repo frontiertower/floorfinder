@@ -64,12 +64,107 @@ const JURY_MEMBERS = [
 export const JuryWalk = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [ratings, setRatings] = useState<Record<string, TeamRating>>({});
+  const [allJudgeRatings, setAllJudgeRatings] = useState<Record<string, Record<string, TeamRating>>>({});
   const [selectedJuryMember, setSelectedJuryMember] = useState<string>('Overall');
   const [sortField, setSortField] = useState<string>('teamName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [trackFilter, setTrackFilter] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { toast } = useToast();
+
+  // Load ratings from database
+  const loadRatings = async (judgeId: string) => {
+    if (!judgeId || judgeId === 'Overall') return;
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/jury-ratings?judgeId=${encodeURIComponent(judgeId)}`);
+      if (response.ok) {
+        const savedRatings = await response.json();
+        setRatings(savedRatings);
+      } else {
+        console.error('Failed to load ratings:', response.statusText);
+        setRatings({});
+      }
+    } catch (error) {
+      console.error('Error loading ratings:', error);
+      setRatings({});
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load all ratings for overall view
+  const loadAllRatings = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/jury-ratings/all');
+      if (response.ok) {
+        const allRatings = await response.json();
+        setAllJudgeRatings(allRatings);
+      } else {
+        console.error('Failed to load all ratings:', response.statusText);
+        setAllJudgeRatings({});
+      }
+    } catch (error) {
+      console.error('Error loading all ratings:', error);
+      setAllJudgeRatings({});
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Save ratings to database
+  const saveRatings = async (judgeId: string, ratingsToSave: Record<string, TeamRating>) => {
+    if (!judgeId || judgeId === 'Overall') return;
+
+    try {
+      const response = await fetch('/api/jury-ratings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ judgeId, ratings: ratingsToSave }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Ratings saved:', result.message);
+      } else {
+        console.error('Failed to save ratings:', response.statusText);
+        toast({
+          variant: "destructive",
+          title: "Save Failed",
+          description: "Could not save ratings to database. Changes may be lost.",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving ratings:', error);
+      toast({
+        variant: "destructive",
+        title: "Save Error",
+        description: "Network error while saving ratings.",
+      });
+    }
+  };
+
+  // Update a specific rating in database
+  const updateRatingInDB = async (judgeId: string, teamKey: string, rating: TeamRating) => {
+    if (!judgeId || judgeId === 'Overall') return;
+
+    try {
+      const response = await fetch('/api/jury-ratings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ judgeId, teamKey, rating }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to update rating:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error updating rating:', error);
+    }
+  };
 
   // Fetch all rooms
   useEffect(() => {
@@ -88,17 +183,13 @@ export const JuryWalk = () => {
     fetchRooms();
   }, []);
 
-  // Load saved ratings from localStorage for selected jury member
+  // Load ratings when jury member changes
   useEffect(() => {
     if (selectedJuryMember === 'Overall') {
       setRatings({});
+      loadAllRatings(); // Load all ratings for aggregate view
     } else if (selectedJuryMember) {
-      const savedRatings = localStorage.getItem(`juryWalkRatings_${selectedJuryMember}`);
-      if (savedRatings) {
-        setRatings(JSON.parse(savedRatings));
-      } else {
-        setRatings({});
-      }
+      loadRatings(selectedJuryMember);
     } else {
       setRatings({});
     }
@@ -297,40 +388,32 @@ export const JuryWalk = () => {
 
   // Calculate average across all judges for a team
   const calculateTeamAverage = (teamKey: string): number => {
-    const allJudgeRatings = JURY_MEMBERS
+    const judgeScores = JURY_MEMBERS
       .filter(judge => judge !== 'Overall')
       .map(judge => {
-        const savedRatings = localStorage.getItem(`juryWalkRatings_${judge}`);
-        if (savedRatings) {
-          const judgeRatings = JSON.parse(savedRatings);
-          return judgeRatings[teamKey]?.total || 0;
-        }
-        return 0;
+        const judgeRatings = allJudgeRatings[judge];
+        return judgeRatings?.[teamKey]?.total || 0;
       })
       .filter(total => total > 0); // Only count rated entries
 
-    if (allJudgeRatings.length === 0) return 0;
-    return allJudgeRatings.reduce((sum, total) => sum + total, 0) / allJudgeRatings.length;
+    if (judgeScores.length === 0) return 0;
+    return judgeScores.reduce((sum, total) => sum + total, 0) / judgeScores.length;
   };
 
   // Calculate average for a specific field across all judges
   const calculateFieldAverage = (teamKey: string, field: keyof TeamRating): number => {
     if (typeof field === 'string' && ['concept', 'quality', 'implementation', 'passthroughCameraAPI', 'immersiveEntertainment', 'handTracking'].includes(field)) {
-      const allJudgeScores = JURY_MEMBERS
+      const fieldScores = JURY_MEMBERS
         .filter(judge => judge !== 'Overall')
         .map(judge => {
-          const savedRatings = localStorage.getItem(`juryWalkRatings_${judge}`);
-          if (savedRatings) {
-            const judgeRatings = JSON.parse(savedRatings);
-            const rating = judgeRatings[teamKey];
-            return rating?.[field] || 0;
-          }
-          return 0;
+          const judgeRatings = allJudgeRatings[judge];
+          const rating = judgeRatings?.[teamKey];
+          return rating?.[field] || 0;
         })
         .filter(score => score > 0); // Only count rated entries
 
-      if (allJudgeScores.length === 0) return 0;
-      return allJudgeScores.reduce((sum, score) => sum + score, 0) / allJudgeScores.length;
+      if (fieldScores.length === 0) return 0;
+      return fieldScores.reduce((sum, score) => sum + score, 0) / fieldScores.length;
     }
     return 0;
   };
@@ -342,13 +425,10 @@ export const JuryWalk = () => {
     JURY_MEMBERS
       .filter(judge => judge !== 'Overall')
       .forEach(judge => {
-        const savedRatings = localStorage.getItem(`juryWalkRatings_${judge}`);
-        if (savedRatings) {
-          const judgeRatings = JSON.parse(savedRatings);
-          const track = judgeRatings[teamKey]?.[field];
-          if (track && track !== '') {
-            trackCounts[track] = (trackCounts[track] || 0) + 1;
-          }
+        const judgeRatings = allJudgeRatings[judge];
+        const track = judgeRatings?.[teamKey]?.[field];
+        if (track && track !== '') {
+          trackCounts[track] = (trackCounts[track] || 0) + 1;
         }
       });
 
@@ -371,20 +451,17 @@ export const JuryWalk = () => {
     JURY_MEMBERS
       .filter(judge => judge !== 'Overall')
       .forEach(judge => {
-        const savedRatings = localStorage.getItem(`juryWalkRatings_${judge}`);
-        if (savedRatings) {
-          const judgeRatings = JSON.parse(savedRatings);
-          const notes = judgeRatings[teamKey]?.notes;
-          if (notes && notes.trim() !== '') {
-            allNotes.push({ judge, notes: notes.trim() });
-          }
+        const judgeRatings = allJudgeRatings[judge];
+        const notes = judgeRatings?.[teamKey]?.notes;
+        if (notes && notes.trim() !== '') {
+          allNotes.push({ judge, notes: notes.trim() });
         }
       });
 
     return allNotes;
   };
 
-  const saveRatings = () => {
+  const saveRatingsManual = async () => {
     if (!selectedJuryMember || selectedJuryMember === 'Overall') {
       toast({
         variant: "destructive",
@@ -393,11 +470,20 @@ export const JuryWalk = () => {
       });
       return;
     }
-    localStorage.setItem(`juryWalkRatings_${selectedJuryMember}`, JSON.stringify(ratings));
-    toast({
-      title: "Manual save completed",
-      description: `Ratings manually saved for ${selectedJuryMember}. (Auto-save is enabled)`,
-    });
+
+    try {
+      await saveRatings(selectedJuryMember, ratings);
+      toast({
+        title: "Manual save completed",
+        description: `Ratings manually saved for ${selectedJuryMember}. (Auto-save is enabled)`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Save failed",
+        description: "Failed to save ratings to database.",
+      });
+    }
   };
 
   const clearRatings = () => {
@@ -748,16 +834,16 @@ export const JuryWalk = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="mb-1">
-                            <div className="grid grid-cols-[1fr,auto,auto,1fr] gap-3 items-center">
+                            <div className="grid grid-cols-[2fr,100px,80px,1fr] gap-4 items-center">
                               <span className="font-medium text-sm lg:text-base truncate">{team.teamName}</span>
-                              <span className="text-sm lg:text-base text-muted-foreground whitespace-nowrap">Room {team.roomNumber}</span>
+                              <span className="text-sm lg:text-base text-muted-foreground text-left">Room {team.roomNumber}</span>
                               {team.teamNumber ? (
-                                <span className="font-bold text-sm lg:text-base text-purple-600 dark:text-purple-400 whitespace-nowrap">{team.teamNumber}</span>
+                                <span className="font-bold text-sm lg:text-base text-purple-600 dark:text-purple-400 text-left">{team.teamNumber}</span>
                               ) : (
                                 <span></span>
                               )}
                               {team.projectName && (
-                                <span className="text-xs lg:text-sm text-blue-600 dark:text-blue-400 truncate ml-2">{team.projectName}</span>
+                                <span className="text-xs lg:text-sm text-blue-600 dark:text-blue-400 truncate">{team.projectName}</span>
                               )}
                             </div>
                           </div>

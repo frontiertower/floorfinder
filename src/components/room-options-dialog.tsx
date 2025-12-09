@@ -117,8 +117,10 @@ export function RoomOptionsDialog({
               id="edit-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onClick={(e) => e.currentTarget.focus()}
               className="col-span-3"
               placeholder="Room name"
+              autoComplete="off"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -130,7 +132,9 @@ export function RoomOptionsDialog({
                 id="edit-teamNumber"
                 value={teamNumber}
                 onChange={(e) => setTeamNumber(e.target.value)}
+                onClick={(e) => e.currentTarget.focus()}
                 placeholder="SF20"
+                autoComplete="off"
               />
               {name && name.match(/SF\d+/i) && (
                 <button
@@ -156,8 +160,10 @@ export function RoomOptionsDialog({
               id="edit-teamName"
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
+              onClick={(e) => e.currentTarget.focus()}
               className="col-span-3"
               placeholder="Engineering Team"
+              autoComplete="off"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -168,8 +174,10 @@ export function RoomOptionsDialog({
               id="edit-projectName"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
+              onClick={(e) => e.currentTarget.focus()}
               className="col-span-3"
               placeholder="Project or product name"
+              autoComplete="off"
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -197,6 +205,7 @@ export function RoomOptionsDialog({
               id="edit-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              onClick={(e) => e.currentTarget.focus()}
               className="col-span-3"
               placeholder="Optional notes..."
             />
@@ -225,7 +234,9 @@ export function RoomOptionsDialog({
               <Input
                 value={customColor}
                 onChange={(e) => setCustomColor(e.target.value)}
+                onClick={(e) => e.currentTarget.focus()}
                 placeholder="Custom color (e.g., rgba(255, 0, 0, 0.5))"
+                autoComplete="off"
               />
             </div>
           </div>
