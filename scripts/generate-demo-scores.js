@@ -1,4 +1,4 @@
-const http = require('http');
+const https = require('https');
 const fetch = require('node-fetch');
 
 // Juror names
@@ -78,9 +78,9 @@ async function generateDemoScores() {
   try {
     console.log('🎯 Generating demo scores for all teams...\n');
 
-    // Get teams from local API
+    // Get teams from production API
     const teams = await new Promise((resolve, reject) => {
-      http.get('http://localhost:9002/api/rooms.json', (res) => {
+      https.get('https://floorfinder-ie82tqzcb-dablclub.vercel.app/api/rooms.json', (res) => {
         let data = '';
         res.on('data', (chunk) => { data += chunk; });
         res.on('end', () => {
@@ -222,7 +222,7 @@ async function generateDemoScores() {
       };
 
       try {
-        const response = await fetch('http://localhost:9002/api/jury-ratings', {
+        const response = await fetch('https://floorfinder-ie82tqzcb-dablclub.vercel.app/api/jury-ratings', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
