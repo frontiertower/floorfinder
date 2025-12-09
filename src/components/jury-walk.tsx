@@ -61,6 +61,7 @@ export const JuryWalk = () => {
   const [ratings, setRatings] = useState<Record<string, TeamRating>>({});
   const [allJurorRatings, setAllJurorRatings] = useState<Record<string, Record<string, TeamRating>>>({});
   const [selectedJuryMember, setSelectedJuryMember] = useState<string>('Overall');
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null);
   const [sortField, setSortField] = useState<string>('teamName');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -125,10 +126,10 @@ export const JuryWalk = () => {
 
         if (data.judgeId && data.ratings) {
           // Check if this matches current juror
-          if (selectedJuror !== 'Overall' && data.judgeId !== selectedJuror) {
+          if (selectedJuryMember !== 'Overall' && data.judgeId !== selectedJuryMember) {
             toast({
               title: "Juror Mismatch",
-              description: `This file is for ${data.judgeId}, but you have ${selectedJuror} selected. The data will be imported for ${data.judgeId}.`,
+              description: `This file is for ${data.judgeId}, but you have ${selectedJuryMember} selected. The data will be imported for ${data.judgeId}.`,
               variant: "default"
             });
           }
@@ -137,8 +138,8 @@ export const JuryWalk = () => {
           await saveRatings(data.judgeId, data.ratings);
 
           // If we're viewing this juror, update the display
-          if (selectedJuror === data.judgeId) {
-            setCurrentRatings(data.ratings);
+          if (selectedJuryMember === data.judgeId) {
+            setRatings(data.ratings);
           }
 
           toast({
@@ -174,13 +175,16 @@ export const JuryWalk = () => {
       if (response.ok) {
         const result = await response.json();
         console.log('Ratings saved:', result.message);
+        return result;
       } else {
-        console.error('Failed to save ratings:', response.statusText);
+        const error = `Failed to save ratings: ${response.statusText}`;
+        console.error(error);
         toast({
           variant: "destructive",
           title: "Save Failed",
           description: "Could not save ratings to database. Changes may be lost.",
         });
+        throw new Error(error);
       }
     } catch (error) {
       console.error('Error saving ratings:', error);
@@ -189,6 +193,7 @@ export const JuryWalk = () => {
         title: "Save Error",
         description: "Network error while saving ratings.",
       });
+      throw error;
     }
   };
 
@@ -239,6 +244,15 @@ export const JuryWalk = () => {
       setRatings({});
     }
   }, [selectedJuryMember]);
+
+  // Cleanup timeout on unmount or juror change
+  useEffect(() => {
+    return () => {
+      if (saveTimeout) {
+        clearTimeout(saveTimeout);
+      }
+    };
+  }, [saveTimeout]);
 
   // Get unique teams with their room names
   const teamsWithRooms = allRooms
@@ -427,9 +441,25 @@ export const JuryWalk = () => {
       const nonZeroScores = scores.filter(score => score > 0);
       r.total = nonZeroScores.length > 0 ? nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length : 0;
 
-      // Auto-save to database immediately
+      // Auto-save to database with debouncing
       if (selectedJuryMember && selectedJuryMember !== 'Overall') {
-        saveRatings(selectedJuryMember, newRatings);
+        // Clear existing timeout
+        if (saveTimeout) {
+          clearTimeout(saveTimeout);
+        }
+
+        // Set new timeout for debounced save
+        const newTimeout = setTimeout(async () => {
+          console.log('Auto-saving ratings for:', selectedJuryMember);
+          try {
+            await saveRatings(selectedJuryMember, newRatings);
+            console.log('Auto-save successful for:', selectedJuryMember);
+          } catch (error) {
+            console.error('Auto-save failed:', error);
+          }
+        }, 1000); // Wait 1 second after last change
+
+        setSaveTimeout(newTimeout);
       }
 
       return newRatings;
