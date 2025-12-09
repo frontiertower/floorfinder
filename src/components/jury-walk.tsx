@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import type { Room } from '@/lib/types';
+import { TRACK_OPTIONS } from '@/lib/types';
 import { ThemeToggle } from './theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Save, Download, Trash2 } from 'lucide-react';
@@ -24,14 +25,6 @@ interface TeamRating {
   total: number;
 }
 
-const TRACK_OPTIONS = [
-  '',
-  'MR/VR',
-  'Passthrough Camera API',
-  'Immersive Entertainment',
-  'Hand Tracking',
-  'Project Upgrade'
-];
 
 const SCORE_OPTIONS = [
   { value: 0, label: '-' },
@@ -222,11 +215,13 @@ export const JuryWalk = () => {
           teamNumber: teamNum,
           projectName: room.projectName || '',
           roomNumber: cleanRoomNumber,
+          tracks: room.tracks || '',
+          addonTracks: room.addonTracks || '',
           floorId: room.floorId
         };
       }
       return acc;
-    }, {} as Record<string, { teamName: string; teamNumber: string; projectName: string; roomNumber: string; floorId: string }>);
+    }, {} as Record<string, { teamName: string; teamNumber: string; projectName: string; roomNumber: string; tracks: string; addonTracks: string; floorId: string }>);
 
   const sortedTeams = Object.values(teamsWithRooms).sort((a, b) => {
     const aKey = `${a.teamName}-${a.floorId}`;
@@ -301,20 +296,17 @@ export const JuryWalk = () => {
   });
 
   // Check if a scoring field should be disabled based on track selection
-  const isTrackFieldDisabled = (teamKey: string, field: string): boolean => {
-    const rating = ratings[teamKey];
-    if (!rating) return false;
-
-    const tracks = rating.tracks?.toLowerCase() || '';
-    const addonTracks = rating.addonTracks?.toLowerCase() || '';
+  const isTrackFieldDisabled = (tracks: string, addonTracks: string, field: string): boolean => {
+    const primaryTrack = tracks?.toLowerCase() || '';
+    const addOnTrack = addonTracks?.toLowerCase() || '';
 
     switch (field) {
       case 'passthroughCameraAPI':
-        return !tracks.includes('passthrough camera api') && !addonTracks.includes('passthrough camera api');
+        return !primaryTrack.includes('passthrough camera api') && !addOnTrack.includes('passthrough camera api');
       case 'immersiveEntertainment':
-        return !tracks.includes('immersive entertainment') && !addonTracks.includes('immersive entertainment');
+        return !primaryTrack.includes('immersive entertainment') && !addOnTrack.includes('immersive entertainment');
       case 'handTracking':
-        return !tracks.includes('hand tracking') && !addonTracks.includes('hand tracking');
+        return !primaryTrack.includes('hand tracking') && !addOnTrack.includes('hand tracking');
       default:
         return false;
     }
@@ -533,8 +525,8 @@ export const JuryWalk = () => {
             team.roomNumber,
             `"${team.teamNumber}"`,
             `"${team.projectName}"`,
-            `"${getMostCommonTrack(key, 'tracks')}"`,
-            `"${getMostCommonTrack(key, 'addonTracks')}"`,
+            `"${team.tracks}"`,
+            `"${team.addonTracks}"`,
             calculateFieldAverage(key, 'concept').toFixed(1),
             calculateFieldAverage(key, 'quality').toFixed(1),
             calculateFieldAverage(key, 'implementation').toFixed(1),
@@ -762,19 +754,9 @@ export const JuryWalk = () => {
               {sortedTeams
                 .filter(team => {
                   if (!trackFilter) return true;
-                  const key = `${team.teamName}-${team.floorId}`;
 
-                  // For Overall view, check aggregate tracks
-                  if (selectedJuryMember === 'Overall') {
-                    const mostCommonTrack = getMostCommonTrack(key, 'tracks');
-                    const mostCommonAddonTrack = getMostCommonTrack(key, 'addonTracks');
-                    return mostCommonTrack === trackFilter || mostCommonAddonTrack === trackFilter;
-                  }
-
-                  // For individual judge view, check their ratings
-                  const rating = ratings[key];
-                  if (!rating) return false;
-                  return rating.tracks === trackFilter || rating.addonTracks === trackFilter;
+                  // Filter by team tracks (now stored in room data)
+                  return team.tracks === trackFilter || team.addonTracks === trackFilter;
                 })
                 .map((team, index) => {
                 const key = `${team.teamName}-${team.floorId}`;
@@ -792,8 +774,8 @@ export const JuryWalk = () => {
                     teamNumber: team.teamNumber,
                     projectName: team.projectName,
                     roomNumber: team.roomNumber,
-                    tracks: getMostCommonTrack(key, 'tracks'),
-                    addonTracks: getMostCommonTrack(key, 'addonTracks'),
+                    tracks: team.tracks,
+                    addonTracks: team.addonTracks,
                     concept: calculateFieldAverage(key, 'concept'),
                     quality: calculateFieldAverage(key, 'quality'),
                     implementation: calculateFieldAverage(key, 'implementation'),
@@ -810,8 +792,8 @@ export const JuryWalk = () => {
                     teamNumber: team.teamNumber,
                     projectName: team.projectName,
                     roomNumber: team.roomNumber,
-                    tracks: '',
-                    addonTracks: '',
+                    tracks: team.tracks,
+                    addonTracks: team.addonTracks,
                     concept: 0,
                     quality: 0,
                     implementation: 0,
@@ -879,49 +861,22 @@ export const JuryWalk = () => {
                     {isExpanded && (
                       <div className="px-4 pb-4 border-t bg-muted/5">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                          {/* Track Selection */}
+                          {/* Track Information (Read-only) */}
                           <div className="space-y-3">
-                            <h4 className="font-medium text-sm">Track Selection</h4>
+                            <h4 className="font-medium text-sm">Track Information</h4>
+                            <p className="text-xs text-muted-foreground">Tracks are set in the room edit modal</p>
                             <div className="space-y-2">
                               <div>
                                 <label className="block text-xs text-muted-foreground mb-1">Primary Track</label>
-                                {selectedJuryMember === 'Overall' ? (
-                                  <div className="w-full px-3 py-2 border rounded bg-muted/20 text-sm">
-                                    {rating.tracks || 'No consensus'}
-                                  </div>
-                                ) : (
-                                  <select
-                                    value={rating.tracks}
-                                    onChange={(e) => updateRating(key, 'tracks', e.target.value)}
-                                    className="w-full px-3 py-2 border rounded bg-background text-sm"
-                                  >
-                                    {TRACK_OPTIONS.map(option => (
-                                      <option key={option} value={option}>
-                                        {option || 'Select...'}
-                                      </option>
-                                    ))}
-                                  </select>
-                                )}
+                                <div className="w-full px-3 py-2 border rounded bg-muted/20 text-sm">
+                                  {team.tracks || 'None'}
+                                </div>
                               </div>
                               <div>
                                 <label className="block text-xs text-muted-foreground mb-1">Add-on Track</label>
-                                {selectedJuryMember === 'Overall' ? (
-                                  <div className="w-full px-3 py-2 border rounded bg-muted/20 text-sm">
-                                    {rating.addonTracks || 'No consensus'}
-                                  </div>
-                                ) : (
-                                  <select
-                                    value={rating.addonTracks}
-                                    onChange={(e) => updateRating(key, 'addonTracks', e.target.value)}
-                                    className="w-full px-3 py-2 border rounded bg-background text-sm"
-                                  >
-                                    {TRACK_OPTIONS.map(option => (
-                                      <option key={`addon-${option}`} value={option}>
-                                        {option || 'Select...'}
-                                      </option>
-                                    ))}
-                                  </select>
-                                )}
+                                <div className="w-full px-3 py-2 border rounded bg-muted/20 text-sm">
+                                  {team.addonTracks || 'None'}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1002,9 +957,9 @@ export const JuryWalk = () => {
                                   <select
                                     value={rating.passthroughCameraAPI}
                                     onChange={(e) => updateRating(key, 'passthroughCameraAPI', parseInt(e.target.value))}
-                                    disabled={isTrackFieldDisabled(key, 'passthroughCameraAPI')}
+                                    disabled={isTrackFieldDisabled(team.tracks, team.addonTracks, 'passthroughCameraAPI')}
                                     className={`w-full px-2 py-2 border rounded bg-background text-center text-sm ${
-                                      isTrackFieldDisabled(key, 'passthroughCameraAPI') ? 'opacity-50 cursor-not-allowed' : ''
+                                      isTrackFieldDisabled(team.tracks, team.addonTracks, 'passthroughCameraAPI') ? 'opacity-50 cursor-not-allowed' : ''
                                     }`}
                                   >
                                     {SCORE_OPTIONS.map(option => (
@@ -1025,9 +980,9 @@ export const JuryWalk = () => {
                                   <select
                                     value={rating.immersiveEntertainment}
                                     onChange={(e) => updateRating(key, 'immersiveEntertainment', parseInt(e.target.value))}
-                                    disabled={isTrackFieldDisabled(key, 'immersiveEntertainment')}
+                                    disabled={isTrackFieldDisabled(team.tracks, team.addonTracks, 'immersiveEntertainment')}
                                     className={`w-full px-2 py-2 border rounded bg-background text-center text-sm ${
-                                      isTrackFieldDisabled(key, 'immersiveEntertainment') ? 'opacity-50 cursor-not-allowed' : ''
+                                      isTrackFieldDisabled(team.tracks, team.addonTracks, 'immersiveEntertainment') ? 'opacity-50 cursor-not-allowed' : ''
                                     }`}
                                   >
                                     {SCORE_OPTIONS.map(option => (
@@ -1048,9 +1003,9 @@ export const JuryWalk = () => {
                                   <select
                                     value={rating.handTracking}
                                     onChange={(e) => updateRating(key, 'handTracking', parseInt(e.target.value))}
-                                    disabled={isTrackFieldDisabled(key, 'handTracking')}
+                                    disabled={isTrackFieldDisabled(team.tracks, team.addonTracks, 'handTracking')}
                                     className={`w-full px-2 py-2 border rounded bg-background text-center text-sm ${
-                                      isTrackFieldDisabled(key, 'handTracking') ? 'opacity-50 cursor-not-allowed' : ''
+                                      isTrackFieldDisabled(team.tracks, team.addonTracks, 'handTracking') ? 'opacity-50 cursor-not-allowed' : ''
                                     }`}
                                   >
                                     {SCORE_OPTIONS.map(option => (

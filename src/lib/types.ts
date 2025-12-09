@@ -12,6 +12,8 @@ export interface Room {
   projectName?: string;
   type?: string;
   notes?: string;
+  tracks?: string;
+  addonTracks?: string;
   color: string;
   coords: [number, number, number, number];
   floorId?: string; // Add optional floorId here
@@ -37,6 +39,14 @@ export const ROOM_TYPES = [
 ] as const;
 
 export type RoomType = typeof ROOM_TYPES[number];
+
+export const TRACK_OPTIONS = [
+  'Passthrough Camera API',
+  'Immersive Entertainment',
+  'Hand Tracking'
+] as const;
+
+export type TrackOption = typeof TRACK_OPTIONS[number];
 
 export interface FloorData {
   floors: Floor[];

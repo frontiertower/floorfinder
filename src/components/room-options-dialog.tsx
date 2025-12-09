@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Room } from '@/lib/types';
-import { ROOM_TYPES } from '@/lib/types';
+import { ROOM_TYPES, TRACK_OPTIONS } from '@/lib/types';
 
 interface RoomOptionsDialogProps {
   isOpen: boolean;
@@ -49,6 +49,8 @@ export function RoomOptionsDialog({
   const [projectName, setProjectName] = useState('');
   const [type, setType] = useState<string>('');
   const [notes, setNotes] = useState('');
+  const [tracks, setTracks] = useState<string>('');
+  const [addonTracks, setAddonTracks] = useState<string>('');
   const [color, setColor] = useState(predefinedColors[0].value);
   const [customColor, setCustomColor] = useState('');
 
@@ -71,6 +73,8 @@ export function RoomOptionsDialog({
       setProjectName(room.projectName || '');
       setType(room.type || '');
       setNotes(room.notes || '');
+      setTracks(room.tracks || '');
+      setAddonTracks(room.addonTracks || '');
       setColor(room.color || predefinedColors[0].value);
       setCustomColor('');
     }
@@ -87,6 +91,8 @@ export function RoomOptionsDialog({
       projectName,
       type: type || undefined,
       notes,
+      tracks,
+      addonTracks,
       color: customColor || color,
     };
 
@@ -192,6 +198,42 @@ export function RoomOptionsDialog({
                 {ROOM_TYPES.map((roomType) => (
                   <SelectItem key={roomType} value={roomType}>
                     {roomType}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-tracks" className="text-right">
+              Primary Track
+            </Label>
+            <Select value={tracks} onValueChange={setTracks}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select primary track..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">None</SelectItem>
+                {TRACK_OPTIONS.map((track) => (
+                  <SelectItem key={track} value={track}>
+                    {track}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="edit-addonTracks" className="text-right">
+              Add-on Track
+            </Label>
+            <Select value={addonTracks} onValueChange={setAddonTracks}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select add-on track..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">None</SelectItem>
+                {TRACK_OPTIONS.map((track) => (
+                  <SelectItem key={track} value={track}>
+                    {track}
                   </SelectItem>
                 ))}
               </SelectContent>
