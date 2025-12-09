@@ -943,12 +943,12 @@ export const JuryWalk = () => {
                           {(rating.tracks || rating.addonTracks) && (
                             <div className="flex gap-1">
                               {rating.tracks && (
-                                <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-sm text-xs">
+                                <span className="px-2 py-0.5 bg-blue-600 text-white rounded-sm text-xs font-medium">
                                   {rating.tracks}
                                 </span>
                               )}
                               {rating.addonTracks && (
-                                <span className="px-2 py-0.5 bg-secondary/50 text-secondary-foreground rounded-sm text-xs">
+                                <span className="px-2 py-0.5 bg-green-600 text-white rounded-sm text-xs font-medium">
                                   +{rating.addonTracks}
                                 </span>
                               )}
