@@ -16,10 +16,19 @@ interface TeamRating {
   quality: number;
   implementation: number;
   passthroughCameraAPI: number;
-  immersiveEntertainment: boolean;
-  handTracking: boolean;
+  immersiveEntertainment: number;
+  handTracking: number;
   total: number;
 }
+
+const TRACK_OPTIONS = [
+  '',
+  'MR/VR',
+  'Passthrough Camera API',
+  'Immersive Entertainment',
+  'Hand Tracking',
+  'Project Upgrade'
+];
 
 export const JuryWalk = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
@@ -51,7 +60,7 @@ export const JuryWalk = () => {
     }
   }, []);
 
-  // Get unique teams with their room numbers
+  // Get unique teams with their room names
   const teamsWithRooms = allRooms
     .filter(room => room.teamName && room.teamName !== 'Private')
     .reduce((acc, room) => {
@@ -59,7 +68,7 @@ export const JuryWalk = () => {
       if (!acc[key]) {
         acc[key] = {
           teamName: room.teamName,
-          roomNumber: `${room.id}-${room.floorId}F`,
+          roomNumber: room.name || room.id, // Use room name if available, otherwise ID
           floorId: room.floorId
         };
       }
@@ -87,8 +96,8 @@ export const JuryWalk = () => {
           quality: 0,
           implementation: 0,
           passthroughCameraAPI: 0,
-          immersiveEntertainment: false,
-          handTracking: false,
+          immersiveEntertainment: 0,
+          handTracking: 0,
           total: 0
         };
       }
@@ -98,9 +107,9 @@ export const JuryWalk = () => {
         [field]: value
       };
 
-      // Calculate total
+      // Calculate total (all 6 criteria, max 5 each = 30 total)
       const r = newRatings[teamKey];
-      r.total = r.concept + r.quality + r.implementation + r.passthroughCameraAPI;
+      r.total = r.concept + r.quality + r.implementation + r.passthroughCameraAPI + r.immersiveEntertainment + r.handTracking;
 
       return newRatings;
     });
@@ -126,7 +135,7 @@ export const JuryWalk = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ['Team Name', 'Room', 'Tracks', 'Add-on Tracks', 'Concept', 'Quality', 'Implementation', 'Passthrough Camera API', 'Total', 'Immersive Entertainment', 'Hand Tracking'];
+    const headers = ['Team', 'Room', 'Tracks', 'Add-on Tracks', 'Concept', 'Quality', 'Implementation', 'Passthrough Camera API', 'Immersive Entertainment', 'Hand Tracking', 'Total'];
     const csvContent = [
       headers.join(','),
       ...sortedTeams.map(team => {
@@ -143,8 +152,8 @@ export const JuryWalk = () => {
           r.implementation,
           r.passthroughCameraAPI,
           r.total,
-          r.immersiveEntertainment ? 'Yes' : 'No',
-          r.handTracking ? 'Yes' : 'No'
+          r.immersiveEntertainment,
+          r.handTracking
         ].join(',');
       }).filter(Boolean)
     ].join('\n');
@@ -200,17 +209,17 @@ export const JuryWalk = () => {
           <table className="w-full min-w-[1200px]">
             <thead className="bg-muted/50 border-b">
               <tr>
-                <th className="p-2 text-left font-semibold text-xs lg:text-sm">Team Name</th>
+                <th className="p-2 text-left font-semibold text-xs lg:text-sm">Team</th>
                 <th className="p-2 text-left font-semibold text-xs lg:text-sm">Room</th>
                 <th className="p-2 text-left font-semibold text-xs lg:text-sm">Tracks</th>
                 <th className="p-2 text-left font-semibold text-xs lg:text-sm">Add-on Tracks</th>
-                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Concept<br/>(0-10)</th>
-                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Quality<br/>(0-10)</th>
-                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Implementation<br/>(0-10)</th>
-                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Passthrough<br/>Camera API<br/>(0-10)</th>
-                <th className="p-2 text-center font-semibold text-xs lg:text-sm bg-primary/10">Total<br/>(0-40)</th>
-                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Immersive<br/>Entertainment</th>
-                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Hand<br/>Tracking</th>
+                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Concept<br/>(1-5)</th>
+                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Quality<br/>(1-5)</th>
+                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Implementation<br/>(1-5)</th>
+                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Passthrough<br/>Camera API<br/>(1-5)</th>
+                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Immersive<br/>Entertainment<br/>(1-5)</th>
+                <th className="p-2 text-center font-semibold text-xs lg:text-sm">Hand<br/>Tracking<br/>(1-5)</th>
+                <th className="p-2 text-center font-semibold text-xs lg:text-sm bg-primary/10">Total<br/>(0-30)</th>
               </tr>
             </thead>
             <tbody>
@@ -235,81 +244,93 @@ export const JuryWalk = () => {
                     <td className="p-2 font-medium text-xs lg:text-sm">{team.teamName}</td>
                     <td className="p-2 text-xs lg:text-sm text-muted-foreground">{team.roomNumber}</td>
                     <td className="p-2">
-                      <input
-                        type="text"
+                      <select
                         value={rating.tracks}
                         onChange={(e) => updateRating(key, 'tracks', e.target.value)}
-                        className="w-24 lg:w-32 px-2 py-1 border rounded bg-background text-xs lg:text-sm"
-                        placeholder="Track..."
-                      />
+                        className="w-full px-2 py-1 border rounded bg-background text-xs lg:text-sm"
+                      >
+                        {TRACK_OPTIONS.map(option => (
+                          <option key={option} value={option}>
+                            {option || 'Select...'}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="p-2">
-                      <input
-                        type="text"
+                      <select
                         value={rating.addonTracks}
                         onChange={(e) => updateRating(key, 'addonTracks', e.target.value)}
-                        className="w-24 lg:w-32 px-2 py-1 border rounded bg-background text-xs lg:text-sm"
-                        placeholder="Add-on..."
-                      />
+                        className="w-full px-2 py-1 border rounded bg-background text-xs lg:text-sm"
+                      >
+                        {TRACK_OPTIONS.map(option => (
+                          <option key={`addon-${option}`} value={option}>
+                            {option || 'Select...'}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="p-2 text-center">
                       <input
                         type="number"
                         min="0"
-                        max="10"
+                        max="5"
                         value={rating.concept}
                         onChange={(e) => updateRating(key, 'concept', parseInt(e.target.value) || 0)}
-                        className="w-16 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
                       />
                     </td>
                     <td className="p-2 text-center">
                       <input
                         type="number"
                         min="0"
-                        max="10"
+                        max="5"
                         value={rating.quality}
                         onChange={(e) => updateRating(key, 'quality', parseInt(e.target.value) || 0)}
-                        className="w-16 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
                       />
                     </td>
                     <td className="p-2 text-center">
                       <input
                         type="number"
                         min="0"
-                        max="10"
+                        max="5"
                         value={rating.implementation}
                         onChange={(e) => updateRating(key, 'implementation', parseInt(e.target.value) || 0)}
-                        className="w-16 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
                       />
                     </td>
                     <td className="p-2 text-center">
                       <input
                         type="number"
                         min="0"
-                        max="10"
+                        max="5"
                         value={rating.passthroughCameraAPI}
                         onChange={(e) => updateRating(key, 'passthroughCameraAPI', parseInt(e.target.value) || 0)}
-                        className="w-16 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                      />
+                    </td>
+                    <td className="p-2 text-center">
+                      <input
+                        type="number"
+                        min="0"
+                        max="5"
+                        value={rating.immersiveEntertainment}
+                        onChange={(e) => updateRating(key, 'immersiveEntertainment', parseInt(e.target.value) || 0)}
+                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                      />
+                    </td>
+                    <td className="p-2 text-center">
+                      <input
+                        type="number"
+                        min="0"
+                        max="5"
+                        value={rating.handTracking}
+                        onChange={(e) => updateRating(key, 'handTracking', parseInt(e.target.value) || 0)}
+                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
                       />
                     </td>
                     <td className="p-2 text-center bg-primary/10 font-bold text-sm lg:text-base">
                       {rating.total}
-                    </td>
-                    <td className="p-2 text-center">
-                      <input
-                        type="checkbox"
-                        checked={rating.immersiveEntertainment}
-                        onChange={(e) => updateRating(key, 'immersiveEntertainment', e.target.checked)}
-                        className="w-4 h-4 lg:w-5 lg:h-5"
-                      />
-                    </td>
-                    <td className="p-2 text-center">
-                      <input
-                        type="checkbox"
-                        checked={rating.handTracking}
-                        onChange={(e) => updateRating(key, 'handTracking', e.target.checked)}
-                        className="w-4 h-4 lg:w-5 lg:h-5"
-                      />
                     </td>
                   </tr>
                 );
@@ -331,7 +352,7 @@ export const JuryWalk = () => {
             <p className="text-2xl font-bold text-primary">
               {Object.values(ratings).length > 0
                 ? (Object.values(ratings).reduce((sum, r) => sum + r.total, 0) / Object.values(ratings).filter(r => r.total > 0).length || 0).toFixed(1)
-                : '0.0'} / 40
+                : '0.0'} / 30
             </p>
           </div>
           <div className="bg-card rounded-lg p-4 shadow">
@@ -339,7 +360,7 @@ export const JuryWalk = () => {
             <p className="text-2xl font-bold text-primary">
               {Object.values(ratings).length > 0
                 ? Math.max(...Object.values(ratings).map(r => r.total), 0)
-                : 0} / 40
+                : 0} / 30
             </p>
           </div>
         </div>
@@ -348,9 +369,9 @@ export const JuryWalk = () => {
         <div className="mt-8 p-4 bg-muted/50 rounded-lg">
           <h3 className="font-semibold mb-2">Instructions</h3>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Rate each criterion from 0-10 points</li>
-            <li>• Total score is automatically calculated (max 40 points)</li>
-            <li>• Check the boxes for teams using Immersive Entertainment or Hand Tracking features</li>
+            <li>• Rate each criterion from 1-5 points (0 = not rated)</li>
+            <li>• Total score is automatically calculated (max 30 points)</li>
+            <li>• All six rating fields contribute to the total score</li>
             <li>• Ratings are saved locally in your browser - click Save to persist changes</li>
             <li>• Export to CSV to download all ratings for external analysis</li>
             <li>• Use Clear All to reset all ratings (this cannot be undone)</li>
