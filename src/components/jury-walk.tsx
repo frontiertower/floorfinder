@@ -30,9 +30,31 @@ const TRACK_OPTIONS = [
   'Project Upgrade'
 ];
 
+const SCORE_OPTIONS = [
+  { value: 0, label: '-' },
+  { value: 1, label: '1' },
+  { value: 2, label: '2' },
+  { value: 3, label: '3' },
+  { value: 4, label: '4' },
+  { value: 5, label: '5' }
+];
+
+const JURY_MEMBERS = [
+  'Select Jury Member',
+  'Judge 1',
+  'Judge 2',
+  'Judge 3',
+  'Judge 4',
+  'Judge 5',
+  'Judge 6',
+  'Judge 7',
+  'Judge 8'
+];
+
 export const JuryWalk = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [ratings, setRatings] = useState<Record<string, TeamRating>>({});
+  const [selectedJuryMember, setSelectedJuryMember] = useState<string>('');
   const { toast } = useToast();
 
   // Fetch all rooms
@@ -52,13 +74,19 @@ export const JuryWalk = () => {
     fetchRooms();
   }, []);
 
-  // Load saved ratings from localStorage
+  // Load saved ratings from localStorage for selected jury member
   useEffect(() => {
-    const savedRatings = localStorage.getItem('juryWalkRatings');
-    if (savedRatings) {
-      setRatings(JSON.parse(savedRatings));
+    if (selectedJuryMember && selectedJuryMember !== 'Select Jury Member') {
+      const savedRatings = localStorage.getItem(`juryWalkRatings_${selectedJuryMember}`);
+      if (savedRatings) {
+        setRatings(JSON.parse(savedRatings));
+      } else {
+        setRatings({});
+      }
+    } else {
+      setRatings({});
     }
-  }, []);
+  }, [selectedJuryMember]);
 
   // Get unique teams with their room names
   const teamsWithRooms = allRooms
@@ -115,27 +143,70 @@ export const JuryWalk = () => {
     });
   };
 
+  // Calculate average across all judges for a team
+  const calculateTeamAverage = (teamKey: string): number => {
+    const allJudgeRatings = JURY_MEMBERS
+      .filter(judge => judge !== 'Select Jury Member')
+      .map(judge => {
+        const savedRatings = localStorage.getItem(`juryWalkRatings_${judge}`);
+        if (savedRatings) {
+          const judgeRatings = JSON.parse(savedRatings);
+          return judgeRatings[teamKey]?.total || 0;
+        }
+        return 0;
+      })
+      .filter(total => total > 0); // Only count rated entries
+
+    if (allJudgeRatings.length === 0) return 0;
+    return allJudgeRatings.reduce((sum, total) => sum + total, 0) / allJudgeRatings.length;
+  };
+
   const saveRatings = () => {
-    localStorage.setItem('juryWalkRatings', JSON.stringify(ratings));
+    if (!selectedJuryMember || selectedJuryMember === 'Select Jury Member') {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a jury member first.",
+      });
+      return;
+    }
+    localStorage.setItem(`juryWalkRatings_${selectedJuryMember}`, JSON.stringify(ratings));
     toast({
       title: "Ratings saved",
-      description: "Your ratings have been saved locally.",
+      description: `Ratings saved for ${selectedJuryMember}.`,
     });
   };
 
   const clearRatings = () => {
-    if (confirm('Are you sure you want to clear all ratings?')) {
+    if (!selectedJuryMember || selectedJuryMember === 'Select Jury Member') {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a jury member first.",
+      });
+      return;
+    }
+    if (confirm(`Are you sure you want to clear all ratings for ${selectedJuryMember}?`)) {
       setRatings({});
-      localStorage.removeItem('juryWalkRatings');
+      localStorage.removeItem(`juryWalkRatings_${selectedJuryMember}`);
       toast({
         title: "Ratings cleared",
-        description: "All ratings have been removed.",
+        description: `All ratings for ${selectedJuryMember} have been removed.`,
       });
     }
   };
 
   const exportToCSV = () => {
-    const headers = ['Team', 'Room', 'Tracks', 'Add-on Tracks', 'Concept', 'Quality', 'Implementation', 'Passthrough Camera API', 'Immersive Entertainment', 'Hand Tracking', 'Total'];
+    if (!selectedJuryMember || selectedJuryMember === 'Select Jury Member') {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a jury member first.",
+      });
+      return;
+    }
+
+    const headers = ['Team', 'Room', 'Tracks', 'Add-on Tracks', 'Concept', 'Quality', 'Implementation', 'Passthrough Camera API', 'Immersive Entertainment', 'Hand Tracking', 'Total', 'Average (All Judges)'];
     const csvContent = [
       headers.join(','),
       ...sortedTeams.map(team => {
@@ -151,9 +222,10 @@ export const JuryWalk = () => {
           r.quality,
           r.implementation,
           r.passthroughCameraAPI,
-          r.total,
           r.immersiveEntertainment,
-          r.handTracking
+          r.handTracking,
+          r.total,
+          calculateTeamAverage(key).toFixed(1)
         ].join(',');
       }).filter(Boolean)
     ].join('\n');
@@ -162,13 +234,13 @@ export const JuryWalk = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `jury-walk-ratings-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `jury-walk-ratings-${selectedJuryMember.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
 
     toast({
       title: "Export successful",
-      description: "Ratings exported to CSV file.",
+      description: `Ratings for ${selectedJuryMember} exported to CSV file.`,
     });
   };
 
@@ -180,6 +252,22 @@ export const JuryWalk = () => {
           <div>
             <h1 className="text-3xl lg:text-4xl font-bold mb-2">Jury Walk Rating System</h1>
             <p className="text-muted-foreground">Rate teams and track scores for the hackathon</p>
+
+            {/* Jury Member Selection */}
+            <div className="mt-4">
+              <label className="block text-sm font-semibold mb-2">Select Jury Member:</label>
+              <select
+                value={selectedJuryMember}
+                onChange={(e) => setSelectedJuryMember(e.target.value)}
+                className="px-4 py-2 border rounded-md bg-background text-foreground border-border min-w-[200px]"
+              >
+                {JURY_MEMBERS.map(member => (
+                  <option key={member} value={member}>
+                    {member}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 lg:gap-4">
             <ThemeToggle />
@@ -206,7 +294,12 @@ export const JuryWalk = () => {
 
         {/* Rating Table */}
         <div className="overflow-x-auto bg-card rounded-lg shadow-lg">
-          <table className="w-full min-w-[1200px]">
+          {!selectedJuryMember || selectedJuryMember === 'Select Jury Member' ? (
+            <div className="p-8 text-center">
+              <p className="text-lg text-muted-foreground">Please select a jury member to begin rating teams.</p>
+            </div>
+          ) : (
+          <table className="w-full min-w-[1300px]">
             <thead className="bg-muted/50 border-b">
               <tr>
                 <th className="p-2 text-left font-semibold text-xs lg:text-sm">Team</th>
@@ -220,6 +313,7 @@ export const JuryWalk = () => {
                 <th className="p-2 text-center font-semibold text-xs lg:text-sm">Immersive<br/>Entertainment<br/>(1-5)</th>
                 <th className="p-2 text-center font-semibold text-xs lg:text-sm">Hand<br/>Tracking<br/>(1-5)</th>
                 <th className="p-2 text-center font-semibold text-xs lg:text-sm bg-primary/10">Total<br/>(0-30)</th>
+                <th className="p-2 text-center font-semibold text-xs lg:text-sm bg-green-100 dark:bg-green-900">Average<br/>(All Judges)</th>
               </tr>
             </thead>
             <tbody>
@@ -270,73 +364,95 @@ export const JuryWalk = () => {
                       </select>
                     </td>
                     <td className="p-2 text-center">
-                      <input
-                        type="number"
-                        min="0"
-                        max="5"
+                      <select
                         value={rating.concept}
-                        onChange={(e) => updateRating(key, 'concept', parseInt(e.target.value) || 0)}
-                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
-                      />
+                        onChange={(e) => updateRating(key, 'concept', parseInt(e.target.value))}
+                        className="w-16 px-1 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                      >
+                        {SCORE_OPTIONS.map(option => (
+                          <option key={`concept-${option.value}`} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="p-2 text-center">
-                      <input
-                        type="number"
-                        min="0"
-                        max="5"
+                      <select
                         value={rating.quality}
-                        onChange={(e) => updateRating(key, 'quality', parseInt(e.target.value) || 0)}
-                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
-                      />
+                        onChange={(e) => updateRating(key, 'quality', parseInt(e.target.value))}
+                        className="w-16 px-1 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                      >
+                        {SCORE_OPTIONS.map(option => (
+                          <option key={`quality-${option.value}`} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="p-2 text-center">
-                      <input
-                        type="number"
-                        min="0"
-                        max="5"
+                      <select
                         value={rating.implementation}
-                        onChange={(e) => updateRating(key, 'implementation', parseInt(e.target.value) || 0)}
-                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
-                      />
+                        onChange={(e) => updateRating(key, 'implementation', parseInt(e.target.value))}
+                        className="w-16 px-1 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                      >
+                        {SCORE_OPTIONS.map(option => (
+                          <option key={`implementation-${option.value}`} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="p-2 text-center">
-                      <input
-                        type="number"
-                        min="0"
-                        max="5"
+                      <select
                         value={rating.passthroughCameraAPI}
-                        onChange={(e) => updateRating(key, 'passthroughCameraAPI', parseInt(e.target.value) || 0)}
-                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
-                      />
+                        onChange={(e) => updateRating(key, 'passthroughCameraAPI', parseInt(e.target.value))}
+                        className="w-16 px-1 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                      >
+                        {SCORE_OPTIONS.map(option => (
+                          <option key={`passthrough-${option.value}`} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="p-2 text-center">
-                      <input
-                        type="number"
-                        min="0"
-                        max="5"
+                      <select
                         value={rating.immersiveEntertainment}
-                        onChange={(e) => updateRating(key, 'immersiveEntertainment', parseInt(e.target.value) || 0)}
-                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
-                      />
+                        onChange={(e) => updateRating(key, 'immersiveEntertainment', parseInt(e.target.value))}
+                        className="w-16 px-1 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                      >
+                        {SCORE_OPTIONS.map(option => (
+                          <option key={`immersive-${option.value}`} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="p-2 text-center">
-                      <input
-                        type="number"
-                        min="0"
-                        max="5"
+                      <select
                         value={rating.handTracking}
-                        onChange={(e) => updateRating(key, 'handTracking', parseInt(e.target.value) || 0)}
-                        className="w-14 px-2 py-1 border rounded bg-background text-center text-xs lg:text-sm"
-                      />
+                        onChange={(e) => updateRating(key, 'handTracking', parseInt(e.target.value))}
+                        className="w-16 px-1 py-1 border rounded bg-background text-center text-xs lg:text-sm"
+                      >
+                        {SCORE_OPTIONS.map(option => (
+                          <option key={`handtracking-${option.value}`} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="p-2 text-center bg-primary/10 font-bold text-sm lg:text-base">
                       {rating.total}
+                    </td>
+                    <td className="p-2 text-center bg-green-100 dark:bg-green-900 font-bold text-sm lg:text-base">
+                      {calculateTeamAverage(key).toFixed(1)}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+          )}
         </div>
 
         {/* Summary Stats */}
@@ -369,7 +485,7 @@ export const JuryWalk = () => {
         <div className="mt-8 p-4 bg-muted/50 rounded-lg">
           <h3 className="font-semibold mb-2">Instructions</h3>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Rate each criterion from 1-5 points (0 = not rated)</li>
+            <li>• Select ratings from dropdown menus: 1-5 points (- = not rated)</li>
             <li>• Total score is automatically calculated (max 30 points)</li>
             <li>• All six rating fields contribute to the total score</li>
             <li>• Ratings are saved locally in your browser - click Save to persist changes</li>
