@@ -16,6 +16,8 @@ export interface JuryRating {
   passthroughCameraAPI: number;
   immersiveEntertainment: number;
   handTracking: number;
+  mrAndVR: number;
+  projectUpgrade: number;
   notes: string;
   total: number;
   lastUpdated: string;
