@@ -6,7 +6,7 @@ import type { Room } from '@/lib/types';
 import { TRACK_OPTIONS } from '@/lib/types';
 import { ThemeToggle } from './theme-toggle';
 import { Button } from '@/components/ui/button';
-import { Save, Download, Trash2 } from 'lucide-react';
+import { Save, Download, Trash2, Upload } from 'lucide-react';
 
 interface TeamRating {
   teamName: string;
@@ -108,6 +108,56 @@ export const JuryWalk = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Import ratings from JSON file
+  const importFromJSON = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+
+        if (data.judgeId && data.ratings) {
+          // Check if this matches current juror
+          if (selectedJuror !== 'Overall' && data.judgeId !== selectedJuror) {
+            toast({
+              title: "Juror Mismatch",
+              description: `This file is for ${data.judgeId}, but you have ${selectedJuror} selected. The data will be imported for ${data.judgeId}.`,
+              variant: "default"
+            });
+          }
+
+          // Import the ratings
+          await saveRatings(data.judgeId, data.ratings);
+
+          // If we're viewing this juror, update the display
+          if (selectedJuror === data.judgeId) {
+            setCurrentRatings(data.ratings);
+          }
+
+          toast({
+            title: "Import Successful",
+            description: `Successfully imported ratings for ${data.judgeId}`,
+          });
+        } else {
+          throw new Error('Invalid file format');
+        }
+      } catch (error) {
+        console.error('Import error:', error);
+        toast({
+          title: "Import Failed",
+          description: "Failed to import ratings. Please check the file format.",
+          variant: "destructive"
+        });
+      }
+    };
+    input.click();
   };
 
   // Save ratings to database
@@ -645,6 +695,10 @@ export const JuryWalk = () => {
             <Button onClick={exportToCSV} variant="outline" size="default">
               <Download className="mr-2 h-4 w-4" />
               Export CSV
+            </Button>
+            <Button onClick={importFromJSON} variant="outline" size="default">
+              <Upload className="mr-2 h-4 w-4" />
+              Import JSON
             </Button>
             <Button onClick={clearRatings} variant="destructive" size="default">
               <Trash2 className="mr-2 h-4 w-4" />

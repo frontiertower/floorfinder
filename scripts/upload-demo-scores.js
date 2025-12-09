@@ -2,7 +2,7 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 
 async function uploadDemoScores() {
-  const baseUrl = 'https://floorfinder-ie82tqzcb-dablclub.vercel.app';
+  const baseUrl = 'https://floorfinder-8bf5bw937-dablclub.vercel.app';
 
   console.log('🚀 Uploading demo scores to production...\n');
 
