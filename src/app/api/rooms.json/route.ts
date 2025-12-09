@@ -104,7 +104,20 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const newRoom = await request.json() as Room;
+    const body = await request.json();
+
+    // Check if this is a bulk track update request
+    if (body.action === 'updateTracks') {
+      return await updateRoomTracks(body);
+    }
+
+    // Check if this is a bulk track update request for multiple teams
+    if (body.action === 'bulkUpdateTracks' && Array.isArray(body.updates)) {
+      return await bulkUpdateTracks(body.updates);
+    }
+
+    // Regular room creation
+    const newRoom = body as Room;
 
     // Validate required fields
     if (!newRoom.id || !newRoom.coords || !newRoom.floorId) {
@@ -138,6 +151,133 @@ export async function POST(request: Request) {
     console.error("Error adding room:", error);
     return NextResponse.json(
       { error: 'Failed to add room' },
+      { status: 500 }
+    );
+  }
+}
+
+// Helper function to update tracks for a specific room
+async function updateRoomTracks(updateData: {
+  roomNumber: string;
+  teamNumber: string;
+  tracks: string;
+  addonTracks: string;
+}) {
+  try {
+    const redis = await getRedisClient();
+
+    // Get existing rooms from Redis
+    const roomsData = await redis.get('rooms');
+    let rooms = roomsData ? JSON.parse(roomsData) : defaultRooms;
+
+    // Find the room to update
+    const roomIndex = rooms.findIndex((room: Room) => {
+      return room.name === updateData.roomNumber || room.id === updateData.roomNumber;
+    });
+
+    if (roomIndex === -1) {
+      return NextResponse.json(
+        { error: `Room ${updateData.roomNumber} not found` },
+        { status: 404 }
+      );
+    }
+
+    // Update the room with tracks
+    rooms[roomIndex] = {
+      ...rooms[roomIndex],
+      tracks: updateData.tracks,
+      addonTracks: updateData.addonTracks,
+      teamNumber: updateData.teamNumber
+    };
+
+    // Save back to Redis
+    if (redis) {
+      await redis.set('rooms', JSON.stringify(rooms));
+    }
+
+    console.log(`Updated tracks for room ${updateData.roomNumber} (${updateData.teamNumber})`);
+
+    return NextResponse.json({
+      success: true,
+      message: `Updated tracks for room ${updateData.roomNumber}`,
+      room: rooms[roomIndex]
+    });
+
+  } catch (error) {
+    console.error("Error updating room tracks:", error);
+    return NextResponse.json(
+      { error: 'Failed to update room tracks' },
+      { status: 500 }
+    );
+  }
+}
+
+// Helper function to bulk update tracks for multiple rooms
+async function bulkUpdateTracks(updates: Array<{
+  roomNumber: string;
+  teamNumber: string;
+  tracks: string;
+  addonTracks: string;
+}>) {
+  try {
+    const redis = await getRedisClient();
+
+    // Get existing rooms from Redis
+    const roomsData = await redis.get('rooms');
+    let rooms = roomsData ? JSON.parse(roomsData) : defaultRooms;
+
+    let updatedCount = 0;
+    const updateResults: Array<{room: string, success: boolean, message: string}> = [];
+
+    for (const update of updates) {
+      // Find the room to update
+      const roomIndex = rooms.findIndex((room: Room) => {
+        return room.name === update.roomNumber || room.id === update.roomNumber;
+      });
+
+      if (roomIndex === -1) {
+        updateResults.push({
+          room: update.roomNumber,
+          success: false,
+          message: `Room ${update.roomNumber} not found`
+        });
+        continue;
+      }
+
+      // Update the room with tracks
+      rooms[roomIndex] = {
+        ...rooms[roomIndex],
+        tracks: update.tracks,
+        addonTracks: update.addonTracks,
+        teamNumber: update.teamNumber
+      };
+
+      updatedCount++;
+      updateResults.push({
+        room: update.roomNumber,
+        success: true,
+        message: `Updated tracks for ${update.teamNumber}`
+      });
+    }
+
+    // Save back to Redis
+    if (redis) {
+      await redis.set('rooms', JSON.stringify(rooms));
+    }
+
+    console.log(`Bulk updated tracks for ${updatedCount} rooms`);
+
+    return NextResponse.json({
+      success: true,
+      message: `Updated tracks for ${updatedCount} rooms`,
+      results: updateResults,
+      updatedCount
+    });
+
+  } catch (error) {
+    console.error("Error bulk updating room tracks:", error);
+    return NextResponse.json(
+      { error: 'Failed to bulk update room tracks' },
       { status: 500 }
     );
   }
