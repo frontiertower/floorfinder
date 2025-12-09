@@ -87,6 +87,10 @@ function normalizeTrack(trackValue) {
     return 'Immersive Entertainment';
   } else if (normalized.includes('passthrough') || normalized.includes('camera') || normalized.includes('pca')) {
     return 'Passthrough Camera API';
+  } else if (normalized.includes('mr and vr') || normalized.includes('mr & vr')) {
+    return 'MR and VR';
+  } else if (normalized.includes('project upgrade')) {
+    return 'Project Upgrade';
   }
 
   // Return empty string for unknown or empty tracks

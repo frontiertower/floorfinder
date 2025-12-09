@@ -21,6 +21,8 @@ interface TeamRating {
   passthroughCameraAPI: number;
   immersiveEntertainment: number;
   handTracking: number;
+  mrAndVR: number;
+  projectUpgrade: number;
   notes: string;
   total: number;
 }
@@ -307,6 +309,10 @@ export const JuryWalk = () => {
         return !primaryTrack.includes('immersive entertainment') && !addOnTrack.includes('immersive entertainment');
       case 'handTracking':
         return !primaryTrack.includes('hand tracking') && !addOnTrack.includes('hand tracking');
+      case 'mrAndVR':
+        return !primaryTrack.includes('mr and vr') && !addOnTrack.includes('mr and vr');
+      case 'projectUpgrade':
+        return !primaryTrack.includes('project upgrade') && !addOnTrack.includes('project upgrade');
       default:
         return false;
     }
@@ -353,6 +359,8 @@ export const JuryWalk = () => {
           passthroughCameraAPI: 0,
           immersiveEntertainment: 0,
           handTracking: 0,
+          mrAndVR: 0,
+          projectUpgrade: 0,
           notes: '',
           total: 0
         };
@@ -363,9 +371,9 @@ export const JuryWalk = () => {
         [field]: value
       };
 
-      // Calculate average (all 6 criteria, max 5 each)
+      // Calculate average (all 8 criteria, max 5 each)
       const r = newRatings[teamKey];
-      const scores = [r.concept, r.quality, r.implementation, r.passthroughCameraAPI, r.immersiveEntertainment, r.handTracking];
+      const scores = [r.concept, r.quality, r.implementation, r.passthroughCameraAPI, r.immersiveEntertainment, r.handTracking, r.mrAndVR, r.projectUpgrade];
       const nonZeroScores = scores.filter(score => score > 0);
       r.total = nonZeroScores.length > 0 ? nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length : 0;
 
@@ -529,7 +537,7 @@ export const JuryWalk = () => {
       return;
     }
 
-    const headers = ['Team', 'Room', 'Team #', 'Project', 'Tracks', 'Add-on Tracks', 'Concept', 'Quality', 'Implementation', 'Passthrough Camera API', 'Immersive Entertainment', 'Hand Tracking', 'Average', 'Notes'];
+    const headers = ['Team', 'Room', 'Team #', 'Project', 'Tracks', 'Add-on Tracks', 'Concept', 'Quality', 'Implementation', 'Passthrough Camera API', 'Immersive Entertainment', 'Hand Tracking', 'MR and VR', 'Project Upgrade', 'Average', 'Notes'];
     const csvContent = [
       headers.join(','),
       ...sortedTeams.map(team => {
@@ -555,6 +563,8 @@ export const JuryWalk = () => {
             calculateFieldAverage(key, 'passthroughCameraAPI').toFixed(1),
             calculateFieldAverage(key, 'immersiveEntertainment').toFixed(1),
             calculateFieldAverage(key, 'handTracking').toFixed(1),
+            calculateFieldAverage(key, 'mrAndVR').toFixed(1),
+            calculateFieldAverage(key, 'projectUpgrade').toFixed(1),
             calculateTeamAverage(key).toFixed(1),
             `"${aggregatedNotes}"`
           ].join(',');
@@ -575,6 +585,8 @@ export const JuryWalk = () => {
             r.passthroughCameraAPI,
             r.immersiveEntertainment,
             r.handTracking,
+            r.mrAndVR,
+            r.projectUpgrade,
             r.total.toFixed(1),
             `"${r.notes}"`
           ].join(',');
@@ -699,6 +711,79 @@ export const JuryWalk = () => {
           </div>
         </div>
 
+        {/* Winners and Runners Up - Only show in Overall view */}
+        {selectedJuryMember === 'Overall' && (
+          <div className="mb-8 bg-card rounded-lg p-6 shadow-lg">
+            <h3 className="text-xl font-semibold mb-6 text-center">🏆 Track Winners & Runners Up</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {TRACK_OPTIONS.filter(track => track && track.trim() !== '').map(track => {
+                // Get teams participating in this track (main or addon)
+                const trackTeams = Object.values(teamsWithRooms)
+                  .filter(team => team.tracks === track || team.addonTracks === track)
+                  .map(team => {
+                    const key = `${team.teamName}-${team.floorId}`;
+                    const averageScore = calculateTeamAverage(key);
+                    return {
+                      ...team,
+                      averageScore,
+                      key
+                    };
+                  })
+                  .filter(team => team.averageScore > 0)
+                  .sort((a, b) => b.averageScore - a.averageScore);
+
+                const winner = trackTeams[0];
+                const runnerUp = trackTeams[1];
+
+                return (
+                  <div key={track} className="bg-muted/30 rounded-lg p-4">
+                    <h4 className="font-semibold text-lg mb-3 text-center text-primary">
+                      {track}
+                    </h4>
+
+                    {winner ? (
+                      <>
+                        <div className="mb-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-yellow-500 text-lg">🥇</span>
+                            <span className="font-medium text-sm">Winner</span>
+                          </div>
+                          <div className="bg-background rounded p-2 text-sm">
+                            <div className="font-medium">{winner.teamName}</div>
+                            <div className="text-muted-foreground text-xs">
+                              {winner.roomNumber} • Score: {winner.averageScore.toFixed(1)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {runnerUp && (
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-gray-400 text-lg">🥈</span>
+                              <span className="font-medium text-sm">Runner Up</span>
+                            </div>
+                            <div className="bg-background rounded p-2 text-sm">
+                              <div className="font-medium">{runnerUp.teamName}</div>
+                              <div className="text-muted-foreground text-xs">
+                                {runnerUp.roomNumber} • Score: {runnerUp.averageScore.toFixed(1)}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="text-center text-muted-foreground text-sm py-4">
+                        No teams with scores yet
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Instructions */}
         <div className="mb-8 p-4 bg-muted/50 rounded-lg">
           <h3 className="font-semibold mb-2">Instructions</h3>
@@ -804,6 +889,8 @@ export const JuryWalk = () => {
                     passthroughCameraAPI: calculateFieldAverage(key, 'passthroughCameraAPI'),
                     immersiveEntertainment: calculateFieldAverage(key, 'immersiveEntertainment'),
                     handTracking: calculateFieldAverage(key, 'handTracking'),
+                    mrAndVR: calculateFieldAverage(key, 'mrAndVR'),
+                    projectUpgrade: calculateFieldAverage(key, 'projectUpgrade'),
                     notes: aggregatedNotes,
                     total: calculateTeamAverage(key)
                   };
@@ -822,6 +909,8 @@ export const JuryWalk = () => {
                     passthroughCameraAPI: 0,
                     immersiveEntertainment: 0,
                     handTracking: 0,
+                    mrAndVR: 0,
+                    projectUpgrade: 0,
                     notes: '',
                     total: 0
                   };
@@ -1032,6 +1121,52 @@ export const JuryWalk = () => {
                                   >
                                     {SCORE_OPTIONS.map(option => (
                                       <option key={`handtracking-${option.value}`} value={option.value}>
+                                        {option.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
+                              </div>
+                              <div>
+                                <label className="block text-xs text-muted-foreground mb-1">MR and VR</label>
+                                {selectedJuryMember === 'Overall' ? (
+                                  <div className="w-full px-2 py-2 border rounded bg-muted/20 text-center text-sm">
+                                    {rating.mrAndVR > 0 ? rating.mrAndVR.toFixed(1) : '-'}
+                                  </div>
+                                ) : (
+                                  <select
+                                    value={rating.mrAndVR}
+                                    onChange={(e) => updateRating(key, 'mrAndVR', parseInt(e.target.value))}
+                                    disabled={isTrackFieldDisabled(team.tracks, team.addonTracks, 'mrAndVR')}
+                                    className={`w-full px-2 py-2 border rounded bg-background text-center text-sm ${
+                                      isTrackFieldDisabled(team.tracks, team.addonTracks, 'mrAndVR') ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                                  >
+                                    {SCORE_OPTIONS.map(option => (
+                                      <option key={`mrvr-${option.value}`} value={option.value}>
+                                        {option.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                )}
+                              </div>
+                              <div>
+                                <label className="block text-xs text-muted-foreground mb-1">Project Upgrade</label>
+                                {selectedJuryMember === 'Overall' ? (
+                                  <div className="w-full px-2 py-2 border rounded bg-muted/20 text-center text-sm">
+                                    {rating.projectUpgrade > 0 ? rating.projectUpgrade.toFixed(1) : '-'}
+                                  </div>
+                                ) : (
+                                  <select
+                                    value={rating.projectUpgrade}
+                                    onChange={(e) => updateRating(key, 'projectUpgrade', parseInt(e.target.value))}
+                                    disabled={isTrackFieldDisabled(team.tracks, team.addonTracks, 'projectUpgrade')}
+                                    className={`w-full px-2 py-2 border rounded bg-background text-center text-sm ${
+                                      isTrackFieldDisabled(team.tracks, team.addonTracks, 'projectUpgrade') ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
+                                  >
+                                    {SCORE_OPTIONS.map(option => (
+                                      <option key={`project-upgrade-${option.value}`} value={option.value}>
                                         {option.label}
                                       </option>
                                     ))}

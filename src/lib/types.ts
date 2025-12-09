@@ -43,7 +43,9 @@ export type RoomType = typeof ROOM_TYPES[number];
 export const TRACK_OPTIONS = [
   'Passthrough Camera API',
   'Immersive Entertainment',
-  'Hand Tracking'
+  'Hand Tracking',
+  'MR and VR',
+  'Project Upgrade'
 ] as const;
 
 export type TrackOption = typeof TRACK_OPTIONS[number];
