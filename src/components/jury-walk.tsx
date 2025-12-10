@@ -1059,12 +1059,6 @@ export const JuryWalk = () => {
                     Team {sortField === 'teamName' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </button>
                   <button
-                    onClick={() => handleSort('projectName')}
-                    className={`px-3 py-1 rounded-md border hover:bg-muted ${sortField === 'projectName' ? 'bg-primary text-primary-foreground' : ''}`}
-                  >
-                    Project {sortField === 'projectName' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </button>
-                  <button
                     onClick={() => handleSort('roomNumber')}
                     className={`px-3 py-1 rounded-md border hover:bg-muted ${sortField === 'roomNumber' ? 'bg-primary text-primary-foreground' : ''}`}
                   >
