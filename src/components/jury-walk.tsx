@@ -254,6 +254,31 @@ export const JuryWalk = () => {
     };
   }, [saveTimeout]);
 
+  // Auto-save when ratings change
+  useEffect(() => {
+    if (selectedJuryMember && selectedJuryMember !== 'Overall' && Object.keys(ratings).length > 0) {
+      console.log('Ratings changed, setting up auto-save for:', selectedJuryMember);
+
+      // Clear existing timeout
+      if (saveTimeout) {
+        clearTimeout(saveTimeout);
+      }
+
+      // Set new timeout for debounced save
+      const newTimeout = setTimeout(async () => {
+        console.log('useEffect auto-save triggered for:', selectedJuryMember);
+        try {
+          await saveRatings(selectedJuryMember, ratings);
+          console.log('useEffect auto-save successful for:', selectedJuryMember);
+        } catch (error) {
+          console.error('useEffect auto-save failed:', error);
+        }
+      }, 1000);
+
+      setSaveTimeout(newTimeout);
+    }
+  }, [ratings, selectedJuryMember]);
+
   // Get unique teams with their room names
   const teamsWithRooms = allRooms
     .filter(room => room.teamName && room.teamName !== 'Private')
@@ -406,6 +431,8 @@ export const JuryWalk = () => {
   };
 
   const updateRating = (teamKey: string, field: keyof TeamRating, value: any) => {
+    console.log('updateRating called:', { teamKey, field, value, selectedJuryMember });
+
     setRatings(prev => {
       const newRatings = { ...prev };
       if (!newRatings[teamKey]) {
@@ -440,27 +467,6 @@ export const JuryWalk = () => {
       const scores = [r.concept, r.quality, r.implementation, r.passthroughCameraAPI, r.immersiveEntertainment, r.handTracking, r.mrAndVR, r.projectUpgrade];
       const nonZeroScores = scores.filter(score => score > 0);
       r.total = nonZeroScores.length > 0 ? nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length : 0;
-
-      // Auto-save to database with debouncing
-      if (selectedJuryMember && selectedJuryMember !== 'Overall') {
-        // Clear existing timeout
-        if (saveTimeout) {
-          clearTimeout(saveTimeout);
-        }
-
-        // Set new timeout for debounced save
-        const newTimeout = setTimeout(async () => {
-          console.log('Auto-saving ratings for:', selectedJuryMember);
-          try {
-            await saveRatings(selectedJuryMember, newRatings);
-            console.log('Auto-save successful for:', selectedJuryMember);
-          } catch (error) {
-            console.error('Auto-save failed:', error);
-          }
-        }, 1000); // Wait 1 second after last change
-
-        setSaveTimeout(newTimeout);
-      }
 
       return newRatings;
     });
