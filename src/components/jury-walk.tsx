@@ -1005,18 +1005,6 @@ export const JuryWalk = () => {
           </div>
         )}
 
-        {/* Instructions */}
-        <div className="mb-8 p-4 bg-muted/50 rounded-lg">
-          <h3 className="font-semibold mb-2">Instructions</h3>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Select ratings from dropdown menus: 1-5 points (- = not rated)</li>
-            <li>• Average score is automatically calculated from rated fields (max 5 points)</li>
-            <li>• Only fields with scores greater than 0 contribute to the average</li>
-            <li>• Ratings are automatically saved as you make changes</li>
-            <li>• Export to CSV to download all ratings for external analysis</li>
-            <li>• Use Clear All to reset all ratings (this cannot be undone)</li>
-          </ul>
-        </div>
 
         {/* Rating Cards */}
         <div className="bg-card rounded-lg shadow-lg">
