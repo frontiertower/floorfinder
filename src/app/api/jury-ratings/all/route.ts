@@ -1,6 +1,22 @@
 import { NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 import type { JuryRating } from '../route';
+
+let redisClient: any = null;
+
+async function getRedisClient() {
+  if (!redisClient && process.env.REDIS_URL) {
+    try {
+      redisClient = createClient({ url: process.env.REDIS_URL });
+      await redisClient.connect();
+      console.log("✅ Connected to Redis for jury ratings (all)");
+    } catch (error) {
+      console.error("❌ Failed to connect to Redis:", error);
+      redisClient = null;
+    }
+  }
+  return redisClient;
+}
 
 // GET - Retrieve all ratings from all jurors for the overall view
 export async function GET() {
@@ -14,10 +30,17 @@ export async function GET() {
     const allRatings: Record<string, Record<string, JuryRating>> = {};
 
     try {
+      const redis = await getRedisClient();
+      if (!redis) {
+        console.log("Redis not available, returning empty ratings");
+        return NextResponse.json({});
+      }
+
       // Fetch ratings for all jurors
       const promises = jurorIds.map(async (jurorId) => {
         try {
-          const ratings = await kv.get<Record<string, JuryRating>>(`juryRatings_${jurorId}`) || {};
+          const ratingsData = await redis.get(`juryRatings_${jurorId}`);
+          const ratings = ratingsData ? JSON.parse(ratingsData) : {};
           return { jurorId, ratings };
         } catch (error) {
           console.log(`Failed to get ratings for ${jurorId}`);
@@ -31,8 +54,9 @@ export async function GET() {
         allRatings[jurorId] = ratings;
       });
 
-    } catch (kvError) {
-      console.log("KV not available, returning empty ratings");
+    } catch (redisError) {
+      console.error("Redis error:", redisError);
+      return NextResponse.json({});
     }
 
     return NextResponse.json(allRatings);

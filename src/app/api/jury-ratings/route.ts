@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 
 export interface JuryRating {
   teamKey: string;
@@ -23,6 +23,22 @@ export interface JuryRating {
   lastUpdated: string;
 }
 
+let redisClient: any = null;
+
+async function getRedisClient() {
+  if (!redisClient && process.env.REDIS_URL) {
+    try {
+      redisClient = createClient({ url: process.env.REDIS_URL });
+      await redisClient.connect();
+      console.log("✅ Connected to Redis for jury ratings");
+    } catch (error) {
+      console.error("❌ Failed to connect to Redis:", error);
+      redisClient = null;
+    }
+  }
+  return redisClient;
+}
+
 // GET - Retrieve all ratings for a specific juror
 export async function GET(request: NextRequest) {
   try {
@@ -37,10 +53,17 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      const ratings = await kv.get<Record<string, JuryRating>>(`juryRatings_${judgeId}`) || {};
+      const redis = await getRedisClient();
+      if (!redis) {
+        console.log("Redis not available, returning empty ratings");
+        return NextResponse.json({});
+      }
+
+      const ratingsData = await redis.get(`juryRatings_${judgeId}`);
+      const ratings = ratingsData ? JSON.parse(ratingsData) : {};
       return NextResponse.json(ratings);
-    } catch (kvError) {
-      console.log("KV not available, returning empty ratings");
+    } catch (redisError) {
+      console.log("Redis error, returning empty ratings:", redisError);
       return NextResponse.json({});
     }
 
@@ -76,20 +99,30 @@ export async function POST(request: NextRequest) {
     });
 
     try {
-      await kv.set(`juryRatings_${judgeId}`, timestampedRatings);
+      const redis = await getRedisClient();
+      if (!redis) {
+        console.log("Redis not available, cannot save");
+        return NextResponse.json({
+          success: false,
+          message: 'Database connection unavailable',
+          count: 0
+        }, { status: 503 });
+      }
+
+      await redis.set(`juryRatings_${judgeId}`, JSON.stringify(timestampedRatings));
 
       return NextResponse.json({
         success: true,
         message: 'Ratings saved successfully',
         count: Object.keys(timestampedRatings).length
       });
-    } catch (kvError) {
-      console.log("KV not available, simulating save");
+    } catch (redisError) {
+      console.error("Redis save error:", redisError);
       return NextResponse.json({
-        success: true,
-        message: 'Ratings saved (local simulation)',
-        count: Object.keys(timestampedRatings).length
-      });
+        success: false,
+        message: 'Failed to save ratings',
+        error: redisError.message
+      }, { status: 500 });
     }
 
   } catch (error) {
@@ -115,8 +148,18 @@ export async function PUT(request: NextRequest) {
     }
 
     try {
+      const redis = await getRedisClient();
+      if (!redis) {
+        console.log("Redis not available, cannot update");
+        return NextResponse.json({
+          success: false,
+          message: 'Database connection unavailable'
+        }, { status: 503 });
+      }
+
       // Get existing ratings
-      const existingRatings = await kv.get<Record<string, JuryRating>>(`juryRatings_${judgeId}`) || {};
+      const existingData = await redis.get(`juryRatings_${judgeId}`);
+      const existingRatings = existingData ? JSON.parse(existingData) : {};
 
       // Update the specific team rating
       existingRatings[teamKey] = {
@@ -124,21 +167,21 @@ export async function PUT(request: NextRequest) {
         lastUpdated: new Date().toISOString()
       };
 
-      // Save back to KV
-      await kv.set(`juryRatings_${judgeId}`, existingRatings);
+      // Save back to Redis
+      await redis.set(`juryRatings_${judgeId}`, JSON.stringify(existingRatings));
 
       return NextResponse.json({
         success: true,
         message: 'Rating updated successfully',
         rating: existingRatings[teamKey]
       });
-    } catch (kvError) {
-      console.log("KV not available, simulating update");
+    } catch (redisError) {
+      console.error("Redis update error:", redisError);
       return NextResponse.json({
-        success: true,
-        message: 'Rating updated (local simulation)',
-        rating: { ...rating, lastUpdated: new Date().toISOString() }
-      });
+        success: false,
+        message: 'Failed to update rating',
+        error: redisError.message
+      }, { status: 500 });
     }
 
   } catch (error) {
@@ -164,18 +207,28 @@ export async function DELETE(request: NextRequest) {
     }
 
     try {
-      await kv.del(`juryRatings_${judgeId}`);
+      const redis = await getRedisClient();
+      if (!redis) {
+        console.log("Redis not available, cannot delete");
+        return NextResponse.json({
+          success: false,
+          message: 'Database connection unavailable'
+        }, { status: 503 });
+      }
+
+      await redis.del(`juryRatings_${judgeId}`);
 
       return NextResponse.json({
         success: true,
         message: `Ratings deleted for judge ${judgeId}`
       });
-    } catch (kvError) {
-      console.log("KV not available, simulating delete");
+    } catch (redisError) {
+      console.error("Redis delete error:", redisError);
       return NextResponse.json({
-        success: true,
-        message: `Ratings deleted for judge ${judgeId} (local simulation)`
-      });
+        success: false,
+        message: 'Failed to delete ratings',
+        error: redisError.message
+      }, { status: 500 });
     }
 
   } catch (error) {
