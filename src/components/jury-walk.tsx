@@ -56,6 +56,28 @@ const JURY_MEMBERS = [
   'Juror 15'
 ];
 
+// Track color mapping for consistent visual identification
+const TRACK_COLORS: Record<string, string> = {
+  'Passthrough Camera API': 'bg-blue-600 text-white',
+  'Immersive Entertainment': 'bg-purple-600 text-white',
+  'Hand Tracking': 'bg-green-600 text-white',
+  'MR and VR': 'bg-orange-600 text-white',
+  'Project Upgrade': 'bg-red-600 text-white'
+};
+
+const getTrackColor = (track: string): string => {
+  return TRACK_COLORS[track] || 'bg-gray-500 text-white';
+};
+
+// Check if a team has been judged by current juror
+const hasBeenJudged = (rating: TeamRating): boolean => {
+  if (!rating) return false;
+  // Consider judged if at least one scoring field has a value > 0
+  return rating.concept > 0 || rating.quality > 0 || rating.implementation > 0 ||
+         rating.passthroughCameraAPI > 0 || rating.immersiveEntertainment > 0 ||
+         rating.handTracking > 0 || rating.mrAndVR > 0 || rating.projectUpgrade > 0;
+};
+
 export const JuryWalk = () => {
   const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [ratings, setRatings] = useState<Record<string, TeamRating>>({});
@@ -898,8 +920,10 @@ export const JuryWalk = () => {
                             Score: {overallWinner.averageScore.toFixed(1)}
                           </div>
                           {overallWinner.tracks && (
-                            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                              {overallWinner.tracks}
+                            <div className="mt-1">
+                              <span className={`px-2 py-0.5 rounded-sm text-xs font-medium ${getTrackColor(overallWinner.tracks)}`}>
+                                {overallWinner.tracks}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -923,8 +947,10 @@ export const JuryWalk = () => {
                             Score: {overallRunnerUp.averageScore.toFixed(1)}
                           </div>
                           {overallRunnerUp.tracks && (
-                            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                              {overallRunnerUp.tracks}
+                            <div className="mt-1">
+                              <span className={`px-2 py-0.5 rounded-sm text-xs font-medium ${getTrackColor(overallRunnerUp.tracks)}`}>
+                                {overallRunnerUp.tracks}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -1119,9 +1145,14 @@ export const JuryWalk = () => {
                   };
                 }
                 const isExpanded = expandedRows.has(key);
+                const isJudged = selectedJuryMember !== 'Overall' && hasBeenJudged(rating);
 
                 return (
-                  <div key={key} className="border rounded-lg bg-background hover:bg-muted/20 transition-colors">
+                  <div key={key} className={`border rounded-lg transition-colors ${
+                    isJudged
+                      ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-950/30'
+                      : 'bg-background hover:bg-muted/20'
+                  }`}>
                     {/* Collapsed row - always visible */}
                     <div
                       className="p-4 cursor-pointer select-none"
@@ -1146,12 +1177,12 @@ export const JuryWalk = () => {
                           {(rating.tracks || rating.addonTracks) && (
                             <div className="flex gap-1">
                               {rating.tracks && (
-                                <span className="px-2 py-0.5 bg-blue-600 text-white rounded-sm text-xs font-medium">
+                                <span className={`px-2 py-0.5 rounded-sm text-xs font-medium ${getTrackColor(rating.tracks)}`}>
                                   {rating.tracks}
                                 </span>
                               )}
                               {rating.addonTracks && (
-                                <span className="px-2 py-0.5 bg-green-600 text-white rounded-sm text-xs font-medium">
+                                <span className={`px-2 py-0.5 rounded-sm text-xs font-medium ${getTrackColor(rating.addonTracks)}`}>
                                   +{rating.addonTracks}
                                 </span>
                               )}
@@ -1164,8 +1195,15 @@ export const JuryWalk = () => {
                               {rating.total > 0 ? rating.total.toFixed(1) : '-'} / 5
                             </div>
                           </div>
-                          <div className="text-lg">
-                            {isExpanded ? '−' : '+'}
+                          <div className="flex items-center gap-2">
+                            {isJudged && (
+                              <div className="flex items-center text-green-600 dark:text-green-400">
+                                <span className="text-lg">✓</span>
+                              </div>
+                            )}
+                            <div className="text-lg">
+                              {isExpanded ? '−' : '+'}
+                            </div>
                           </div>
                         </div>
                       </div>
