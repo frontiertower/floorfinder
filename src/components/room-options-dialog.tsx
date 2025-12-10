@@ -73,8 +73,8 @@ export function RoomOptionsDialog({
       setProjectName(room.projectName || '');
       setType(room.type || '');
       setNotes(room.notes || '');
-      setTracks(room.tracks || '');
-      setAddonTracks(room.addonTracks || '');
+      setTracks(room.tracks || 'none');
+      setAddonTracks(room.addonTracks || 'none');
       setColor(room.color || predefinedColors[0].value);
       setCustomColor('');
     }
@@ -91,8 +91,8 @@ export function RoomOptionsDialog({
       projectName,
       type: type || undefined,
       notes,
-      tracks,
-      addonTracks,
+      tracks: tracks === 'none' ? '' : tracks,
+      addonTracks: addonTracks === 'none' ? '' : addonTracks,
       color: customColor || color,
     };
 
@@ -212,7 +212,7 @@ export function RoomOptionsDialog({
                 <SelectValue placeholder="Select primary track..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
                 {TRACK_OPTIONS.map((track) => (
                   <SelectItem key={track} value={track}>
                     {track}
@@ -230,7 +230,7 @@ export function RoomOptionsDialog({
                 <SelectValue placeholder="Select add-on track..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
                 {TRACK_OPTIONS.map((track) => (
                   <SelectItem key={track} value={track}>
                     {track}
