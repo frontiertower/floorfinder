@@ -216,6 +216,55 @@ export const JuryWalk = () => {
     }
   };
 
+  // Update team tracks in room database
+  const updateTeamTracks = async (teamKey: string, roomNumber: string, tracks: string, addonTracks: string) => {
+    const team = teamsWithRooms[teamKey];
+    if (!team || !team.teamNumber) {
+      toast({
+        variant: "destructive",
+        title: "Update failed",
+        description: "Unable to identify team number for track update",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/rooms.json', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateTracks',
+          roomNumber: `${roomNumber}-${team.teamNumber}`,
+          teamNumber: team.teamNumber,
+          tracks,
+          addonTracks
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Tracks updated",
+          description: `Updated tracks for ${team.teamName}`,
+        });
+        // Reload rooms to reflect changes
+        const roomsResponse = await fetch('/api/rooms.json');
+        if (roomsResponse.ok) {
+          const rooms = await roomsResponse.json();
+          setAllRooms(rooms);
+        }
+      } else {
+        throw new Error('Failed to update tracks');
+      }
+    } catch (error) {
+      console.error('Error updating tracks:', error);
+      toast({
+        variant: "destructive",
+        title: "Update failed",
+        description: "Failed to update team tracks",
+      });
+    }
+  };
+
   // Fetch all rooms
   useEffect(() => {
     const fetchRooms = async () => {
@@ -354,8 +403,13 @@ export const JuryWalk = () => {
         bValue = bRating?.addonTracks || '';
         break;
       case 'total':
-        aValue = aRating?.total || 0;
-        bValue = bRating?.total || 0;
+        if (selectedJuryMember === 'Overall') {
+          aValue = calculateTeamAverage(aKey);
+          bValue = calculateTeamAverage(bKey);
+        } else {
+          aValue = aRating?.total || 0;
+          bValue = bRating?.total || 0;
+        }
         break;
       case 'average':
         aValue = calculateTeamAverage(aKey);
@@ -804,8 +858,85 @@ export const JuryWalk = () => {
         {/* Winners and Runners Up - Only show in Overall view */}
         {selectedJuryMember === 'Overall' && (
           <div className="mb-8 bg-card rounded-lg p-6 shadow-lg">
-            <h3 className="text-xl font-semibold mb-6 text-center">🏆 Track Winners & Runners Up</h3>
+            <h3 className="text-xl font-semibold mb-6 text-center">🏆 Winners & Runners Up</h3>
 
+            {/* Overall Winners (All Teams) */}
+            <div className="mb-8 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-800">
+              <h4 className="text-lg font-semibold mb-4 text-center text-yellow-800 dark:text-yellow-200">🥇 Overall Winners (All Teams)</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(() => {
+                  // Get all teams with scores, sorted by average
+                  const allTeamsWithScores = Object.values(teamsWithRooms)
+                    .map(team => {
+                      const key = `${team.teamName}-${team.floorId}`;
+                      const averageScore = calculateTeamAverage(key);
+                      return {
+                        ...team,
+                        averageScore,
+                        key
+                      };
+                    })
+                    .filter(team => team.averageScore > 0)
+                    .sort((a, b) => b.averageScore - a.averageScore);
+
+                  const overallWinner = allTeamsWithScores[0];
+                  const overallRunnerUp = allTeamsWithScores[1];
+
+                  return (
+                    <>
+                      {overallWinner ? (
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-yellow-300 dark:border-yellow-700">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-yellow-500 text-xl">🥇</span>
+                            <span className="font-bold text-lg">Overall Winner</span>
+                          </div>
+                          <div className="font-bold text-lg">{overallWinner.teamName}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Room {overallWinner.roomNumber} • {overallWinner.teamNumber}
+                          </div>
+                          <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">
+                            Score: {overallWinner.averageScore.toFixed(1)}
+                          </div>
+                          {overallWinner.tracks && (
+                            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                              {overallWinner.tracks}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="col-span-2 text-center text-muted-foreground py-4">
+                          No teams with scores yet
+                        </div>
+                      )}
+
+                      {overallRunnerUp && (
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-gray-400 text-xl">🥈</span>
+                            <span className="font-bold text-lg">Overall Runner Up</span>
+                          </div>
+                          <div className="font-bold text-lg">{overallRunnerUp.teamName}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Room {overallRunnerUp.roomNumber} • {overallRunnerUp.teamNumber}
+                          </div>
+                          <div className="text-lg font-bold text-gray-600 dark:text-gray-400">
+                            Score: {overallRunnerUp.averageScore.toFixed(1)}
+                          </div>
+                          {overallRunnerUp.tracks && (
+                            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                              {overallRunnerUp.tracks}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Track-Specific Winners */}
+            <h4 className="text-lg font-semibold mb-4 text-center">Track-Specific Winners</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {TRACK_OPTIONS.filter(track => track && track.trim() !== '').map(track => {
                 // Get teams participating in this track (main or addon)
@@ -943,7 +1074,7 @@ export const JuryWalk = () => {
                     onClick={() => handleSort('total')}
                     className={`px-3 py-1 rounded-md border hover:bg-muted ${sortField === 'total' ? 'bg-primary text-primary-foreground' : ''}`}
                   >
-                    Average {sortField === 'total' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    {selectedJuryMember === 'Overall' ? 'Score' : 'Average'} {sortField === 'total' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </button>
                 </div>
               </div>
@@ -1062,22 +1193,58 @@ export const JuryWalk = () => {
                     {isExpanded && (
                       <div className="px-4 pb-4 border-t bg-muted/5">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                          {/* Track Information (Read-only) */}
+                          {/* Track Information */}
                           <div className="space-y-3">
                             <h4 className="font-medium text-sm">Track Information</h4>
-                            <p className="text-xs text-muted-foreground">Tracks are set in the room edit modal</p>
+                            {selectedJuryMember === 'Overall' ? (
+                              <p className="text-xs text-muted-foreground">Edit tracks here to update room data</p>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">Tracks are set in the room edit modal</p>
+                            )}
                             <div className="space-y-2">
                               <div>
                                 <label className="block text-xs text-muted-foreground mb-1">Primary Track</label>
-                                <div className="w-full px-3 py-2 border rounded bg-muted/20 text-sm">
-                                  {team.tracks || 'None'}
-                                </div>
+                                {selectedJuryMember === 'Overall' ? (
+                                  <select
+                                    value={team.tracks || 'none'}
+                                    onChange={(e) => {
+                                      const newTracks = e.target.value === 'none' ? '' : e.target.value;
+                                      updateTeamTracks(key, team.roomNumber, newTracks, team.addonTracks);
+                                    }}
+                                    className="w-full px-3 py-2 border rounded bg-background text-sm"
+                                  >
+                                    <option value="none">None</option>
+                                    {TRACK_OPTIONS.filter(t => t).map(track => (
+                                      <option key={track} value={track}>{track}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <div className="w-full px-3 py-2 border rounded bg-muted/20 text-sm">
+                                    {team.tracks || 'None'}
+                                  </div>
+                                )}
                               </div>
                               <div>
                                 <label className="block text-xs text-muted-foreground mb-1">Add-on Track</label>
-                                <div className="w-full px-3 py-2 border rounded bg-muted/20 text-sm">
-                                  {team.addonTracks || 'None'}
-                                </div>
+                                {selectedJuryMember === 'Overall' ? (
+                                  <select
+                                    value={team.addonTracks || 'none'}
+                                    onChange={(e) => {
+                                      const newAddonTracks = e.target.value === 'none' ? '' : e.target.value;
+                                      updateTeamTracks(key, team.roomNumber, team.tracks, newAddonTracks);
+                                    }}
+                                    className="w-full px-3 py-2 border rounded bg-background text-sm"
+                                  >
+                                    <option value="none">None</option>
+                                    {TRACK_OPTIONS.filter(t => t).map(track => (
+                                      <option key={track} value={track}>{track}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <div className="w-full px-3 py-2 border rounded bg-muted/20 text-sm">
+                                    {team.addonTracks || 'None'}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
