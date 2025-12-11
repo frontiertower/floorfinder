@@ -464,7 +464,9 @@ export const JuryWalk = () => {
     const aRating = ratings[aKey];
     const bRating = ratings[bKey];
 
-    let aValue: any, bValue: any;
+    // Initialize variables with defaults to prevent undefined access
+    let aValue: any = '';
+    let bValue: any = '';
 
     switch (sortField) {
       case 'teamName':
@@ -528,11 +530,15 @@ export const JuryWalk = () => {
         return a.teamName.localeCompare(b.teamName);
     }
 
+    // Ensure we have valid values for comparison
+    if (aValue === undefined || aValue === null) aValue = '';
+    if (bValue === undefined || bValue === null) bValue = '';
+
     if (typeof aValue === 'string') {
       const comparison = aValue.localeCompare(bValue);
       return sortDirection === 'asc' ? comparison : -comparison;
     } else {
-      const comparison = aValue - bValue;
+      const comparison = (aValue || 0) - (bValue || 0);
       return sortDirection === 'asc' ? comparison : -comparison;
     }
   });
