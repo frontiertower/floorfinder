@@ -133,49 +133,122 @@ export const JuryWalk = () => {
     }
   };
 
-  // Import ratings from JSON file
-  const importFromJSON = () => {
+  // Import ratings from CSV file
+  const importFromCSV = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.json';
+    input.accept = '.csv';
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
       try {
         const text = await file.text();
-        const data = JSON.parse(text);
+        const lines = text.split('\n').filter(line => line.trim());
 
-        if (data.judgeId && data.ratings) {
-          // Check if this matches current juror
-          if (selectedJuryMember !== 'Overall' && data.judgeId !== selectedJuryMember) {
-            toast({
-              title: "Juror Mismatch",
-              description: `This file is for ${data.judgeId}, but you have ${selectedJuryMember} selected. The data will be imported for ${data.judgeId}.`,
-              variant: "default"
-            });
-          }
+        if (lines.length < 2) {
+          throw new Error('CSV file must have at least a header row and one data row');
+        }
 
-          // Import the ratings
-          await saveRatings(data.judgeId, data.ratings);
+        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
 
-          // If we're viewing this juror, update the display
-          if (selectedJuryMember === data.judgeId) {
-            setRatings(data.ratings);
-          }
+        // Expected headers: Team,Room,Team #,Project,Tracks,Add-on Tracks,Concept,Quality,Implementation,Passthrough Camera API,Immersive Entertainment,Hand Tracking,MR and VR,Project Upgrade,Average,Notes
+        const expectedHeaders = ['Team', 'Room', 'Team #', 'Project', 'Tracks', 'Add-on Tracks', 'Concept', 'Quality', 'Implementation', 'Passthrough Camera API', 'Immersive Entertainment', 'Hand Tracking', 'MR and VR', 'Project Upgrade', 'Average', 'Notes'];
+
+        // Check if this looks like our CSV format
+        const hasRequiredHeaders = ['Team', 'Concept', 'Quality', 'Implementation'].every(required =>
+          headers.some(h => h.toLowerCase().includes(required.toLowerCase()))
+        );
+
+        if (!hasRequiredHeaders) {
+          throw new Error('CSV format not recognized. Please use the exported CSV format.');
+        }
+
+        const importedRatings: Record<string, TeamRating> = {};
+        let importCount = 0;
+
+        // Parse data rows
+        for (let i = 1; i < lines.length; i++) {
+          const row = lines[i].split(',').map(cell => cell.trim().replace(/"/g, ''));
+
+          if (row.length < headers.length) continue; // Skip incomplete rows
+
+          const teamName = row[headers.indexOf('Team')] || row[0];
+          const roomNumber = row[headers.indexOf('Room')] || row[1];
+          const teamNumber = row[headers.indexOf('Team #')] || row[2];
+          const projectName = row[headers.indexOf('Project')] || row[3];
+          const tracks = row[headers.indexOf('Tracks')] || row[4] || '';
+          const addonTracks = row[headers.indexOf('Add-on Tracks')] || row[5] || '';
+
+          // Find concept, quality, implementation scores
+          const concept = parseFloat(row[headers.indexOf('Concept')] || row[6]) || 0;
+          const quality = parseFloat(row[headers.indexOf('Quality')] || row[7]) || 0;
+          const implementation = parseFloat(row[headers.indexOf('Implementation')] || row[8]) || 0;
+          const passthroughCameraAPI = parseFloat(row[headers.indexOf('Passthrough Camera API')] || row[9]) || 0;
+          const immersiveEntertainment = parseFloat(row[headers.indexOf('Immersive Entertainment')] || row[10]) || 0;
+          const handTracking = parseFloat(row[headers.indexOf('Hand Tracking')] || row[11]) || 0;
+          const mrAndVR = parseFloat(row[headers.indexOf('MR and VR')] || row[12]) || 0;
+          const projectUpgrade = parseFloat(row[headers.indexOf('Project Upgrade')] || row[13]) || 0;
+          const notes = row[headers.indexOf('Notes')] || row[15] || '';
+
+          if (!teamName) continue; // Skip rows without team name
+
+          // Calculate total (average of non-zero scores)
+          const scores = [concept, quality, implementation, passthroughCameraAPI, immersiveEntertainment, handTracking, mrAndVR, projectUpgrade];
+          const nonZeroScores = scores.filter(score => score > 0);
+          const total = nonZeroScores.length > 0 ? nonZeroScores.reduce((sum, score) => sum + score, 0) / nonZeroScores.length : 0;
+
+          // Use team name + floor as key (assuming floor 1 for imports)
+          const teamKey = `${teamName}-1`;
+
+          importedRatings[teamKey] = {
+            teamName,
+            teamNumber,
+            projectName,
+            roomNumber,
+            tracks,
+            addonTracks,
+            concept,
+            quality,
+            implementation,
+            passthroughCameraAPI,
+            immersiveEntertainment,
+            handTracking,
+            mrAndVR,
+            projectUpgrade,
+            notes,
+            total
+          };
+
+          importCount++;
+        }
+
+        if (importCount === 0) {
+          throw new Error('No valid rating data found in CSV file');
+        }
+
+        // Save the imported ratings
+        if (selectedJuryMember && selectedJuryMember !== 'Overall') {
+          await saveRatings(selectedJuryMember, importedRatings);
+          setRatings(importedRatings);
 
           toast({
-            title: "Import Successful",
-            description: `Successfully imported ratings for ${data.judgeId}`,
+            title: "CSV Import Successful",
+            description: `Successfully imported ${importCount} team ratings for ${selectedJuryMember}`,
           });
         } else {
-          throw new Error('Invalid file format');
+          toast({
+            title: "Select a Juror",
+            description: "Please select a specific juror before importing CSV data.",
+            variant: "destructive"
+          });
         }
+
       } catch (error) {
-        console.error('Import error:', error);
+        console.error('CSV Import error:', error);
         toast({
-          title: "Import Failed",
-          description: "Failed to import ratings. Please check the file format.",
+          title: "CSV Import Failed",
+          description: error instanceof Error ? error.message : "Failed to import CSV. Please check the file format.",
           variant: "destructive"
         });
       }
@@ -810,9 +883,9 @@ export const JuryWalk = () => {
               <Download className="mr-2 h-4 w-4" />
               Export CSV
             </Button>
-            <Button onClick={importFromJSON} variant="outline" size="default">
+            <Button onClick={importFromCSV} variant="outline" size="default">
               <Upload className="mr-2 h-4 w-4" />
-              Import JSON
+              Import CSV
             </Button>
             <Button onClick={clearRatings} variant="destructive" size="default">
               <Trash2 className="mr-2 h-4 w-4" />
