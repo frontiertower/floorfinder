@@ -443,6 +443,8 @@ export const JuryWalk = () => {
       case 'passthroughCameraAPI':
       case 'immersiveEntertainment':
       case 'handTracking':
+      case 'mrAndVR':
+      case 'projectUpgrade':
         aValue = aRating?.[sortField as keyof TeamRating] || 0;
         bValue = bRating?.[sortField as keyof TeamRating] || 0;
         break;
