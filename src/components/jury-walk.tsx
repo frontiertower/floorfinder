@@ -458,60 +458,32 @@ export const JuryWalk = () => {
       return acc;
     }, {} as Record<string, { teamName: string; teamNumber: string; projectName: string; roomNumber: string; tracks: string; addonTracks: string; floorId: string }>);
 
-  const sortedTeams = Object.values(teamsWithRooms).sort((a, b) => {
-    const aKey = `${a.teamName}-${a.floorId}`;
-    const bKey = `${b.teamName}-${b.floorId}`;
-    const aRating = ratings[aKey];
-    const bRating = ratings[bKey];
-
-    // Initialize variables with defaults to prevent undefined access
-    let aValue: any = '';
-    let bValue: any = '';
+  // Helper function to get sort value safely
+  const getSortValue = (team: any, sortField: string) => {
+    const teamKey = `${team.teamName}-${team.floorId}`;
+    const teamRating = ratings[teamKey];
 
     switch (sortField) {
       case 'teamName':
-        aValue = a.teamName;
-        bValue = b.teamName;
-        break;
+        return team.teamName || '';
       case 'teamNumber':
-        // Extract numeric part from team number (SF##) for proper sorting
-        const aTeamNum = parseInt(a.teamNumber.replace(/\D/g, '')) || 0;
-        const bTeamNum = parseInt(b.teamNumber.replace(/\D/g, '')) || 0;
-        aValue = aTeamNum;
-        bValue = bTeamNum;
-        break;
+        return parseInt((team.teamNumber || '').replace(/\D/g, '')) || 0;
       case 'projectName':
-        aValue = a.projectName;
-        bValue = b.projectName;
-        break;
+        return team.projectName || '';
       case 'roomNumber':
-        // Extract numeric part from room number for proper numeric sorting
-        const aNum = parseInt(a.roomNumber.replace(/\D/g, '')) || 0;
-        const bNum = parseInt(b.roomNumber.replace(/\D/g, '')) || 0;
-        aValue = aNum;
-        bValue = bNum;
-        break;
+        return parseInt((team.roomNumber || '').replace(/\D/g, '')) || 0;
       case 'tracks':
-        aValue = aRating?.tracks || '';
-        bValue = bRating?.tracks || '';
-        break;
+        return teamRating?.tracks || '';
       case 'addonTracks':
-        aValue = aRating?.addonTracks || '';
-        bValue = bRating?.addonTracks || '';
-        break;
+        return teamRating?.addonTracks || '';
       case 'total':
         if (selectedJuryMember === 'Overall') {
-          aValue = calculateTeamAverage(aKey);
-          bValue = calculateTeamAverage(bKey);
+          return calculateTeamAverage(teamKey) || 0;
         } else {
-          aValue = aRating?.total || 0;
-          bValue = bRating?.total || 0;
+          return teamRating?.total || 0;
         }
-        break;
       case 'average':
-        aValue = calculateTeamAverage(aKey);
-        bValue = calculateTeamAverage(bKey);
-        break;
+        return calculateTeamAverage(teamKey) || 0;
       case 'concept':
       case 'quality':
       case 'implementation':
@@ -520,27 +492,35 @@ export const JuryWalk = () => {
       case 'handTracking':
       case 'mrAndVR':
       case 'projectUpgrade':
-        aValue = aRating?.[sortField as keyof TeamRating] || 0;
-        bValue = bRating?.[sortField as keyof TeamRating] || 0;
-        break;
+        return teamRating?.[sortField as keyof TeamRating] || 0;
       default:
-        // Default to floor then team name
-        const floorCompare = parseInt(a.floorId) - parseInt(b.floorId);
-        if (floorCompare !== 0) return floorCompare;
-        return a.teamName.localeCompare(b.teamName);
+        return team.teamName || '';
+    }
+  };
+
+  const sortedTeams = Object.values(teamsWithRooms).sort((a, b) => {
+    // Handle default sorting first
+    if (!sortField || sortField === '') {
+      const floorCompare = parseInt(a.floorId) - parseInt(b.floorId);
+      if (floorCompare !== 0) return floorCompare;
+      return (a.teamName || '').localeCompare(b.teamName || '');
     }
 
-    // Ensure we have valid values for comparison
-    if (aValue === undefined || aValue === null) aValue = '';
-    if (bValue === undefined || bValue === null) bValue = '';
+    // Get sort values using helper function
+    const aValue = getSortValue(a, sortField);
+    const bValue = getSortValue(b, sortField);
 
-    if (typeof aValue === 'string') {
+    // Handle string comparison
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
       const comparison = aValue.localeCompare(bValue);
       return sortDirection === 'asc' ? comparison : -comparison;
-    } else {
-      const comparison = (aValue || 0) - (bValue || 0);
-      return sortDirection === 'asc' ? comparison : -comparison;
     }
+
+    // Handle numeric comparison
+    const aNum = Number(aValue) || 0;
+    const bNum = Number(bValue) || 0;
+    const comparison = aNum - bNum;
+    return sortDirection === 'asc' ? comparison : -comparison;
   });
 
   // Check if a scoring field should be disabled based on track selection
