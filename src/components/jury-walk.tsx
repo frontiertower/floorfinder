@@ -458,6 +458,20 @@ export const JuryWalk = () => {
       return acc;
     }, {} as Record<string, { teamName: string; teamNumber: string; projectName: string; roomNumber: string; tracks: string; addonTracks: string; floorId: string }>);
 
+  // Calculate average across all jurors for a team
+  const calculateTeamAverage = (teamKey: string): number => {
+    const jurorScores = JURY_MEMBERS
+      .filter(juror => juror !== 'Overall')
+      .map(juror => {
+        const jurorRatings = allJurorRatings[juror];
+        return jurorRatings?.[teamKey]?.total || 0;
+      })
+      .filter(total => total > 0); // Only count rated entries
+
+    if (jurorScores.length === 0) return 0;
+    return jurorScores.reduce((sum, total) => sum + total, 0) / jurorScores.length;
+  };
+
   // Helper function to get sort value safely
   const getSortValue = (team: any, sortField: string) => {
     const teamKey = `${team.teamName}-${team.floorId}`;
@@ -607,20 +621,6 @@ export const JuryWalk = () => {
 
       return newRatings;
     });
-  };
-
-  // Calculate average across all jurors for a team
-  const calculateTeamAverage = (teamKey: string): number => {
-    const jurorScores = JURY_MEMBERS
-      .filter(juror => juror !== 'Overall')
-      .map(juror => {
-        const jurorRatings = allJurorRatings[juror];
-        return jurorRatings?.[teamKey]?.total || 0;
-      })
-      .filter(total => total > 0); // Only count rated entries
-
-    if (jurorScores.length === 0) return 0;
-    return jurorScores.reduce((sum, total) => sum + total, 0) / jurorScores.length;
   };
 
   // Calculate average for a specific field across all jurors
