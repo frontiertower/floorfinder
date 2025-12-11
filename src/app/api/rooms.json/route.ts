@@ -164,20 +164,44 @@ async function updateRoomTracks(updateData: {
   addonTracks: string;
 }) {
   try {
+    console.log(`Attempting to update tracks for room: ${updateData.roomNumber}, team: ${updateData.teamNumber}`);
+
     const redis = await getRedisClient();
+    let rooms: Room[] = [];
 
-    // Get existing rooms from Redis
-    const roomsData = await redis.get('rooms');
-    let rooms = roomsData ? JSON.parse(roomsData) : defaultRooms;
+    // Get existing rooms from Redis or use defaults
+    if (redis) {
+      const roomsData = await redis.get('rooms');
+      rooms = roomsData ? JSON.parse(roomsData) : defaultRooms;
+      console.log(`Found ${rooms.length} rooms in Redis`);
+    } else {
+      console.log("Redis not available, using default rooms");
+      rooms = [...defaultRooms]; // Create a copy
+    }
 
-    // Find the room to update
-    const roomIndex = rooms.findIndex((room: Room) => {
-      return room.name === updateData.roomNumber || room.id === updateData.roomNumber;
+    // Find the room to update - try multiple matching strategies
+    let roomIndex = rooms.findIndex((room: Room) => {
+      return room.name === updateData.roomNumber ||
+             room.id === updateData.roomNumber ||
+             room.name?.includes(updateData.teamNumber) ||
+             room.id?.includes(updateData.teamNumber);
     });
 
+    console.log(`Looking for room: ${updateData.roomNumber}, found index: ${roomIndex}`);
+
     if (roomIndex === -1) {
+      // Try to find by team name if provided in the room data
+      roomIndex = rooms.findIndex((room: Room) => {
+        return room.teamName === updateData.teamNumber ||
+               room.teamNumber === updateData.teamNumber;
+      });
+      console.log(`Tried finding by team, found index: ${roomIndex}`);
+    }
+
+    if (roomIndex === -1) {
+      console.log(`Available rooms:`, rooms.map(r => ({ id: r.id, name: r.name, teamNumber: r.teamNumber })));
       return NextResponse.json(
-        { error: `Room ${updateData.roomNumber} not found` },
+        { error: `Room ${updateData.roomNumber} not found. Available rooms: ${rooms.map(r => r.name || r.id).join(', ')}` },
         { status: 404 }
       );
     }
@@ -190,12 +214,15 @@ async function updateRoomTracks(updateData: {
       teamNumber: updateData.teamNumber
     };
 
-    // Save back to Redis
+    // Save back to Redis if available
     if (redis) {
       await redis.set('rooms', JSON.stringify(rooms));
+      console.log("Saved updated rooms to Redis");
+    } else {
+      console.log("Redis not available - changes will not persist");
     }
 
-    console.log(`Updated tracks for room ${updateData.roomNumber} (${updateData.teamNumber})`);
+    console.log(`Successfully updated tracks for room ${updateData.roomNumber} (${updateData.teamNumber})`);
 
     return NextResponse.json({
       success: true,
@@ -206,7 +233,7 @@ async function updateRoomTracks(updateData: {
   } catch (error) {
     console.error("Error updating room tracks:", error);
     return NextResponse.json(
-      { error: 'Failed to update room tracks' },
+      { error: `Failed to update room tracks: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }
