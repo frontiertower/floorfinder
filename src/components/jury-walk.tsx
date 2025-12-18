@@ -837,7 +837,7 @@ export const JuryWalk = () => {
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl lg:text-4xl font-bold mb-2">Jury Walk Rating System</h1>
+            <h1 className="text-3xl lg:text-4xl font-bold mb-2">Hackathon Judging</h1>
             <p className="text-muted-foreground">Rate teams and track scores for the hackathon</p>
 
             {/* Jury Member Selection */}

@@ -262,7 +262,7 @@ const FloorFinder = () => {
                   href="/jury-walk"
                   className="w-full block text-left py-2 px-4 rounded transition-colors hover:bg-primary/20 text-foreground"
                 >
-                  📋 Jury Walk Rating
+                  📋 Hackathon Judging
                 </a>
               </div>
 
