@@ -3,7 +3,7 @@ const path = require('path');
 
 // Read the CSV file and parse team track data
 function parseCSV() {
-  const csvPath = '/Users/colinlowenberg/Downloads/SensAI Hack Applications - San Francisco 2025 - Team Registration.csv';
+  const csvPath = '/Users/colinlowenberg/Downloads/Frontier Tower Applications - San Francisco 2025 - Team Registration.csv';
   const csvContent = fs.readFileSync(csvPath, 'utf8');
   const lines = csvContent.split('\n');
 
@@ -138,7 +138,7 @@ function generateUpdateCommands() {
 
 // Run the script
 if (require.main === module) {
-  console.log('Processing SensAI Hack team track data...');
+  console.log('Processing Frontier Tower team track data...');
   console.log('');
   generateUpdateCommands();
 }

@@ -190,8 +190,8 @@ const FloorFinder = () => {
 
       {/* Floor Selection Sidebar */}
       <div className={`${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 fixed lg:relative w-full lg:w-64 h-full bg-background dark:bg-black p-4 shadow-md flex flex-col border-r border-border z-50 transition-transform duration-300 ease-in-out`}>
-      <a href="/"><h1 className="text-2xl lg:text-3xl font-headline text-center mb-4">SensAI Hack</h1></a>
-      <a href="https://sensaihack.space" className="text-center text-blue-500 text-sm lg:text-base">(<span className="text-blue-500 underline text-center">sensaihack.space</span>)</a>
+      <a href="/"><h1 className="text-2xl lg:text-3xl font-headline text-center mb-4">Frontier Tower</h1></a>
+      <a href="https://frontiertower.space" className="text-center text-blue-500 text-sm lg:text-base">(<span className="text-blue-500 underline text-center">frontiertower.space</span>)</a>
         
         <div className="relative mb-4">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -235,12 +235,12 @@ const FloorFinder = () => {
             </div>
           ) : (
             <div>
-              {/* SensAI Hack Spaces - moved to top */}
+              {/* Frontier Tower Spaces - moved to top */}
               <div className="mb-4 space-y-2">
                 <button
                   className={`w-full text-left py-2 px-4 rounded transition-colors ${selectedFloor?.id === 'spreadsheet' ? 'bg-primary/80 text-primary-foreground' : 'hover:bg-primary/20 text-foreground'}`}
                   onClick={() => {
-                    setSelectedFloor({ id: 'spreadsheet', name: 'SensAI Hack Spaces', level: 0 });
+                    setSelectedFloor({ id: 'spreadsheet', name: 'Frontier Tower Spaces', level: 0 });
                     setSearchQuery('');
                     setHighlightedRoom(null);
                     window.location.hash = 'spreadsheet';
@@ -248,7 +248,7 @@ const FloorFinder = () => {
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  📊 SensAI Hack Spaces
+                  📊 Frontier Tower Spaces
                 </button>
 
                 <a
@@ -304,7 +304,7 @@ const FloorFinder = () => {
         <div className="flex justify-between items-center px-4 lg:px-6 py-3 lg:py-4 bg-background border-b mt-14 lg:mt-0">
           <div>
             {selectedFloor && selectedFloor.id === 'spreadsheet' ? (
-              <h2 className="text-2xl font-bold text-primary">📊 SensAI Hack Spaces</h2>
+              <h2 className="text-2xl font-bold text-primary">📊 Frontier Tower Spaces</h2>
             ) : selectedFloor && selectedFloor.id !== 'readme' && selectedFloor.id !== 'spreadsheet' && (
               <FloorNameEditor
                 floorId={selectedFloor.id}

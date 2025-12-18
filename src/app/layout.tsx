@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'SensAI Hack',
+  title: 'Frontier Tower',
   description: 'Interactive SVG map of a multistory building.',
 };
 

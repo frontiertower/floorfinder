@@ -1,4 +1,4 @@
-# **App Name**: SensAI Hack
+# **App Name**: Frontier Tower
 
 ## Core Features:
 
