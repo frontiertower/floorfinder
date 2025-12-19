@@ -45,12 +45,8 @@ export function RoomOptionsDialog({
 }: RoomOptionsDialogProps) {
   const [name, setName] = useState('');
   const [teamName, setTeamName] = useState('');
-  const [teamNumber, setTeamNumber] = useState('');
-  const [projectName, setProjectName] = useState('');
   const [type, setType] = useState<string>('');
   const [notes, setNotes] = useState('');
-  const [tracks, setTracks] = useState<string>('');
-  const [addonTracks, setAddonTracks] = useState<string>('');
   const [color, setColor] = useState(predefinedColors[0].value);
   const [customColor, setCustomColor] = useState('');
 
@@ -59,22 +55,8 @@ export function RoomOptionsDialog({
     if (room) {
       setName(room.name);
       setTeamName(room.teamName || '');
-
-      // Extract team number from room name if not already set
-      let teamNum = room.teamNumber || '';
-      if (!teamNum && room.name) {
-        const match = room.name.match(/SF\d+/i);
-        if (match) {
-          teamNum = match[0].toUpperCase();
-        }
-      }
-      setTeamNumber(teamNum);
-
-      setProjectName(room.projectName || '');
       setType(room.type || '');
       setNotes(room.notes || '');
-      setTracks(room.tracks || 'none');
-      setAddonTracks(room.addonTracks || 'none');
       setColor(room.color || predefinedColors[0].value);
       setCustomColor('');
     }
@@ -87,12 +69,8 @@ export function RoomOptionsDialog({
       ...room,
       name: name || 'Unnamed Room',
       teamName,
-      teamNumber,
-      projectName,
       type: type || undefined,
       notes,
-      tracks: tracks === 'none' ? '' : tracks,
-      addonTracks: addonTracks === 'none' ? '' : addonTracks,
       color: customColor || color,
     };
 
@@ -130,35 +108,6 @@ export function RoomOptionsDialog({
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-teamNumber" className="text-right">
-              Team Number
-            </Label>
-            <div className="col-span-3 space-y-1">
-              <Input
-                id="edit-teamNumber"
-                value={teamNumber}
-                onChange={(e) => setTeamNumber(e.target.value)}
-                onClick={(e) => e.currentTarget.focus()}
-                placeholder="SF20"
-                autoComplete="off"
-              />
-              {name && name.match(/SF\d+/i) && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const match = name.match(/SF\d+/i);
-                    if (match) {
-                      setTeamNumber(match[0].toUpperCase());
-                    }
-                  }}
-                  className="text-xs text-primary hover:underline"
-                >
-                  Extract from room name ({name.match(/SF\d+/i)?.[0].toUpperCase()})
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="edit-teamName" className="text-right">
               Team Name
             </Label>
@@ -169,20 +118,6 @@ export function RoomOptionsDialog({
               onClick={(e) => e.currentTarget.focus()}
               className="col-span-3"
               placeholder="Engineering Team"
-              autoComplete="off"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-projectName" className="text-right">
-              Project Name
-            </Label>
-            <Input
-              id="edit-projectName"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              onClick={(e) => e.currentTarget.focus()}
-              className="col-span-3"
-              placeholder="Project or product name"
               autoComplete="off"
             />
           </div>
@@ -198,42 +133,6 @@ export function RoomOptionsDialog({
                 {ROOM_TYPES.map((roomType) => (
                   <SelectItem key={roomType} value={roomType}>
                     {roomType}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-tracks" className="text-right">
-              Primary Track
-            </Label>
-            <Select value={tracks} onValueChange={setTracks}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select primary track..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                {TRACK_OPTIONS.map((track) => (
-                  <SelectItem key={track} value={track}>
-                    {track}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-addonTracks" className="text-right">
-              Add-on Track
-            </Label>
-            <Select value={addonTracks} onValueChange={setAddonTracks}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select add-on track..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                {TRACK_OPTIONS.map((track) => (
-                  <SelectItem key={track} value={track}>
-                    {track}
                   </SelectItem>
                 ))}
               </SelectContent>
