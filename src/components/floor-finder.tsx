@@ -318,20 +318,36 @@ const FloorFinder = () => {
                       body: JSON.stringify({ floorId: selectedFloor.id, name: newName }),
                     });
                     if (response.ok) {
+                      // Update local state
                       setCustomFloorNames(prev => ({
                         ...prev,
                         [selectedFloor.id]: newName
                       }));
+                      
+                      // Refresh the floor list to get the updated names
+                      const floorsResponse = await fetch('/api/floors');
+                      if (floorsResponse.ok) {
+                        const updatedFloors = await floorsResponse.json();
+                        setAllFloors(updatedFloors);
+                      }
+                      
                       toast({
                         title: "Floor renamed",
                         description: `Floor name updated to "${newName}"`,
                       });
+                    } else {
+                      toast({
+                        variant: "destructive",
+                        title: "Save failed",
+                        description: "Failed to save floor name. Please try again.",
+                      });
                     }
                   } catch (error) {
+                    console.error('Error updating floor name:', error);
                     toast({
                       variant: "destructive",
                       title: "Error",
-                      description: "Failed to update floor name.",
+                      description: "Network error. Floor name not saved.",
                     });
                   }
                 }}
