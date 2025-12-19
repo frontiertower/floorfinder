@@ -5,7 +5,7 @@ import { allFloors } from '@/lib/config';
 import type { Room, Floor } from '@/lib/types';
 import { ThemeToggle } from './theme-toggle';
 
-const SELECTED_FLOORS = ['2', '7', '12', '15', '16'];
+const SELECTED_FLOORS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '14', '15', '16'];
 const FLOOR_HEIGHT = 80; // Height of each floor in pixels
 const BUILDING_WIDTH = 800; // Width of building in pixels
 
@@ -253,7 +253,7 @@ export const BuildingSlice = () => {
                       fontSize="9"
                       className="blueprint-text"
                     >
-                      +{(parseInt(floor.id) * 3.5).toFixed(1)}m
+                      +{(floor.id === '0' ? -3.5 : parseInt(floor.id) * 3.5).toFixed(1)}m
                     </text>
 
                     {/* Horizontal elevation line */}
@@ -386,7 +386,7 @@ export const BuildingSlice = () => {
             {/* Title block */}
             <g transform={`translate(${BUILDING_WIDTH - 150}, ${totalHeight - 40})`}>
               <rect x="0" y="0" width="200" height="30" fill="white" stroke="white" strokeWidth="1"/>
-              <text x="10" y="12" fill="#0d47a1" fontSize="8" className="blueprint-text">PROJECT: SENSAI HACK</text>
+              <text x="10" y="12" fill="#0d47a1" fontSize="8" className="blueprint-text">PROJECT: FRONTIER TOWER</text>
               <text x="10" y="22" fill="#0d47a1" fontSize="8" className="blueprint-text">DRAWN BY: AI ARCHITECT</text>
               <text x="130" y="12" fill="#0d47a1" fontSize="8" className="blueprint-text">SHEET: 1 OF 1</text>
               <text x="130" y="22" fill="#0d47a1" fontSize="8" className="blueprint-text">REV: A</text>
