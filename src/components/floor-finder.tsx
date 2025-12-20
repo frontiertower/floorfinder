@@ -257,13 +257,6 @@ const FloorFinder = () => {
                 >
                   🏢 Building Slice View
                 </a>
-
-                <a
-                  href="/jury-walk"
-                  className="w-full block text-left py-2 px-4 rounded transition-colors hover:bg-primary/20 text-foreground"
-                >
-                  📋 Hackathon Judging
-                </a>
               </div>
 
               <h2 className="text-xl font-bold mb-2">Floors</h2>
