@@ -27,7 +27,14 @@ const FloorFinder = () => {
   const [highlightedRoom, setHighlightedRoom] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isEditModeEnabled, setIsEditModeEnabled] = useState(false);
-  const [customFloorNames, setCustomFloorNames] = useState<Record<string, string>>({});
+  const [customFloorNames, setCustomFloorNames] = useState<Record<string, string>>(() => {
+    // Load from localStorage on mount
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('customFloorNames');
+      return saved ? JSON.parse(saved) : {};
+    }
+    return {};
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
@@ -318,10 +325,12 @@ const FloorFinder = () => {
                     
                     if (response.ok && data.success) {
                       // Update local state
-                      setCustomFloorNames(prev => ({
-                        ...prev,
+                      const updatedNames = {
+                        ...customFloorNames,
                         [selectedFloor.id]: newName
-                      }));
+                      };
+                      setCustomFloorNames(updatedNames);
+                      localStorage.setItem('customFloorNames', JSON.stringify(updatedNames));
                       
                       // Refresh the floor list to get the updated names
                       const floorsResponse = await fetch('/api/floors');
@@ -335,11 +344,18 @@ const FloorFinder = () => {
                         description: `Floor name updated to "${newName}"`,
                       });
                     } else {
-                      console.error('[Client] Save failed:', data);
+                      // KV not configured - use localStorage as fallback
+                      console.warn('[Client] Using localStorage fallback for floor names');
+                      const updatedNames = {
+                        ...customFloorNames,
+                        [selectedFloor.id]: newName
+                      };
+                      setCustomFloorNames(updatedNames);
+                      localStorage.setItem('customFloorNames', JSON.stringify(updatedNames));
+                      
                       toast({
-                        variant: "destructive",
-                        title: "Save failed",
-                        description: data.message || data.error || "Failed to save floor name. Check if Vercel KV is configured.",
+                        title: "Floor renamed (local only)",
+                        description: `Floor name updated to "${newName}". Note: Saved in browser only.`,
                       });
                     }
                   } catch (error) {
