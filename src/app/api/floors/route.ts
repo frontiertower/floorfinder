@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { getRedisClient } from '@/lib/redis';
 import type { Floor } from '@/lib/types';
 import { allFloors } from '@/lib/config';
 
 // Store custom floor names and custom floors
 export async function GET() {
   try {
-    const customFloorNames = await kv.get<Record<string, string>>('floorNames') || {};
-    const customFloors = await kv.get<(Floor & { imageUrl?: string; isCustom?: boolean })[]>('customFloors') || [];
+    const redis = await getRedisClient();
+    
+    const customFloorNamesStr = await redis.get('floorNames');
+    const customFloorNames = customFloorNamesStr ? JSON.parse(customFloorNamesStr) : {};
+    
+    const customFloorsStr = await redis.get('customFloors');
+    const customFloors = customFloorsStr ? JSON.parse(customFloorsStr) : [];
 
     // Merge custom names with default floors
     const defaultFloors = allFloors.map(floor => ({
@@ -21,8 +26,8 @@ export async function GET() {
 
     return NextResponse.json(allCombinedFloors);
   } catch (error) {
-    // If KV is not configured, return default floors
-    console.log("Vercel KV not configured, using default floors");
+    console.error('[Floor API GET] Redis error:', error);
+    // If Redis is not configured, return default floors
     const defaultFloors = allFloors.map(floor => ({ ...floor, isCustom: false }));
     return NextResponse.json(defaultFloors);
   }
@@ -43,17 +48,20 @@ export async function PUT(request: Request) {
     }
 
     try {
+      const redis = await getRedisClient();
+      
       // Get existing custom names
-      const customFloorNames = await kv.get<Record<string, string>>('floorNames') || {};
+      const customFloorNamesStr = await redis.get('floorNames');
+      const customFloorNames = customFloorNamesStr ? JSON.parse(customFloorNamesStr) : {};
       console.log('[Floor API] Current floor names:', customFloorNames);
 
       // Update the floor name
       customFloorNames[floorId] = name;
       console.log('[Floor API] Updated floor names:', customFloorNames);
 
-      // Save back to KV
-      await kv.set('floorNames', customFloorNames);
-      console.log('[Floor API] Successfully saved to KV');
+      // Save back to Redis
+      await redis.set('floorNames', JSON.stringify(customFloorNames));
+      console.log('[Floor API] Successfully saved to Redis');
 
       // Return updated floors
       const floors = allFloors.map(floor => ({
@@ -64,14 +72,12 @@ export async function PUT(request: Request) {
 
       console.log('[Floor API] Returning updated floors');
       return NextResponse.json({ success: true, floors });
-    } catch (kvError) {
-      // If KV is not configured (local development)
-      console.error('[Floor API] KV error:', kvError);
-      console.log('[Floor API] Vercel KV not configured, floor name update simulated');
+    } catch (redisError) {
+      console.error('[Floor API] Redis error:', redisError);
       return NextResponse.json({ 
         success: false, 
-        error: 'KV not configured',
-        message: 'Floor names cannot be saved without Vercel KV' 
+        error: 'Redis not configured',
+        message: 'Floor names cannot be saved without Redis connection' 
       }, { status: 500 });
     }
 
