@@ -32,7 +32,10 @@ export async function PUT(request: Request) {
   try {
     const { floorId, name } = await request.json();
 
+    console.log('[Floor API] PUT request:', { floorId, name });
+
     if (!floorId || !name) {
+      console.error('[Floor API] Missing required fields:', { floorId, name });
       return NextResponse.json(
         { error: 'Missing floorId or name' },
         { status: 400 }
@@ -42,30 +45,40 @@ export async function PUT(request: Request) {
     try {
       // Get existing custom names
       const customFloorNames = await kv.get<Record<string, string>>('floorNames') || {};
+      console.log('[Floor API] Current floor names:', customFloorNames);
 
       // Update the floor name
       customFloorNames[floorId] = name;
+      console.log('[Floor API] Updated floor names:', customFloorNames);
 
       // Save back to KV
       await kv.set('floorNames', customFloorNames);
+      console.log('[Floor API] Successfully saved to KV');
 
       // Return updated floors
       const floors = allFloors.map(floor => ({
         ...floor,
-        name: customFloorNames[floor.id] || floor.name
+        name: customFloorNames[floor.id] || floor.name,
+        isCustom: false
       }));
 
-      return NextResponse.json(floors);
+      console.log('[Floor API] Returning updated floors');
+      return NextResponse.json({ success: true, floors });
     } catch (kvError) {
-      // If KV is not configured (local development), just return success
-      console.log("Vercel KV not configured, floor name update simulated");
-      return NextResponse.json({ success: true });
+      // If KV is not configured (local development)
+      console.error('[Floor API] KV error:', kvError);
+      console.log('[Floor API] Vercel KV not configured, floor name update simulated');
+      return NextResponse.json({ 
+        success: false, 
+        error: 'KV not configured',
+        message: 'Floor names cannot be saved without Vercel KV' 
+      }, { status: 500 });
     }
 
   } catch (error) {
-    console.error("Error updating floor name:", error);
+    console.error('[Floor API] Error updating floor name:', error);
     return NextResponse.json(
-      { error: 'Failed to update floor name' },
+      { error: 'Failed to update floor name', details: String(error) },
       { status: 500 }
     );
   }

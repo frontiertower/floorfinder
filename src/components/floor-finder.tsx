@@ -312,12 +312,18 @@ const FloorFinder = () => {
                 isEditMode={isEditMode}
                 onNameChange={async (newName) => {
                   try {
+                    console.log('[Client] Updating floor name:', { floorId: selectedFloor.id, name: newName });
+                    
                     const response = await fetch('/api/floors', {
                       method: 'PUT',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ floorId: selectedFloor.id, name: newName }),
                     });
-                    if (response.ok) {
+                    
+                    const data = await response.json();
+                    console.log('[Client] API response:', data);
+                    
+                    if (response.ok && data.success) {
                       // Update local state
                       setCustomFloorNames(prev => ({
                         ...prev,
@@ -336,14 +342,15 @@ const FloorFinder = () => {
                         description: `Floor name updated to "${newName}"`,
                       });
                     } else {
+                      console.error('[Client] Save failed:', data);
                       toast({
                         variant: "destructive",
                         title: "Save failed",
-                        description: "Failed to save floor name. Please try again.",
+                        description: data.message || data.error || "Failed to save floor name. Check if Vercel KV is configured.",
                       });
                     }
                   } catch (error) {
-                    console.error('Error updating floor name:', error);
+                    console.error('[Client] Error updating floor name:', error);
                     toast({
                       variant: "destructive",
                       title: "Error",
