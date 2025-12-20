@@ -366,17 +366,12 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden md:table-cell">Room ID</TableHead>
                 <TableHead className="text-xs md:text-sm px-2 md:px-4">Room</TableHead>
                 <TableHead className="text-xs md:text-sm px-2 md:px-4">Team</TableHead>
                 <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden sm:table-cell">Type</TableHead>
                 <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden sm:table-cell">Floor</TableHead>
                 <TableHead className="text-xs md:text-sm px-2 md:px-4 sm:hidden">Floor#</TableHead>
-                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden md:table-cell">Size</TableHead>
-                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden lg:table-cell">Area</TableHead>
-                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden lg:table-cell">Color</TableHead>
                 <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden xl:table-cell">Notes</TableHead>
-                <TableHead className="text-xs md:text-sm px-2 md:px-4 hidden xl:table-cell">Coordinates</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -386,35 +381,19 @@ export function RoomsSpreadsheet({ rooms, customFloorNames, isEditMode = false, 
                   className={isEditMode ? 'cursor-pointer hover:bg-muted/50' : ''}
                   onClick={() => handleRoomClick(room)}
                 >
-                  <TableCell className="font-mono text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 hidden md:table-cell">{room.id}</TableCell>
                   <TableCell className="font-medium text-xs md:text-sm px-2 md:px-4 py-2 md:py-3">{room.name}</TableCell>
                   <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3">{room.teamName || '-'}</TableCell>
                   <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 hidden sm:table-cell">{room.type || '-'}</TableCell>
                   <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 hidden sm:table-cell">{room.floorName}</TableCell>
                   <TableCell className="text-xs md:text-sm px-2 md:px-4 py-2 md:py-3 sm:hidden">{room.floorLevel}</TableCell>
-                  <TableCell className="font-mono text-xs px-2 md:px-4 py-2 md:py-3 hidden md:table-cell">{room.dimensions}</TableCell>
-                  <TableCell className="font-mono text-xs px-2 md:px-4 py-2 md:py-3 hidden lg:table-cell">{room.area}</TableCell>
-                  <TableCell className="px-2 md:px-4 py-2 md:py-3 hidden lg:table-cell">
-                    <div className="flex items-center gap-1 md:gap-2">
-                      <div
-                        className="w-3 h-3 md:w-4 md:h-4 border border-gray-300 rounded"
-                        style={{ backgroundColor: room.color }}
-                        title={room.color}
-                      />
-                      <span className="text-xs text-muted-foreground hidden xl:inline">{room.color}</span>
-                    </div>
-                  </TableCell>
                   <TableCell className="max-w-xs truncate text-xs px-2 md:px-4 py-2 md:py-3 hidden xl:table-cell" title={room.notes}>
                     {room.notes || '-'}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs px-2 md:px-4 py-2 md:py-3 hidden xl:table-cell">
-                    [{room.coords ? room.coords.map(c => (c ?? 0).toFixed(1)).join(', ') : '0.0, 0.0, 0.0, 0.0'}]
                   </TableCell>
                 </TableRow>
               ))}
               {filteredAndSortedRooms.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center text-muted-foreground py-6 md:py-8 text-sm">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-6 md:py-8 text-sm">
                     {searchQuery ? 'No rooms found matching your search' : 'No rooms found'}
                   </TableCell>
                 </TableRow>
