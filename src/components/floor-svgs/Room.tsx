@@ -18,6 +18,9 @@ interface RoomProps {
 export const Room: React.FC<RoomProps> = ({ id, name, teamName, coords, color = 'rgba(100, 100, 100, .5)', notes, onMouseEnter, onMouseLeave, onClick, floorId, viewBox }) => {
   let [x, y, width, height] = coords;
 
+  // Filter out placeholder team names
+  const displayTeamName = (teamName && teamName !== 'Rent Me!' && teamName !== 'Open') ? teamName : undefined;
+
   // No Y coordinate transformation needed - use coordinates as drawn
 
   // Calculate text position for the center of the rectangle
@@ -29,7 +32,7 @@ export const Room: React.FC<RoomProps> = ({ id, name, teamName, coords, color = 
 
   const handleMouseEnter = (event: React.MouseEvent<SVGGElement, MouseEvent>) => {
     if (onMouseEnter) {
-      onMouseEnter({ id, name, teamName, floorId, notes, coords, color });
+      onMouseEnter({ id, name, teamName: displayTeamName, floorId, notes, coords, color });
     }
   };
 
@@ -70,10 +73,10 @@ export const Room: React.FC<RoomProps> = ({ id, name, teamName, coords, color = 
         fill="hsl(var(--foreground))"
         className="pointer-events-none"
       >
-        <tspan x={textX} dy={teamName ? `-${fontSize * 0.5}` : "0"}>
-          {teamName || ''}
+        <tspan x={textX} dy={displayTeamName ? `-${fontSize * 0.5}` : "0"}>
+          {displayTeamName || ''}
         </tspan>
-        <tspan x={textX} dy={teamName ? `${fontSize * 1.2}` : "0"}>
+        <tspan x={textX} dy={displayTeamName ? `${fontSize * 1.2}` : "0"}>
           {name}
         </tspan>
       </text>
